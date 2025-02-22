@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://ch3jstghyg3ft"]
+
+[ext_resource type="Script" path="res://addons/roommate/controls/roommate_root_actions/roommate_root_actions.gd" id="1_0ttl4"]
+[ext_resource type="Texture2D" uid="uid://c3uij025wp1o1" path="res://icon.svg" id="2_xsq2m"]
+
+[node name="MenuButton" type="MenuButton"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Roommate"
+icon = ExtResource("2_xsq2m")
+item_count = 1
+popup/item_0/text = "Generate mesh"
+script = ExtResource("1_0ttl4")
