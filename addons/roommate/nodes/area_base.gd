@@ -32,22 +32,6 @@ func _create_block() -> Block:
 class Block:
 	extends RefCounted
 	
-	const FACES = [
-		Vector3i.UP,
-		Vector3i.DOWN,
-		Vector3i.LEFT,
-		Vector3i.RIGHT,
-		Vector3i.FORWARD,
-		Vector3i.BACK,
-	]
-	const ROTATIONS := {
-		Vector3i.UP: Quaternion(Vector3.RIGHT, PI / 2),
-		Vector3i.DOWN: Quaternion(Vector3.LEFT, PI / 2),
-		Vector3i.LEFT: Quaternion(Vector3.UP, PI / 2),
-		Vector3i.RIGHT: Quaternion(Vector3.DOWN, PI / 2),
-		Vector3i.FORWARD: Quaternion.IDENTITY,
-		Vector3i.BACK: Quaternion(Vector3.UP, PI),
-	}
 	const DEFAULT_MATERIAL := preload("res://test/test_material.tres") # TMP?
 	
 	var position := Vector3i.ZERO

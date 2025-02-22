@@ -9,9 +9,9 @@ var box_edit_gizmo_plugin := BoxEditGizmoPlugin.new()
 func _enter_tree() -> void:
 	EditorInterface.get_selection().selection_changed.connect(_update_controls_visibility)
 	
-	add_custom_type("RoommateRoot", "MeshInstance3D", RoommateRoot, preload("res://icon.svg"))
-	add_custom_type("RoommateSpace", "RoommateAreaBase", RoommateSpace, preload("res://icon.svg"))
-	add_custom_type("RoommateOutOfBounds", "RoommateAreaBase", RoommateOutOfBounds, preload("res://icon.svg"))
+	add_custom_type(_name_of(RoommateRoot), "MeshInstance3D", RoommateRoot, preload("res://icon.svg"))
+	add_custom_type(_name_of(RoommateSpace), _name_of(RoommateAreaBase), RoommateSpace, preload("res://icon.svg"))
+	add_custom_type(_name_of(RoommateOutOfBounds), _name_of(RoommateAreaBase), RoommateOutOfBounds, preload("res://icon.svg"))
 	add_node_3d_gizmo_plugin(box_edit_gizmo_plugin)
 	
 	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as RoommateRootActions
@@ -27,8 +27,9 @@ func _exit_tree() -> void:
 	_root_actions = null
 	
 	remove_node_3d_gizmo_plugin(box_edit_gizmo_plugin)
-	remove_custom_type("RoommateRoot")
-	remove_custom_type("RoommateSpace")
+	remove_custom_type(_name_of(RoommateRoot))
+	remove_custom_type(_name_of(RoommateSpace))
+	remove_custom_type(_name_of(RoommateOutOfBounds))
 
 
 func _update_controls_visibility() -> void:
@@ -38,3 +39,7 @@ func _update_controls_visibility() -> void:
 	var is_extends := func(node: Node) -> bool:
 		return node is RoommateRoot
 	_root_actions.visible = nodes.any(is_extends)
+
+
+func _name_of(script: Script) -> StringName:
+	return script.get_global_name()

@@ -11,7 +11,7 @@ func _has_gizmo(for_node_3d: Node3D) -> bool:
 
 
 func _get_gizmo_name() -> String:
-	return "Roommate Spaces"
+	return "Roommate Areas"
 
 
 func _redraw(gizmo: EditorNode3DGizmo) -> void:

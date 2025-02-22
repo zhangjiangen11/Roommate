@@ -4,8 +4,7 @@ extends RoommateAreaBase
 
 
 func _create_block() -> Block:
-	var block := Block.new()
-	return block
+	return Block.new()
 
 
 class Block:
