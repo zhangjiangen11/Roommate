@@ -39,14 +39,14 @@ class Block:
 				continue
 			
 			var next_block := blocks.get_single(position + face)
-			if next_block is RoommateEmptySpace.Block:
+			if next_block is RoommateSpace.Block:
 				continue
 			
 			var face_material: Material = materials.get(face, DEFAULT_MATERIAL)
 			if target_material != face_material:
 				continue
 			
-			if next_block is RoommateFilledSpace.Block:
+			if next_block is RoommateOutOfBounds.Block:
 				var origin: Vector3 = to_position(position) + face * block_size / 2
 				var face_transform := Transform3D(Basis(ROTATIONS[face]), origin).scaled_local(Vector3.ONE * block_size)
 				var face_mesh := geometry.get(face, QuadMesh.new())

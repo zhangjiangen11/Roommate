@@ -11,7 +11,7 @@ extends MeshInstance3D
 
 
 func generate_mesh() -> void:
-	var nodes := find_children("*", "RoommateSpaceBase", true, false)
+	var nodes := find_children("*", "RoommateAreaBase", true, false)
 	var spaces: Array[RoommateAreaBase] = []
 	spaces.assign(nodes)
 	spaces.sort_custom(_sort_by_priority)
