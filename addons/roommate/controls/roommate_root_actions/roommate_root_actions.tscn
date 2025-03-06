@@ -10,4 +10,5 @@ text = "Roommate"
 icon = ExtResource("2_xsq2m")
 item_count = 1
 popup/item_0/text = "Generate mesh"
+popup/item_0/id = 0
 script = ExtResource("1_0ttl4")

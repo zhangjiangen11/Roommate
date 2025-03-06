@@ -3,7 +3,7 @@ extends EditorPlugin
 
 const ROOT_ACTIONS_SCENE := preload("res://addons/roommate/controls/roommate_root_actions/roommate_root_actions.tscn")
 
-var _root_actions: RoommateRootActions
+var _root_actions: Control
 var box_edit_gizmo_plugin := BoxEditGizmoPlugin.new()
 
 func _enter_tree() -> void:
@@ -14,7 +14,7 @@ func _enter_tree() -> void:
 	add_custom_type(_name_of(RoommateOutOfBounds), _name_of(RoommateAreaBase), RoommateOutOfBounds, preload("res://icon.svg"))
 	add_node_3d_gizmo_plugin(box_edit_gizmo_plugin)
 	
-	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as RoommateRootActions
+	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as Control
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, _root_actions)
 	_update_controls_visibility()
 

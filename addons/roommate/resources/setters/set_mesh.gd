@@ -1,0 +1,2 @@
+class_name RoommateSetMesh
+extends RoommateSetterBase

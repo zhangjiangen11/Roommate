@@ -1,5 +1,4 @@
 @tool
-class_name RoommateRootActions
 extends MenuButton
 
 
