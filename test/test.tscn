@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=4 uid="uid://b4rogewtd43dd"]
 
 [ext_resource type="Material" uid="uid://beq5cddbcrgnb" path="res://test/test_material.tres" id="1_4pwjp"]
-[ext_resource type="Script" path="res://addons/roommate/nodes/root.gd" id="4_v4t7x"]
-[ext_resource type="Script" path="res://addons/roommate/nodes/space.gd" id="5_qcdyq"]
+[ext_resource type="Script" uid="uid://dg5rxr32ferpm" path="res://addons/roommate/nodes/root.gd" id="4_v4t7x"]
+[ext_resource type="Script" uid="uid://bxwfdl4vj68ya" path="res://addons/roommate/nodes/space.gd" id="5_qcdyq"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_jjnfd"]
 _surfaces = [{
@@ -34,7 +34,6 @@ script = ExtResource("4_v4t7x")
 [node name="RoommateSpace" type="Node3D" parent="RoommateRoot"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.65174, 1, 2.867)
 script = ExtResource("5_qcdyq")
-skip_floor = true
 size = Vector3(2, 2, 1)
 space_priority = -1
 

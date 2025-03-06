@@ -1,22 +1,22 @@
 [gd_resource type="ArrayMesh" load_steps=3 format=4 uid="uid://o44pwl7hoxcj"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l4kvj"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_unmw7"]
 resource_name = "Material"
 cull_mode = 2
 albedo_color = Color(0.906332, 0.906332, 0.906332, 1)
 roughness = 0.5
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_u1ved"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_nvaku"]
 _surfaces = [{
 "aabb": AABB(-0.5, -0.5, -0.325737, 1, 1, 0.325737),
 "format": 34896613377,
 "index_count": 12,
-"index_data": PackedByteArray("AAABAAQAAwACAAQAAgAAAAQAAQADAAQA"),
+"index_data": PackedByteArray("AAABAAIAAQADAAIABAAAAAIAAwAEAAIA"),
 "name": "Material",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 5,
-"vertex_data": PackedByteArray("//////7/AAD//wAA/v8AAAAA/////wAAAAAAAP//AAD9fwGAAAAAAA==")
+"vertex_data": PackedByteArray("//////7/AAD//wAA/v8AAP1/AYAAAAAAAAAAAP//AAAAAP////8AAA==")
 }]
 blend_shape_mode = 0
 
@@ -24,16 +24,16 @@ blend_shape_mode = 0
 resource_name = "custom_wall_Cube"
 _surfaces = [{
 "aabb": AABB(-0.5, -0.5, -0.325737, 1, 1, 0.325737),
-"attribute_data": PackedByteArray("9/8GAPf/BgD4//j/+P/4/wYABwAGAAcABgD4/wYA+P/9f/5//X/+f/1//n/9f/5/"),
+"attribute_data": PackedByteArray("9/8GAPj/+P/9f/5/BgD4/wYABwD9f/5/BgAHAPf/BgD9f/5/+P/4/wYA+P/9f/5/"),
 "format": 34896613399,
 "index_count": 12,
-"index_data": PackedByteArray("AQADAAsABwAFAAoABAAAAAkAAgAGAAgA"),
-"material": SubResource("StandardMaterial3D_l4kvj"),
+"index_data": PackedByteArray("AAABAAIAAwAEAAUABgAHAAgACQAKAAsA"),
+"material": SubResource("StandardMaterial3D_unmw7"),
 "name": "Material",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 12,
-"vertex_data": PackedByteArray("//////7/hpf//////v+Fl///AAD+/4WX//8AAP7/hZcAAP////+GlwAA/////4aXAAAAAP//hZcAAAAA//+Gl/1/AYAAAIWX/X8BgAAAhpf9fwGAAACGl/1/AYAAAIWXAAD/f/9///////9//3///wAA/3//fwAA////f/9/AAD///9/AAD/f/9/AAD/f///")
+"vertex_data": PackedByteArray("//////7/hZf//wAA/v+Fl/1/AYAAAIWXAAAAAP//hpcAAP////+Gl/1/AYAAAIaXAAD/////hpf//////v+Gl/1/AYAAAIaX//8AAP7/hZcAAAAA//+Fl/1/AYAAAIWX/3////9/////f////38AAP9/AAD/fwAAAAD/fwAA/38AAP9/////f////3////9/")
 }]
 blend_shape_mode = 0
-shadow_mesh = SubResource("ArrayMesh_u1ved")
+shadow_mesh = SubResource("ArrayMesh_nvaku")

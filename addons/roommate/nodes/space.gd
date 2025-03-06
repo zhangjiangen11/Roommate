@@ -2,58 +2,46 @@
 class_name RoommateSpace
 extends RoommateAreaBase
 
-@export_group("Skip")
-@export var skip_ceil := false
-@export var skip_floor := false
-@export var skip_forward_wall := false
-@export var skip_back_wall := false
-@export var skip_left_wall := false
-@export var skip_right_wall := false
+const PART_DEFINITIONS := {
+	Vector3i.ZERO: Quaternion.IDENTITY,
+	Vector3i.UP: Quaternion(Vector3.RIGHT, PI / 2),
+	Vector3i.DOWN: Quaternion(Vector3.LEFT, PI / 2),
+	Vector3i.LEFT: Quaternion(Vector3.UP, PI / 2),
+	Vector3i.RIGHT: Quaternion(Vector3.DOWN, PI / 2),
+	Vector3i.FORWARD: Quaternion.IDENTITY,
+	Vector3i.BACK: Quaternion(Vector3.UP, PI),
+}
 
 
-func _create_block() -> Block:
-	var block := Block.new()
-	var box := BoxMesh.new()
-	box.size = Vector3.ONE * 0.4
-	block.geometry[Vector3i.ZERO] = box
-	if skip_ceil:
-		block.geometry[Vector3i.UP] = null
-	if skip_floor:
-		block.geometry[Vector3i.DOWN] = null
-	if skip_left_wall:
-		block.geometry[Vector3i.LEFT] = null
-	if skip_right_wall:
-		block.geometry[Vector3i.RIGHT] = null
-	if skip_forward_wall:
-		block.geometry[Vector3i.FORWARD] = null
-	if skip_back_wall:
-		block.geometry[Vector3i.BACK] = null
-	return block
+func _create_block() -> RoommateAreaBase.Block:
+	return Block.new()
 
 
 class Block:
 	extends RoommateAreaBase.Block
 	
 	
-	func handle(target_material: Material, tool: SurfaceTool, blocks: Blocks) -> bool:
-		var faces_created := false
-		for face in RoommateRoot.BLOCK_FACES:
-			if geometry.has(face) and not geometry[face]:
+	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: Blocks) -> bool:
+		var part_generated := false
+		for part_position in PART_DEFINITIONS:
+			var part_rotation := PART_DEFINITIONS[part_position] as Quaternion
+			var part := parts.get(part_position) as Part
+			if not part or part.material != target_material:
 				continue
 			
-			var next_block := blocks.get_single(position + face)
-			if face != Vector3i.ZERO and next_block is RoommateSpace.Block:
+			var next_block := blocks.get_single(position + part_position)
+			if part_position != Vector3i.ZERO and next_block is RoommateSpace.Block:
 				continue
 			
-			var face_material: Material = materials.get(face, DEFAULT_MATERIAL)
-			if target_material != face_material:
-				continue
-			
-			if next_block is RoommateOutOfBounds.Block or face == Vector3i.ZERO:
-				var origin: Vector3 = to_position(position) + face * block_size / 2
-				var face_rotation := Basis(RoommateRoot.BLOCK_ROTATIONS[face])
-				var face_transform := Transform3D(face_rotation, origin).scaled_local(Vector3.ONE * block_size)
-				var face_mesh := geometry.get(face, QuadMesh.new())
-				tool.append_from(face_mesh, 0, face_transform)
-				faces_created = true
-		return faces_created
+			if next_block is RoommateOutOfBounds.Block or part_position == Vector3i.ZERO:
+				var origin: Vector3 = to_position(position) + part_position * block_size / 2
+				var part_transform := Transform3D(Basis(part_rotation), origin).scaled_local(Vector3.ONE * block_size)
+				tool.append_from(part.mesh, 0, part_transform)
+				part_generated = true
+		return part_generated
+
+
+class Part:
+	var mesh: Mesh
+	var collision_mesh: Mesh
+	var material: Material

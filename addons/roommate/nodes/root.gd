@@ -2,25 +2,6 @@
 class_name RoommateRoot
 extends MeshInstance3D
 
-const BLOCK_FACES = [
-	Vector3i.ZERO,
-	Vector3i.UP,
-	Vector3i.DOWN,
-	Vector3i.LEFT,
-	Vector3i.RIGHT,
-	Vector3i.FORWARD,
-	Vector3i.BACK,
-]
-const BLOCK_ROTATIONS := {
-	Vector3i.ZERO: Quaternion.IDENTITY,
-	Vector3i.UP: Quaternion(Vector3.RIGHT, PI / 2),
-	Vector3i.DOWN: Quaternion(Vector3.LEFT, PI / 2),
-	Vector3i.LEFT: Quaternion(Vector3.UP, PI / 2),
-	Vector3i.RIGHT: Quaternion(Vector3.DOWN, PI / 2),
-	Vector3i.FORWARD: Quaternion.IDENTITY,
-	Vector3i.BACK: Quaternion(Vector3.UP, PI),
-}
-
 @export var block_size := 1.0:
 	get:
 		return block_size
@@ -51,7 +32,7 @@ func generate_mesh() -> void:
 	for target_material in global_mat:
 		var tool := SurfaceTool.new()
 		tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var faces_created := blocks.handle_all(tool, target_material)
+		var faces_created := blocks.generate_parts(tool, target_material)
 		if not faces_created:
 			continue
 		tool.index()

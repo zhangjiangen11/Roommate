@@ -32,15 +32,12 @@ func _create_block() -> Block:
 class Block:
 	extends RefCounted
 	
-	const DEFAULT_MATERIAL := preload("res://test/test_material.tres") # TMP?
-	
 	var position := Vector3i.ZERO
 	var block_size := 1.0
-	var geometry := Dictionary()
-	var materials := Dictionary()
+	var parts := Dictionary()
 	
 	
-	func handle(target_material: Material, tool: SurfaceTool, blocks: Blocks) -> bool: # virtual method
+	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: Blocks) -> bool: # virtual method
 		return false
 	
 	

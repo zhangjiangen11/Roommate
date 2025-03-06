@@ -16,15 +16,15 @@ func add_array(new_blocks: Array[RoommateAreaBase.Block]) -> void:
 		old_block.materials.merge(new_block.materials, true)
 
 
-func handle_all(tool: SurfaceTool, target_material: Material) -> bool:
+func generate_parts(tool: SurfaceTool, target_material: Material) -> bool:
 	var _blocks_to_handle: Array[RoommateAreaBase.Block] = []
 	_blocks_to_handle.assign(_blocks.values())
-	var any_faces_created := false
+	var any_parts_generated := false
 	for block in _blocks_to_handle:
-		var faces_created := block.handle(target_material, tool, self)
-		if faces_created:
-			any_faces_created = true
-	return any_faces_created
+		var parts_generated := block.generate_parts(target_material, tool, self)
+		if parts_generated:
+			any_parts_generated = true
+	return any_parts_generated
 
 
 func get_single(position: Vector3i) -> RoommateAreaBase.Block:
