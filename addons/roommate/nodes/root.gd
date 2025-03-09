@@ -9,30 +9,33 @@ extends MeshInstance3D
 		block_size = value
 		generate_mesh()
 
+@export var style: RoommateStyle
+
 
 func generate_mesh() -> void:
 	var nodes := find_children("*", _name_of(RoommateAreaBase), true, false)
 	var areas: Array[RoommateAreaBase] = []
 	areas.assign(nodes)
-	areas.sort_custom(_sort_by_priority)
 	if areas.size() == 0:
 		return
 	
-	var blocks := Blocks.new()
+	var all_blocks := RoommateAreaBase.Blocks.new()
 	for area in areas:
-		var area_blocks := area.get_blocks(block_size)
-		blocks.add_array(area_blocks)
+		var area_blocks := area.create_blocks(block_size)
+		all_blocks.merge(area_blocks)
 	
-	var global_mat := [
-		RoommateAreaBase.Block.DEFAULT_MATERIAL,
-		preload("res://test/floor_material.tres"),
-		preload("res://test/wall_material.tres"),
+	var all_materials: Array[Material] = [
+		preload("res://addons/roommate/defaults/default_material.tres"),
 	]
+	if style:
+		all_materials.append_array(style.get_all_materials())
+		style.apply_style(all_blocks)
+	
 	var result := ArrayMesh.new()
-	for target_material in global_mat:
+	for target_material in all_materials:
 		var tool := SurfaceTool.new()
 		tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var faces_created := blocks.generate_parts(tool, target_material)
+		var faces_created := all_blocks.generate_parts(tool, target_material)
 		if not faces_created:
 			continue
 		tool.index()
@@ -43,10 +46,6 @@ func generate_mesh() -> void:
 		var last_surface_id := result.get_surface_count() - 1
 		result.surface_set_material(last_surface_id, target_material)
 	mesh = result
-
-
-func _sort_by_priority(a: RoommateAreaBase, b: RoommateAreaBase) -> bool:
-	return a.space_priority > b.space_priority
 
 
 func _name_of(script: Script) -> StringName:

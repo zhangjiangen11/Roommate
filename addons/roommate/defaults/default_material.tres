@@ -1,6 +1,6 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://beq5cddbcrgnb"]
 
-[ext_resource type="Texture2D" uid="uid://dulfgfqi4nnkd" path="res://test/texture_test.png" id="1_v03vr"]
+[ext_resource type="Texture2D" uid="uid://dulfgfqi4nnkd" path="res://addons/roommate/defaults/default_texture.png" id="1_v03vr"]
 
 [resource]
 albedo_texture = ExtResource("1_v03vr")

@@ -1,0 +1,82 @@
+[gd_resource type="Resource" script_class="RoommateStyle" load_steps=17 format=3 uid="uid://faajh4b6rphh"]
+
+[ext_resource type="Script" uid="uid://db2e2mqlvrtqo" path="res://addons/roommate/resources/ruleset.gd" id="1_a05q6"]
+[ext_resource type="Material" uid="uid://dmes7flcsmm63" path="res://test/wall_material.tres" id="2_2tkag"]
+[ext_resource type="Script" uid="uid://cd0swaydoq86h" path="res://addons/roommate/resources/style.gd" id="2_y51m1"]
+[ext_resource type="Script" uid="uid://cnf0g0kmv0u2t" path="res://addons/roommate/resources/part.gd" id="3_fv6jg"]
+[ext_resource type="Script" uid="uid://y5md0wq6m7r7" path="res://addons/roommate/resources/selectors/selector_base.gd" id="4_7bq0h"]
+[ext_resource type="Script" uid="uid://gq8ujcxc8lo" path="res://addons/roommate/resources/selectors/select_all_space.gd" id="5_y80v4"]
+[ext_resource type="Material" uid="uid://bfsmengf4gmr" path="res://test/floor_material.tres" id="6_fv6jg"]
+
+[sub_resource type="Resource" id="Resource_kdy2r"]
+script = ExtResource("3_fv6jg")
+material = ExtResource("2_2tkag")
+skip = false
+metadata/_custom_type_script = "uid://cnf0g0kmv0u2t"
+
+[sub_resource type="Resource" id="Resource_7bq0h"]
+script = ExtResource("5_y80v4")
+ceil = true
+floor = true
+wall_left = true
+wall_right = true
+wall_forward = true
+wall_back = true
+center = false
+metadata/_custom_type_script = "uid://gq8ujcxc8lo"
+
+[sub_resource type="Resource" id="Resource_rprh5"]
+script = ExtResource("1_a05q6")
+selectors = Array[ExtResource("4_7bq0h")]([SubResource("Resource_7bq0h")])
+part = SubResource("Resource_kdy2r")
+metadata/_custom_type_script = "uid://db2e2mqlvrtqo"
+
+[sub_resource type="Resource" id="Resource_y80v4"]
+script = ExtResource("3_fv6jg")
+material = ExtResource("6_fv6jg")
+skip = false
+metadata/_custom_type_script = "uid://cnf0g0kmv0u2t"
+
+[sub_resource type="Resource" id="Resource_2tkag"]
+script = ExtResource("5_y80v4")
+ceil = true
+floor = true
+wall_left = false
+wall_right = false
+wall_forward = false
+wall_back = false
+center = false
+metadata/_custom_type_script = "uid://gq8ujcxc8lo"
+
+[sub_resource type="Resource" id="Resource_fv6jg"]
+script = ExtResource("1_a05q6")
+selectors = Array[ExtResource("4_7bq0h")]([SubResource("Resource_2tkag")])
+part = SubResource("Resource_y80v4")
+metadata/_custom_type_script = "uid://db2e2mqlvrtqo"
+
+[sub_resource type="Resource" id="Resource_ieh8g"]
+script = ExtResource("3_fv6jg")
+skip = true
+metadata/_custom_type_script = "uid://cnf0g0kmv0u2t"
+
+[sub_resource type="Resource" id="Resource_806on"]
+script = ExtResource("5_y80v4")
+ceil = false
+floor = false
+wall_left = true
+wall_right = false
+wall_forward = false
+wall_back = false
+center = false
+metadata/_custom_type_script = "uid://gq8ujcxc8lo"
+
+[sub_resource type="Resource" id="Resource_21gf2"]
+script = ExtResource("1_a05q6")
+selectors = Array[ExtResource("4_7bq0h")]([SubResource("Resource_806on")])
+part = SubResource("Resource_ieh8g")
+metadata/_custom_type_script = "uid://db2e2mqlvrtqo"
+
+[resource]
+script = ExtResource("2_y51m1")
+rulesets = Array[ExtResource("1_a05q6")]([SubResource("Resource_rprh5"), SubResource("Resource_fv6jg"), SubResource("Resource_21gf2")])
+metadata/_custom_type_script = "uid://cd0swaydoq86h"

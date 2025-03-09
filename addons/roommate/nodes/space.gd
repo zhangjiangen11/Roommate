@@ -14,19 +14,25 @@ const PART_DEFINITIONS := {
 
 
 func _create_block() -> RoommateAreaBase.Block:
-	return Block.new()
+	var block := Block.new()
+	var default_part := preload("res://addons/roommate/defaults/default_part.tres") as RoommatePart
+	for part_position in PART_DEFINITIONS:
+		block.parts[part_position] = default_part.duplicate()
+	var center_part := block.parts[Vector3i.ZERO] as RoommatePart
+	center_part.skip = true
+	return block
 
 
 class Block:
 	extends RoommateAreaBase.Block
 	
 	
-	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: Blocks) -> bool:
+	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: RoommateAreaBase.Blocks) -> bool:
 		var part_generated := false
 		for part_position in PART_DEFINITIONS:
 			var part_rotation := PART_DEFINITIONS[part_position] as Quaternion
-			var part := parts.get(part_position) as Part
-			if not part or part.material != target_material:
+			var part := parts.get(part_position) as RoommatePart
+			if not part or part.skip or not part.mesh or part.material != target_material:
 				continue
 			
 			var next_block := blocks.get_single(position + part_position)
@@ -39,9 +45,3 @@ class Block:
 				tool.append_from(part.mesh, 0, part_transform)
 				part_generated = true
 		return part_generated
-
-
-class Part:
-	var mesh: Mesh
-	var collision_mesh: Mesh
-	var material: Material

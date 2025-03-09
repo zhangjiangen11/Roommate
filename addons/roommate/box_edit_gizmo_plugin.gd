@@ -25,7 +25,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 			var vertex_2 := box.get_endpoint(j)
 			if vertex_1.distance_squared_to(vertex_2) != 4:
 				continue
-			lines.push_back(vertex_1 * space.size / 2)
-			lines.push_back(vertex_2 * space.size / 2)
+			lines.push_back(vertex_1 * space.area_size / 2)
+			lines.push_back(vertex_2 * space.area_size / 2)
 	
 	gizmo.add_lines(lines, get_material("main", gizmo), false)
