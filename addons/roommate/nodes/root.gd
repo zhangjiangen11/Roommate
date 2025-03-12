@@ -11,11 +11,15 @@ extends MeshInstance3D
 
 @export var style: RoommateStyle
 
+@export_group("editor")
+@export var test := 1
+
 
 func generate_mesh() -> void:
 	var nodes := find_children("*", _name_of(RoommateBlocksArea), true, false)
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(nodes)
+	areas.sort_custom(sort_areas)
 	if areas.size() == 0:
 		return
 	
@@ -46,6 +50,12 @@ func generate_mesh() -> void:
 		var last_surface_id := result.get_surface_count() - 1
 		result.surface_set_material(last_surface_id, target_material)
 	mesh = result
+
+
+func sort_areas(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
+	if a is RoommateOutOfBounds:
+		return false
+	return true
 
 
 func _name_of(script: Script) -> StringName:
