@@ -1,17 +1,17 @@
 @tool
-class_name RoommateAreaBase
+class_name RoommateBlocksArea
 extends Node3D
 
 @export var area_size := Vector3.ONE
 
 
-func create_blocks(block_size: float) -> RoommateAreaBase.Blocks:
+func create_blocks(block_size: float) -> RoommateBlocksArea.Blocks:
 	var start_space_position := position - area_size / 2
 	var box := AABB(start_space_position, area_size)
 	var start_block_position := (box.position / block_size).floor() as Vector3i
 	var end_block_position := (box.end / block_size).ceil() as Vector3i
 	
-	var results := RoommateAreaBase.Blocks.new()
+	var results := RoommateBlocksArea.Blocks.new()
 	for x in range(start_block_position.x, end_block_position.x):
 		for y in range(start_block_position.y, end_block_position.y):
 			for z in range(start_block_position.z, end_block_position.z):
@@ -36,7 +36,7 @@ class Block:
 	var parts := Dictionary()
 	
 	
-	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: RoommateAreaBase.Blocks) -> bool: # virtual method
+	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: RoommateBlocksArea.Blocks) -> bool: # virtual method
 		return false
 	
 	
@@ -50,23 +50,23 @@ class Blocks:
 	var _blocks := Dictionary()
 
 
-	func get_array() -> Array[RoommateAreaBase.Block]:
-		var result: Array[RoommateAreaBase.Block] = []
+	func get_array() -> Array[RoommateBlocksArea.Block]:
+		var result: Array[RoommateBlocksArea.Block] = []
 		result.assign(_blocks.values())
 		return result
 
 
-	func add(new_block: RoommateAreaBase.Block) -> void:
+	func add(new_block: RoommateBlocksArea.Block) -> void:
 		_blocks[new_block.position] = new_block
 
 
-	func merge(blocks: RoommateAreaBase.Blocks) -> void:
+	func merge(blocks: RoommateBlocksArea.Blocks) -> void:
 		for new_block in blocks.get_array():
 			_blocks[new_block.position] = new_block
 
 
 	func generate_parts(tool: SurfaceTool, target_material: Material) -> bool:
-		var _blocks_to_handle: Array[RoommateAreaBase.Block] = []
+		var _blocks_to_handle: Array[RoommateBlocksArea.Block] = []
 		_blocks_to_handle.assign(_blocks.values())
 		var any_parts_generated := false
 		for block in _blocks_to_handle:
@@ -76,8 +76,8 @@ class Blocks:
 		return any_parts_generated
 
 
-	func get_single(position: Vector3i) -> RoommateAreaBase.Block:
-		var result := _blocks.get(position) as RoommateAreaBase.Block
+	func get_single(position: Vector3i) -> RoommateBlocksArea.Block:
+		var result := _blocks.get(position) as RoommateBlocksArea.Block
 		if result:
 			return result
 		return RoommateOutOfBounds.Block.new()

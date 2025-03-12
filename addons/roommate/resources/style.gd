@@ -5,10 +5,10 @@ extends Resource
 @export var rulesets: Array[RoommateRuleset] = []
 
 
-func apply_style(source_blocks: RoommateAreaBase.Blocks) -> void:
+func apply(source_blocks: RoommateBlocksArea.Blocks) -> void:
 	for ruleset in rulesets:
 		if ruleset:
-			ruleset.apply_ruleset(source_blocks)
+			ruleset.apply(source_blocks)
 
 
 func get_all_materials() -> Array[Material]:

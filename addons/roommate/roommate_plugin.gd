@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const ROOT_ACTIONS_SCENE := preload("res://addons/roommate/controls/roommate_root_actions/roommate_root_actions.tscn")
+const ROOT_ACTIONS_SCENE := preload("./controls/roommate_root_actions/roommate_root_actions.tscn")
 
 var _root_actions: Control
 var box_edit_gizmo_plugin := BoxEditGizmoPlugin.new()
@@ -10,8 +10,8 @@ func _enter_tree() -> void:
 	EditorInterface.get_selection().selection_changed.connect(_update_controls_visibility)
 	
 	add_custom_type(_name_of(RoommateRoot), "MeshInstance3D", RoommateRoot, preload("res://icon.svg"))
-	add_custom_type(_name_of(RoommateSpace), _name_of(RoommateAreaBase), RoommateSpace, preload("res://icon.svg"))
-	add_custom_type(_name_of(RoommateOutOfBounds), _name_of(RoommateAreaBase), RoommateOutOfBounds, preload("res://icon.svg"))
+	add_custom_type(_name_of(RoommateSpace), _name_of(RoommateBlocksArea), RoommateSpace, preload("res://icon.svg"))
+	add_custom_type(_name_of(RoommateOutOfBounds), _name_of(RoommateBlocksArea), RoommateOutOfBounds, preload("res://icon.svg"))
 	add_node_3d_gizmo_plugin(box_edit_gizmo_plugin)
 	
 	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as Control

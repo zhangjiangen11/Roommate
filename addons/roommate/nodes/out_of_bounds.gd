@@ -1,11 +1,11 @@
 @tool
 class_name RoommateOutOfBounds
-extends RoommateAreaBase
+extends RoommateBlocksArea
 
 
-func _create_block() -> RoommateAreaBase.Block:
+func _create_block() -> RoommateBlocksArea.Block:
 	return Block.new()
 
 
 class Block:
-	extends RoommateAreaBase.Block
+	extends RoommateBlocksArea.Block

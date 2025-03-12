@@ -1,6 +1,6 @@
 @tool
 class_name RoommateSpace
-extends RoommateAreaBase
+extends RoommateBlocksArea
 
 const PART_DEFINITIONS := {
 	Vector3i.ZERO: Quaternion.IDENTITY,
@@ -13,26 +13,31 @@ const PART_DEFINITIONS := {
 }
 
 
-func _create_block() -> RoommateAreaBase.Block:
+func _create_block() -> RoommateBlocksArea.Block:
 	var block := Block.new()
-	var default_part := preload("res://addons/roommate/defaults/default_part.tres") as RoommatePart
+	var default_part := RoommateSpacePart.new()
+	default_part.action = RoommatePart.Action.INCLUDE
+	default_part.mesh = QuadMesh.new()
+	default_part.material = preload("../defaults/default_material.tres") as Material
 	for part_position in PART_DEFINITIONS:
-		block.parts[part_position] = default_part.duplicate()
-	var center_part := block.parts[Vector3i.ZERO] as RoommatePart
-	center_part.skip = true
+		var part_duplicate := default_part.duplicate() as RoommateSpacePart
+		part_duplicate.part_position = part_position
+		block.parts[part_position] = part_duplicate
+	var center_part := block.parts[Vector3i.ZERO] as RoommateSpacePart
+	center_part.action = RoommatePart.Action.SKIP
 	return block
 
 
 class Block:
-	extends RoommateAreaBase.Block
+	extends RoommateBlocksArea.Block
 	
 	
-	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: RoommateAreaBase.Blocks) -> bool:
+	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: RoommateBlocksArea.Blocks) -> bool:
 		var part_generated := false
 		for part_position in PART_DEFINITIONS:
 			var part_rotation := PART_DEFINITIONS[part_position] as Quaternion
-			var part := parts.get(part_position) as RoommatePart
-			if not part or part.skip or not part.mesh or part.material != target_material:
+			var part := parts.get(part_position) as RoommateSpacePart
+			if not part or part.action == RoommatePart.Action.SKIP or not part.mesh or part.material != target_material:
 				continue
 			
 			var next_block := blocks.get_single(position + part_position)

@@ -13,23 +13,23 @@ extends MeshInstance3D
 
 
 func generate_mesh() -> void:
-	var nodes := find_children("*", _name_of(RoommateAreaBase), true, false)
-	var areas: Array[RoommateAreaBase] = []
+	var nodes := find_children("*", _name_of(RoommateBlocksArea), true, false)
+	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(nodes)
 	if areas.size() == 0:
 		return
 	
-	var all_blocks := RoommateAreaBase.Blocks.new()
+	var all_blocks := RoommateBlocksArea.Blocks.new()
 	for area in areas:
 		var area_blocks := area.create_blocks(block_size)
 		all_blocks.merge(area_blocks)
 	
 	var all_materials: Array[Material] = [
-		preload("res://addons/roommate/defaults/default_material.tres"),
+		preload("../defaults/default_material.tres"),
 	]
 	if style:
 		all_materials.append_array(style.get_all_materials())
-		style.apply_style(all_blocks)
+		style.apply(all_blocks)
 	
 	var result := ArrayMesh.new()
 	for target_material in all_materials:
