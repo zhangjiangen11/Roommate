@@ -19,7 +19,7 @@ func generate_mesh() -> void:
 	var nodes := find_children("*", _name_of(RoommateBlocksArea), true, false)
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(nodes)
-	areas.sort_custom(sort_areas)
+	areas.sort_custom(_sort_by_type)
 	if areas.size() == 0:
 		return
 	
@@ -32,8 +32,14 @@ func generate_mesh() -> void:
 		preload("../defaults/default_material.tres"),
 	]
 	if style:
-		all_materials.append_array(style.get_all_materials())
 		style.apply(all_blocks)
+		all_materials.append_array(style.get_all_materials())
+	
+	var areas_with_style := areas.filter(_filter_by_style) as Array[RoommateBlocksArea]
+	areas_with_style.sort_custom(_sort_by_style)
+	for area in areas_with_style:
+		var area_blocks := all_blocks.get_blocks(area.get_block_positions(block_size))
+		area.style.apply(area_blocks)
 	
 	var result := ArrayMesh.new()
 	for target_material in all_materials:
@@ -52,10 +58,18 @@ func generate_mesh() -> void:
 	mesh = result
 
 
-func sort_areas(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
+func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
 	if a is RoommateOutOfBounds:
 		return false
 	return true
+
+
+func _sort_by_style(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
+	return a.style.apply_priority < b.style.apply_priority
+
+
+func _filter_by_style(a: RoommateBlocksArea) -> bool:
+	return a.style != null
 
 
 func _name_of(script: Script) -> StringName:

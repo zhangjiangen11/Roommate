@@ -3,23 +3,30 @@ class_name RoommateBlocksArea
 extends Node3D
 
 @export var area_size := Vector3.ONE
+@export var style: RoommateStyle
 
 
-func create_blocks(block_size: float) -> RoommateBlocksArea.Blocks:
+func get_block_positions(block_size: float) -> Array[Vector3i]:
+	var result: Array[Vector3i] = []
 	var start_space_position := position - area_size / 2
 	var box := AABB(start_space_position, area_size)
 	var start_block_position := (box.position / block_size).floor() as Vector3i
 	var end_block_position := (box.end / block_size).ceil() as Vector3i
-	
-	var results := RoommateBlocksArea.Blocks.new()
 	for x in range(start_block_position.x, end_block_position.x):
 		for y in range(start_block_position.y, end_block_position.y):
 			for z in range(start_block_position.z, end_block_position.z):
-				var block := _create_block()
-				assert(block)
-				block.position = Vector3i(x, y, z)
-				block.block_size = block_size
-				results.add(block)
+				result.append(Vector3i(x, y, z))
+	return result
+
+
+func create_blocks(block_size: float) -> RoommateBlocksArea.Blocks:
+	var results := RoommateBlocksArea.Blocks.new()
+	for position in get_block_positions(block_size):
+		var block := _create_block()
+		assert(block)
+		block.position = position
+		block.block_size = block_size
+		results.add(block)
 	return results
 
 
@@ -60,6 +67,14 @@ class Blocks:
 		var filter_func := func(block: RoommateBlocksArea.Block) -> bool:
 			return not block is RoommateOutOfBounds.Block
 		return get_all().filter(filter_func)
+
+
+	func get_blocks(positions: Array[Vector3i]) -> RoommateBlocksArea.Blocks:
+		var result := RoommateBlocksArea.Blocks.new()
+		for position in positions:
+			if _blocks.has(position):
+				result.add(_blocks[position])
+		return result
 
 
 	func add(new_block: RoommateBlocksArea.Block) -> void:
