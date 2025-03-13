@@ -3,32 +3,34 @@ class_name RoommateRuleset
 extends Resource
 
 @export var block_selectors: Array[RoommateBlocksSelector]
-@export var part_selectors: Array[RoommatePartsSelector]
-@export var setter: RoommatePart
+@export var parts_setters: Array[RoommatePartsSetter]
 
 
 func apply(source_blocks: RoommateBlocksArea.Blocks) -> void:
-	var selected_blocks := source_blocks
+	var selected_blocks := RoommateBlocksArea.Blocks.new()
 	for selector in block_selectors:
 		if not selector:
 			continue
-		selected_blocks = selector.select(selected_blocks, source_blocks)
+		var selector_result := selector.select(source_blocks)
+		selected_blocks.merge(selector_result)
 	
 	var source_parts: Array[RoommatePart] = []
-	for block in selected_blocks.get_array():
+	for block in selected_blocks.get_all():
 		source_parts.append_array(block.parts.values())
 	
-	var selected_parts := source_parts
-	for selector in part_selectors:
-		if not selector:
+	for setter in parts_setters:
+		if not setter:
 			continue
-		selected_parts = selector.select(selected_parts, source_parts)
-	
-	for part in selected_parts:
-		part.set_values(setter)
+		setter.set_all(source_parts)
 
 
-func get_material() -> Material:
-	if not setter:
-		return null
-	return setter.material
+func get_materials() -> Array[Material]:
+	var result: Array[Material] = []
+	for setter in parts_setters:
+		if not setter:
+			continue
+		var setter_materials := setter.get_materials()
+		for material in setter_materials:
+			if material and not material in result:
+				result.append(material)
+	return result

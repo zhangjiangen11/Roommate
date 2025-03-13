@@ -50,10 +50,16 @@ class Blocks:
 	var _blocks := Dictionary()
 
 
-	func get_array() -> Array[RoommateBlocksArea.Block]:
+	func get_all() -> Array[RoommateBlocksArea.Block]:
 		var result: Array[RoommateBlocksArea.Block] = []
 		result.assign(_blocks.values())
 		return result
+
+
+	func get_in_bounds() -> Array[RoommateBlocksArea.Block]:
+		var filter_func := func(block: RoommateBlocksArea.Block) -> bool:
+			return not block is RoommateOutOfBounds.Block
+		return get_all().filter(filter_func)
 
 
 	func add(new_block: RoommateBlocksArea.Block) -> void:
@@ -61,7 +67,7 @@ class Blocks:
 
 
 	func merge(blocks: RoommateBlocksArea.Blocks) -> void:
-		for new_block in blocks.get_array():
+		for new_block in blocks.get_all():
 			_blocks[new_block.position] = new_block
 
 

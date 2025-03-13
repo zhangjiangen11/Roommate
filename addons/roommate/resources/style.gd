@@ -14,7 +14,10 @@ func apply(source_blocks: RoommateBlocksArea.Blocks) -> void:
 func get_all_materials() -> Array[Material]:
 	var result: Array[Material] = []
 	for ruleset in rulesets:
-		var material := ruleset.get_material()
-		if material and not result.has(material):
-			result.append(material)
+		if not ruleset:
+			continue
+		var ruleset_materials := ruleset.get_materials()
+		for material in ruleset_materials:
+			if material and not material in result:
+				result.append(material)
 	return result
