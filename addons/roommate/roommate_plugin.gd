@@ -7,11 +7,11 @@ var _root_actions: Control
 var box_edit_gizmo_plugin := BoxEditGizmoPlugin.new()
 
 func _enter_tree() -> void:
-	EditorInterface.get_selection().selection_changed.connect(_update_controls_visibility)
+	get_editor_interface().get_selection().selection_changed.connect(_update_controls_visibility)
 	
-	add_custom_type(_name_of(RoommateRoot), "MeshInstance3D", RoommateRoot, preload("res://icon.svg"))
-	add_custom_type(_name_of(RoommateSpace), _name_of(RoommateBlocksArea), RoommateSpace, preload("res://icon.svg"))
-	add_custom_type(_name_of(RoommateOutOfBounds), _name_of(RoommateBlocksArea), RoommateOutOfBounds, preload("res://icon.svg"))
+	add_custom_type("RoommateRoot", "MeshInstance3D", RoommateRoot, preload("res://icon.svg"))
+	add_custom_type("RoommateSpace", "RoommateBlocksArea", RoommateSpace, preload("res://icon.svg"))
+	add_custom_type("RoommateOutOfBounds", "RoommateBlocksArea", RoommateOutOfBounds, preload("res://icon.svg"))
 	add_node_3d_gizmo_plugin(box_edit_gizmo_plugin)
 	
 	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as Control
@@ -20,26 +20,22 @@ func _enter_tree() -> void:
 
 
 func _exit_tree() -> void:
-	EditorInterface.get_selection().selection_changed.disconnect(_update_controls_visibility)
+	get_editor_interface().get_selection().selection_changed.disconnect(_update_controls_visibility)
 	
 	remove_control_from_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, _root_actions)
 	_root_actions.free()
 	_root_actions = null
 	
 	remove_node_3d_gizmo_plugin(box_edit_gizmo_plugin)
-	remove_custom_type(_name_of(RoommateRoot))
-	remove_custom_type(_name_of(RoommateSpace))
-	remove_custom_type(_name_of(RoommateOutOfBounds))
+	remove_custom_type("RoommateRoot")
+	remove_custom_type("RoommateSpace")
+	remove_custom_type("RoommateOutOfBounds")
 
 
 func _update_controls_visibility() -> void:
 	if not _root_actions:
 		return
-	var nodes := EditorInterface.get_selection().get_selected_nodes()
+	var nodes := get_editor_interface().get_selection().get_selected_nodes()
 	var is_extends := func(node: Node) -> bool:
 		return node is RoommateRoot
 	_root_actions.visible = nodes.any(is_extends)
-
-
-func _name_of(script: Script) -> StringName:
-	return script.get_global_name()

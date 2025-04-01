@@ -8,11 +8,13 @@ extends RoommateBlocksSelector
 func select(source_blocks: RoommateBlocksArea.Blocks) -> RoommateBlocksArea.Blocks:
 	var result := RoommateBlocksArea.Blocks.new()
 	
-	var biggest_values := Vector3i.MIN
-	var smallest_values := Vector3i.MAX
+	var biggest_values := Vector3i(-Vector3.INF)
+	var smallest_values := Vector3i(Vector3.INF) - Vector3i.ONE
 	for block in source_blocks.get_in_bounds():
-		biggest_values = biggest_values.max(block.position)
-		smallest_values = smallest_values.min(block.position)
+		biggest_values = Vector3i(maxi(block.position.x, biggest_values.x),
+				maxi(block.position.y, biggest_values.y), maxi(block.position.z, biggest_values.z))
+		smallest_values = Vector3i(mini(block.position.x, smallest_values.x),
+				mini(block.position.y, smallest_values.y), mini(block.position.z, smallest_values.z))
 	
 	var required_x = null
 	var required_y = null

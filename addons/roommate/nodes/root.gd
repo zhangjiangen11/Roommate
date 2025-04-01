@@ -16,7 +16,7 @@ extends MeshInstance3D
 
 
 func generate_mesh() -> void:
-	var nodes := find_children("*", _name_of(RoommateBlocksArea), true, false)
+	var nodes := find_children("*", "RoommateBlocksArea", true, false)
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(nodes)
 	areas.sort_custom(_sort_by_type)
@@ -70,7 +70,3 @@ func _sort_by_style(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
 
 func _filter_by_style(a: RoommateBlocksArea) -> bool:
 	return a.style != null
-
-
-func _name_of(script: Script) -> StringName:
-	return script.get_global_name()

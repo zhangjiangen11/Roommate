@@ -7,7 +7,7 @@ func _ready() -> void:
 
 
 func _on_popup_menu_id_pressed(id: int) -> void:
-	var nodes := EditorInterface.get_selection().get_selected_nodes()
+	var nodes := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
 	var is_extends := func (node: Node) -> bool:
 		return node is RoommateRoot
 	var filtered := nodes.filter(is_extends)
