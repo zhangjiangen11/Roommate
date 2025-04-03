@@ -28,5 +28,12 @@ func get_all_materials() -> Array[Material]:
 	return result
 
 
+func select_all_blocks() -> RoommateRuleset:
+	var ruleset := RoommateRuleset.new()
+	ruleset.block_selectors.append(RoommateBlocksSelector.new())
+	_current_rulesets.append(ruleset)
+	return ruleset
+
+
 func _build_rulesets() -> void: # virtual function
 	pass

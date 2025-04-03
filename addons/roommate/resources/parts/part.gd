@@ -18,3 +18,8 @@ func set_values(other_part: RoommatePart) -> void:
 		material = other_part.material
 	if other_part.action != Action.UNDEFINED:
 		action = other_part.action
+
+
+func set_material(new_material: Material) -> RoommatePart:
+	material = new_material
+	return self

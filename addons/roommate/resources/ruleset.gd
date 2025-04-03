@@ -34,3 +34,21 @@ func get_materials() -> Array[Material]:
 			if material and not material in result:
 				result.append(material)
 	return result
+
+
+func select_all_parts() -> RoommatePart:
+	var part := RoommatePart.new()
+	var setter := RoommateAllSpacePartsSetter.new()
+	setter.setter = part
+	return part
+
+
+func select_all_walls() -> RoommatePart:
+	var part := RoommatePart.new()
+	var setter := RoommateSpacePartsSetter.new()
+	setter.wall_forward_setter = part
+	setter.wall_back_setter = part
+	setter.wall_left_setter = part
+	setter.wall_right_setter = part
+	parts_setters.append(setter)
+	return part;
