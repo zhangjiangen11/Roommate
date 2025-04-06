@@ -16,6 +16,7 @@ enum Action { UNDEFINED, INCLUDE, SKIP }
 @export var mesh: Mesh
 @export var material: Material
 
+var _part_properties := {}
 
 func set_values(other_part: RoommatePart) -> void:
 	if not other_part:

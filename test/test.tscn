@@ -36,19 +36,15 @@ script = ExtResource("3_uupu6")
 
 [sub_resource type="Resource" id="Resource_fxpnm"]
 script = ExtResource("6_fljdm")
-action = 2
 
 [sub_resource type="Resource" id="Resource_rr4o3"]
 script = ExtResource("6_fljdm")
-action = 2
 
 [sub_resource type="Resource" id="Resource_larbu"]
 script = ExtResource("6_fljdm")
-action = 2
 
 [sub_resource type="Resource" id="Resource_8ua20"]
 script = ExtResource("6_fljdm")
-action = 2
 
 [sub_resource type="Resource" id="Resource_877u8"]
 script = ExtResource("10_pd00f")
