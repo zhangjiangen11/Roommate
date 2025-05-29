@@ -21,40 +21,23 @@ const PART_DEFINITIONS := {
 }
 
 
-func _create_block() -> RoommateBlocksArea.Block:
-	var block := Block.new()
-	var default_part := RoommateSpacePart.new()
-	default_part.action = RoommatePart.Action.INCLUDE
-	default_part.mesh = QuadMesh.new()
-	default_part.material = preload("../defaults/default_material.tres") as Material
-	for part_position in PART_DEFINITIONS:
-		var part_duplicate := default_part.duplicate() as RoommateSpacePart
-		part_duplicate.part_position = part_position
-		block.parts[part_position] = part_duplicate
-	var center_part := block.parts[Vector3i.ZERO] as RoommateSpacePart
-	center_part.action = RoommatePart.Action.SKIP
-	return block
+func _process_block(new_block: RoommateBlock) -> void:
+	new_block.block_type_id = "btid_space";
+	new_block.slots = {
+		"sid_center": _create_part(Vector3i.ZERO),
+		"sid_up": _create_part(Vector3i.ZERO),
+		"sid_down": _create_part(Vector3i.ZERO),
+		"sid_left": _create_part(Vector3i.ZERO),
+		"sid_right": _create_part(Vector3i.ZERO),
+		"sid_forward": _create_part(Vector3i.ZERO),
+		"sid_back": _create_part(Vector3i.ZERO),
+	}
 
 
-class Block:
-	extends RoommateBlocksArea.Block
+func _create_part(anchor: Vector3i) -> RoommatePart:
+	var result := RoommatePart.new()
 	
-	
-	func generate_parts(target_material: Material, tool: SurfaceTool, blocks: RoommateBlocksArea.Blocks) -> bool:
-		var part_generated := false
-		for part_position in PART_DEFINITIONS:
-			var part_rotation := PART_DEFINITIONS[part_position] as Quaternion
-			var part := parts.get(part_position) as RoommateSpacePart
-			if not part or part.action == RoommatePart.Action.SKIP or not part.mesh or part.material != target_material:
-				continue
-			
-			var next_block := blocks.get_single(position + part_position)
-			if part_position != Vector3i.ZERO and next_block is RoommateSpace.Block:
-				continue
-			
-			if next_block is RoommateOutOfBounds.Block or part_position == Vector3i.ZERO:
-				var origin: Vector3 = to_position(position) + part_position * block_size / 2
-				var part_transform := Transform3D(Basis(part_rotation), origin).scaled_local(Vector3.ONE * block_size)
-				tool.append_from(part.mesh, 0, part_transform)
-				part_generated = true
-		return part_generated
+	result.anchor = anchor
+	result.mesh = QuadMesh.new()
+	result.material = preload("../defaults/default_material.tres")
+	return result

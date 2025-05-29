@@ -19,11 +19,14 @@ extends MeshInstance3D
 
 @export var style: RoommateStyle
 
-@export_group("editor")
-@export var test := 1
+@export_group("Editor")
+@export var nav_regions: Array[NavigationRegion3D]
+
+var _tool := SurfaceTool.new()
 
 
 func generate_mesh() -> void:
+	# Searching for areas
 	var nodes := find_children("*", "RoommateBlocksArea", true, false)
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(nodes)
@@ -31,39 +34,39 @@ func generate_mesh() -> void:
 	if areas.size() == 0:
 		return
 	
-	var all_blocks := RoommateBlocksArea.Blocks.new()
+	# Creating all the blocks that defined by areas and applying styles
+	var all_blocks := {}
 	for area in areas:
 		var area_blocks := area.create_blocks(block_size)
-		all_blocks.merge(area_blocks)
+		all_blocks.merge(area_blocks, true)
 	
-	var all_materials: Array[Material] = [
-		preload("../defaults/default_material.tres"),
-	]
+	# Applying global style
 	if style:
+		style.build()
 		style.apply(all_blocks)
-		all_materials.append_array(style.get_all_materials())
 	
+	# Applying per area style
 	var areas_with_style := areas.filter(_filter_by_style) as Array[RoommateBlocksArea]
 	areas_with_style.sort_custom(_sort_by_style)
 	for area in areas_with_style:
-		var area_blocks := all_blocks.get_blocks(area.get_block_positions(block_size))
+		var area_blocks := {}
+		for area_block_position in area.get_block_positions(block_size):
+			area_blocks[area_block_position] = all_blocks[area_block_position]
+		area.style.build()
 		area.style.apply(area_blocks)
 	
+	for block_position in all_blocks:
+		var block := all_blocks[block_position] as RoommateBlock
+		var part := block.slots["sid_up"] as RoommatePart
+		print("%s: %s" % [block_position, part.transform.origin])
+		
 	var result := ArrayMesh.new()
-	for target_material in all_materials:
-		var tool := SurfaceTool.new()
-		tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var faces_created := all_blocks.generate_parts(tool, target_material)
-		if not faces_created:
-			continue
-		tool.index()
-		tool.generate_normals()
-		tool.generate_tangents()
-		var mesh_surface := tool.commit_to_arrays()
-		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_surface)
-		var last_surface_id := result.get_surface_count() - 1
-		result.surface_set_material(last_surface_id, target_material)
+	# TODO: generate
 	mesh = result
+	
+	for nav_region in nav_regions:
+		if nav_region:
+			nav_region.bake_navigation_mesh()
 
 
 func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
@@ -73,7 +76,7 @@ func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
 
 
 func _sort_by_style(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
-	return a.style.apply_priority < b.style.apply_priority
+	return a.style.apply_order < b.style.apply_order
 
 
 func _filter_by_style(a: RoommateBlocksArea) -> bool:

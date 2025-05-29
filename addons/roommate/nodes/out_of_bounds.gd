@@ -11,9 +11,5 @@ class_name RoommateOutOfBounds
 extends RoommateBlocksArea
 
 
-func _create_block() -> RoommateBlocksArea.Block:
-	return Block.new()
-
-
-class Block:
-	extends RoommateBlocksArea.Block
+func _process_block(new_block: RoommateBlock) -> void:
+	new_block.block_type_id = "btid_out_of_bounds";

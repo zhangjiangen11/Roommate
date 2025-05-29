@@ -7,11 +7,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateSpacePart
-extends RoommatePart
+class_name RoommatePart
+extends RefCounted
 
-var part_position: Vector3i
-
-
-func set_values(other_part: RoommatePart) -> void:
-	super.set_values(other_part)
+var transform := Transform3D.IDENTITY
+var anchor := Vector3.ZERO
+var uv_transform := Transform2D.IDENTITY
+var mesh: Mesh
+var material: Material

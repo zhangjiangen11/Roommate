@@ -1,0 +1,24 @@
+# Copyright (c) 2025 Kirill Rozhkov.
+#
+# This file is part of Roommate plugin: https://github.com/Hoork/Roommate
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+@tool
+class_name RoommateBlock
+extends RefCounted
+
+@export var block_type_id: StringName
+@export var block_position: Vector3i
+@export var slots := {}
+
+
+func get_parts_with_material(target_material: Material) -> Dictionary:
+	var result := {}
+	for slot_id in slots:
+		var part := slots.get(slot_id) as RoommatePart
+		if part and part.material == target_material:
+			result[slot_id] = part
+	return result
