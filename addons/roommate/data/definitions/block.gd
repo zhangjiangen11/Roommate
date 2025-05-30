@@ -10,15 +10,15 @@
 class_name RoommateBlock
 extends RefCounted
 
+const SLOT_DIRECTIONS = {
+	&"sid_up": Vector3i.UP,
+	&"sid_down": Vector3i.DOWN,
+	&"sid_left": Vector3i.LEFT,
+	&"sid_right": Vector3i.RIGHT,
+	&"sid_forward": Vector3i.FORWARD,
+	&"sid_back": Vector3i.BACK,
+}
+
 @export var block_type_id: StringName
 @export var block_position: Vector3i
 @export var slots := {}
-
-
-func get_parts_with_material(target_material: Material) -> Dictionary:
-	var result := {}
-	for slot_id in slots:
-		var part := slots.get(slot_id) as RoommatePart
-		if part and part.material == target_material:
-			result[slot_id] = part
-	return result

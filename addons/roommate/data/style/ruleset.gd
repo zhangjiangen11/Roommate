@@ -36,15 +36,3 @@ func apply(source_blocks: Dictionary) -> void:
 		for block_position in selected_blocks:
 			var block := selected_blocks[block_position] as RoommateBlock
 			setter.apply(block.slots)
-
-
-func get_materials() -> Array[Material]:
-	var result: Array[Material] = []
-	for setter in parts_setters:
-		if not setter:
-			push_warning("Setter is null")
-			continue
-		var setter_material := setter.new_values.get(&"material") as Material
-		if setter_material and not setter_material in result:
-			result.append(setter_material)
-	return result

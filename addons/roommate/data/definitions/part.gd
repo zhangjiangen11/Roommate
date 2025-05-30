@@ -11,7 +11,7 @@ class_name RoommatePart
 extends RefCounted
 
 var transform := Transform3D.IDENTITY
+var offset := Vector3.ZERO
 var anchor := Vector3.ZERO
 var uv_transform := Transform2D.IDENTITY
 var mesh: Mesh
-var material: Material

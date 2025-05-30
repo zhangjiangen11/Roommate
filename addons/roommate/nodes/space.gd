@@ -10,34 +10,29 @@
 class_name RoommateSpace
 extends RoommateBlocksArea
 
-const PART_DEFINITIONS := {
-	Vector3i.ZERO: Quaternion.IDENTITY,
-	Vector3i.UP: Quaternion(Vector3.RIGHT, PI / 2),
-	Vector3i.DOWN: Quaternion(Vector3.LEFT, PI / 2),
-	Vector3i.LEFT: Quaternion(Vector3.UP, PI / 2),
-	Vector3i.RIGHT: Quaternion(Vector3.DOWN, PI / 2),
-	Vector3i.FORWARD: Quaternion.IDENTITY,
-	Vector3i.BACK: Quaternion(Vector3.UP, PI),
-}
-
 
 func _process_block(new_block: RoommateBlock) -> void:
 	new_block.block_type_id = "btid_space";
+	var center_part := _create_part(Vector3.ONE / 2, Vector3.ZERO, 0)
+	center_part.mesh = null
 	new_block.slots = {
-		"sid_center": _create_part(Vector3i.ZERO),
-		"sid_up": _create_part(Vector3i.ZERO),
-		"sid_down": _create_part(Vector3i.ZERO),
-		"sid_left": _create_part(Vector3i.ZERO),
-		"sid_right": _create_part(Vector3i.ZERO),
-		"sid_forward": _create_part(Vector3i.ZERO),
-		"sid_back": _create_part(Vector3i.ZERO),
+		&"sid_center": center_part,
+		&"sid_up": _create_part(Vector3(0.5, 1, 0.5), Vector3.RIGHT, PI / 2),
+		&"sid_down": _create_part(Vector3(0.5, 0, 0.5), Vector3.LEFT, PI / 2),
+		&"sid_left": _create_part(Vector3(0, 0.5, 0.5), Vector3.UP, PI / 2),
+		&"sid_right": _create_part(Vector3(1, 0.5, 0.5), Vector3.DOWN, PI / 2),
+		&"sid_forward": _create_part(Vector3(0.5, 0.5, 0), Vector3.ZERO, 0),
+		&"sid_back": _create_part(Vector3(0.5, 0.5, 1), Vector3.UP, PI),
 	}
 
 
-func _create_part(anchor: Vector3i) -> RoommatePart:
+func _create_part(anchor: Vector3, rotation_axis: Vector3, angle: float) -> RoommatePart:
 	var result := RoommatePart.new()
-	
+	result.transform = Transform3D.IDENTITY
+	if rotation_axis != Vector3.ZERO:
+		result.transform = result.transform.rotated_local(rotation_axis, angle)
 	result.anchor = anchor
-	result.mesh = QuadMesh.new()
-	result.material = preload("../defaults/default_material.tres")
+	var default_mesh := QuadMesh.new()
+	default_mesh.material = preload("../defaults/default_material.tres")
+	result.mesh = default_mesh
 	return result

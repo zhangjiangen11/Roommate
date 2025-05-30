@@ -17,9 +17,10 @@ var new_values := {}
 func apply(slots: Dictionary) -> void:
 	for slot_id in slots:
 		if not slot_id in selected_slot_ids:
-			return
+			continue
 		var current_part := slots.get(slot_id) as RoommatePart
 		if not current_part:
-			return
+			continue
 		for property_name in new_values:
+			print(new_values[property_name])
 			current_part.set(property_name, new_values[property_name])

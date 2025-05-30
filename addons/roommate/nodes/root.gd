@@ -17,12 +17,12 @@ extends MeshInstance3D
 		block_size = value
 		generate_mesh()
 
-@export var style: RoommateStyle
+@export var global_style: RoommateStyle
 
 @export_group("Editor")
-@export var nav_regions: Array[NavigationRegion3D]
+@export var linked_nav_regions: Array[NavigationRegion3D]
 
-var _tool := SurfaceTool.new()
+var _tools := {}
 
 
 func generate_mesh() -> void:
@@ -41,9 +41,9 @@ func generate_mesh() -> void:
 		all_blocks.merge(area_blocks, true)
 	
 	# Applying global style
-	if style:
-		style.build()
-		style.apply(all_blocks)
+	if global_style:
+		global_style.build()
+		global_style.apply(all_blocks)
 	
 	# Applying per area style
 	var areas_with_style := areas.filter(_filter_by_style) as Array[RoommateBlocksArea]
@@ -55,18 +55,61 @@ func generate_mesh() -> void:
 		area.style.build()
 		area.style.apply(area_blocks)
 	
+	# generating mesh
+	var result := ArrayMesh.new()
+	_tools.clear()
 	for block_position in all_blocks:
 		var block := all_blocks[block_position] as RoommateBlock
-		var part := block.slots["sid_up"] as RoommatePart
-		print("%s: %s" % [block_position, part.transform.origin])
-		
-	var result := ArrayMesh.new()
-	# TODO: generate
+		match block.block_type_id:
+			&"btid_space":
+				_generate_space_block(block, all_blocks)
+			_:
+				push_error("Unknown block type: %s" % block.block_type_id)
+				return
+	
+	# stitching it all together
+	for surface_material in _tools:
+		var tool := _tools[surface_material] as SurfaceTool
+		tool.index()
+		tool.generate_normals()
+		tool.generate_tangents()
+		var mesh_surface := tool.commit_to_arrays()
+		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_surface)
+		result.surface_set_material(result.get_surface_count() - 1, surface_material)
 	mesh = result
 	
-	for nav_region in nav_regions:
+	# other actions
+	for nav_region in linked_nav_regions:
 		if nav_region:
 			nav_region.bake_navigation_mesh()
+
+
+func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void:
+	for slot_id in block.slots:
+		var part := block.slots.get(slot_id) as RoommatePart
+		var direction := RoommateBlock.SLOT_DIRECTIONS.get(slot_id, Vector3i.ZERO) as Vector3i
+		var adjacent_block := all_blocks.get(block.block_position + direction) as RoommateBlock
+		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds":
+			_generate_part(part, block)
+
+
+func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
+	if not part or not part.mesh:
+		return
+	for surface_id in part.mesh.get_surface_count():
+		var origin := _to_position(parent_block.block_position) + block_size * part.anchor
+		var part_transform := Transform3D.IDENTITY.translated_local(origin).translated_local(part.offset) * part.transform
+		var material := part.mesh.surface_get_material(surface_id)
+		if not _tools.has(material):
+			var new_tool := SurfaceTool.new()
+			new_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+			_tools[material] = new_tool
+		var tool := _tools.get(material) as SurfaceTool
+		tool.append_from(part.mesh, surface_id, part_transform)
+
+
+func _to_position(block_position: Vector3i) -> Vector3:
+		return block_position * block_size
 
 
 func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:

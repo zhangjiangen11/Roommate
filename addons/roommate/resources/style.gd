@@ -30,16 +30,6 @@ func apply(source_blocks: Dictionary) -> void:
 		ruleset.apply(source_blocks)
 
 
-func get_materials() -> Array[Material]:
-	var result: Array[Material] = []
-	for ruleset in _current_rulesets:
-		var ruleset_materials := ruleset.get_materials()
-		for ruleset_material in ruleset_materials:
-			if ruleset_material and not ruleset_material in result:
-				result.append(ruleset_material)
-	return result
-
-
 func create_ruleset() -> void:
 	_current_ruleset = RoommateRuleset.new()
 	_current_rulesets.append(_current_ruleset)
@@ -68,28 +58,35 @@ func select_parts(slot_ids: Array[StringName]) -> void:
 
 func select_all_parts() -> void:
 	select_parts([
-		"sid_center",
-		"sid_up",
-		"sid_down",
-		"sid_left",
-		"sid_right",
-		"sid_forward",
-		"sid_back",
+		&"sid_center",
+		&"sid_up",
+		&"sid_down",
+		&"sid_left",
+		&"sid_right",
+		&"sid_forward",
+		&"sid_back",
 	])
 
 
-func set_material(material: Material) -> void:
-	if not _has_current_setter():
-		return
-	_current_setter.new_values[&"material"] = material
+func select_all_walls() -> void:
+	select_parts([
+		&"sid_left",
+		&"sid_right",
+		&"sid_forward",
+		&"sid_back",
+	])
 
 
 func set_offset(offset: Vector3) -> void:
 	if not _has_current_setter():
 		return
-	var transform = _current_setter.new_values.get(&"transform", Transform3D.IDENTITY) as Transform3D
-	transform.origin = offset
-	_current_setter.new_values[&"transform"] = transform
+	_current_setter.new_values[&"offset"] = offset
+
+
+func set_mesh(mesh: Mesh) -> void:
+	if not _has_current_setter():
+		return
+	_current_setter.new_values[&"mesh"] = mesh
 
 
 func _selector_all_blocks(source_blocks: Dictionary) -> Array[Vector3i]:
