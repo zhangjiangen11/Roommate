@@ -20,9 +20,10 @@ extends MeshInstance3D
 @export var global_style: RoommateStyle
 
 @export_group("Editor")
-@export var linked_nav_regions: Array[NavigationRegion3D]
+@export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
 
 var _tools := {}
+var _collision_faces := PackedVector3Array()
 
 
 func generate_mesh() -> void:
@@ -56,6 +57,7 @@ func generate_mesh() -> void:
 	# generating mesh
 	var result := ArrayMesh.new()
 	_tools.clear()
+	_collision_faces.clear()
 	for block_position in all_blocks:
 		var block := all_blocks[block_position] as RoommateBlock
 		match block.block_type_id:
@@ -77,9 +79,14 @@ func generate_mesh() -> void:
 	mesh = result
 	
 	# other actions
-	for nav_region in linked_nav_regions:
-		if nav_region:
-			nav_region.bake_navigation_mesh()
+	var this_node: Node = self
+	if Engine.is_editor_hint():
+		this_node = EditorPlugin.new().get_editor_interface().get_edited_scene_root().get_node(get_path())
+	var collision_shape := this_node.get_node_or_null(linked_collision_shape) as CollisionShape3D
+	if collision_shape:
+		var shape := ConcavePolygonShape3D.new()
+		shape.set_faces(_collision_faces)
+		collision_shape.shape = shape
 
 
 func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void:
@@ -94,10 +101,18 @@ func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part or not part.mesh:
 		return
+	var origin := _to_position(parent_block.block_position) + block_size * part.anchor
+	var part_basis := Basis.from_euler(part.rotation).scaled(part.scale)
+	var part_transform := Transform3D(part_basis, origin + part.relative_position)
+	
+	var collision_basis := Basis.from_euler(part.collision_rotation).scaled(part.collision_scale)
+	var collision_transform := Transform3D(collision_basis, origin + part.collision_relative_position)
+	
+	if part.collision_mesh:
+		var part_collision_faces := collision_transform * part.collision_mesh.get_faces()
+		_collision_faces.append_array(part_collision_faces)
+	
 	for surface_id in part.mesh.get_surface_count():
-		var origin := _to_position(parent_block.block_position) + block_size * part.anchor
-		var basis := Basis.from_euler(part.rotation).scaled(part.scale)
-		var part_transform := Transform3D(basis, origin + part.relative_position)
 		var material := part.mesh.surface_get_material(surface_id)
 		if not _tools.has(material):
 			var new_tool := SurfaceTool.new()

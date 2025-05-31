@@ -16,5 +16,9 @@ var relative_position := Vector3.ZERO
 var rotation := Vector3.ZERO
 var scale := Vector3.ONE
 
+var collision_relative_position := Vector3.ZERO
+var collision_rotation := Vector3.ZERO
+var collision_scale := Vector3.ONE
+
 var mesh: Mesh
 var collision_mesh: Mesh

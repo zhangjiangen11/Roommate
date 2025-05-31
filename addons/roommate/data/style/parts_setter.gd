@@ -37,6 +37,18 @@ func set_scale(scale: Vector3) -> void:
 	_new_values[&"scale"] = scale
 
 
+func set_collision_offset(offset: Vector3) -> void:
+	_new_values[&"collision_relative_position"] = offset
+
+
+func set_collision_rotation(rotation: Vector3) -> void:
+	_new_values[&"collision_rotation"] = rotation
+
+
+func set_collision_scale(scale: Vector3) -> void:
+	_new_values[&"collision_scale"] = scale
+
+
 func set_mesh(mesh: Mesh) -> void:
 	_new_values[&"mesh"] = mesh
 

@@ -17,3 +17,6 @@ func _build_rulesets() -> void:
 	s2.set_offset(Vector3.FORWARD)
 	s2.set_rotation(Vector3(deg_to_rad(-80), 0, 0))
 	s2.set_scale(Vector3.ONE * 0.5)
+	s2.set_collision_offset(Vector3.FORWARD)
+	s2.set_collision_rotation(Vector3(deg_to_rad(-80), 0, 0))
+	s2.set_collision_scale(Vector3.ONE * 0.5)
