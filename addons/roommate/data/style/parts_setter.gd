@@ -26,16 +26,20 @@ func apply(slots: Dictionary) -> void:
 
 
 func set_offset(offset: Vector3) -> void:
-	_new_values[&"offset_position"] = offset
+	_new_values[&"relative_position"] = offset
 
 
-func set_euler(euler: Vector3) -> void:
-	_new_values[&"offset_euler"] = euler
+func set_rotation(rotation: Vector3) -> void:
+	_new_values[&"rotation"] = rotation
 
 
 func set_scale(scale: Vector3) -> void:
-	_new_values[&"offset_scale"] = scale
+	_new_values[&"scale"] = scale
 
 
 func set_mesh(mesh: Mesh) -> void:
 	_new_values[&"mesh"] = mesh
+
+
+func set_collision_mesh(mesh: Mesh) -> void:
+	_new_values[&"collision_mesh"] = mesh

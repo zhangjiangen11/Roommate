@@ -96,9 +96,8 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		return
 	for surface_id in part.mesh.get_surface_count():
 		var origin := _to_position(parent_block.block_position) + block_size * part.anchor
-		var relative_transform := Transform3D.IDENTITY.translated_local(part.offset_position).translated(origin)
-		relative_transform.basis = Basis.from_euler(part.offset_euler).scaled(part.offset_scale)
-		var part_transform := relative_transform * part.transform
+		var basis := Basis.from_euler(part.rotation).scaled(part.scale)
+		var part_transform := Transform3D(basis, origin + part.relative_position)
 		var material := part.mesh.surface_get_material(surface_id)
 		if not _tools.has(material):
 			var new_tool := SurfaceTool.new()

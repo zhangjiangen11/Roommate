@@ -15,5 +15,5 @@ func _build_rulesets() -> void:
 	
 	var s2 := r1.select_parts([&"sid_down"])
 	s2.set_offset(Vector3.FORWARD)
-	s2.set_euler(Vector3(deg_to_rad(20), 0, 0))
+	s2.set_rotation(Vector3(deg_to_rad(-80), 0, 0))
 	s2.set_scale(Vector3.ONE * 0.5)
