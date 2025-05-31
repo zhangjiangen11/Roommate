@@ -7,17 +7,15 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommatePart
+class_name RoommateBlocksSelector
 extends RefCounted
 
-var transform := Transform3D.IDENTITY
-var anchor := Vector3.ZERO
+enum Mode { INCLUDE, EXCLUDE }
 
-var offset_position := Vector3.ZERO
-var offset_euler := Vector3.ZERO
-var offset_scale := Vector3.ONE
+var mode := Mode.INCLUDE
+var check_selection: Callable
 
-var mesh: Mesh
-var collision_mesh: Mesh
 
-var uv_transform := Transform2D.IDENTITY
+func check_block_inclusion(block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var selected := check_selection.call(block, source_blocks) as bool
+	return selected and mode == Mode.INCLUDE

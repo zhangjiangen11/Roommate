@@ -10,29 +10,79 @@
 class_name RoommateRuleset
 extends RefCounted
 
-var block_selectors: Array[Callable] = []
-var parts_setters: Array[RoommatePartsSetter] = []
+var _blocks_selectors: Array[RoommateBlocksSelector] = []
+var _parts_setters: Array[RoommatePartsSetter] = []
 
 
 func apply(source_blocks: Dictionary) -> void:
-	if block_selectors.size() == 0:
-		push_warning("Ruleset doesnt have block selectors")
-	if parts_setters.size() == 0:
+	if _blocks_selectors.size() == 0:
+		push_warning("Ruleset doesnt have blocks selectors")
+	if _parts_setters.size() == 0:
 		push_warning("Ruleset doesnt have parts setters")
-	
-	var selected_blocks := {}
-	for selector in block_selectors:
-		if not selector.is_valid():
-			push_warning("Block selector %s is not valid" % [selector.get_method()])
+	for block_position in source_blocks:
+		var include := false
+		var block := source_blocks[block_position] as RoommateBlock
+		for blocks_selector in _blocks_selectors:
+			include = blocks_selector.check_block_inclusion(block, source_blocks)
+		if not include:
 			continue
-		var selected_block_positions := selector.call(source_blocks) as Array[Vector3i]
-		for selected_block_position in selected_block_positions:
-			selected_blocks[selected_block_position] = source_blocks[selected_block_position]
-	
-	for setter in parts_setters:
-		if not setter:
-			push_warning("Setter is null")
-			continue
-		for block_position in selected_blocks:
-			var block := selected_blocks[block_position] as RoommateBlock
+		for setter in _parts_setters:
+			if not setter:
+				push_warning("Setter is null")
+				continue
 			setter.apply(block.slots)
+
+
+func select_blocks(check_selection: Callable, mode := RoommateBlocksSelector.Mode.INCLUDE) -> RoommateBlocksSelector:
+	var selector := RoommateBlocksSelector.new()
+	selector.check_selection = check_selection
+	selector.mode = mode
+	_blocks_selectors.append(selector)
+	return selector
+
+
+func select_all_blocks(mode := RoommateBlocksSelector.Mode.INCLUDE) -> RoommateBlocksSelector:
+	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		return true
+	return select_blocks(_check_selection, mode)
+
+
+func select_edge_blocks(edge: Vector3i, mode := RoommateBlocksSelector.Mode.INCLUDE) -> RoommateBlocksSelector:
+	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		var result := true
+		if edge.x != 0:
+			result = result and not source_blocks.has(block.block_position + edge * Vector3i.RIGHT)
+		if edge.y != 0:
+			result = result and not source_blocks.has(block.block_position + edge * Vector3i.UP)
+		if edge.z != 0:
+			result = result and not source_blocks.has(block.block_position + edge * Vector3i.BACK)
+		return result
+	return select_blocks(_check_selection, mode)
+
+
+func select_parts(slot_ids: Array[StringName]) -> RoommatePartsSetter:
+	var new_setter = RoommatePartsSetter.new()
+	new_setter.selected_slot_ids = slot_ids
+	_parts_setters.append(new_setter)
+	return new_setter
+
+
+func select_all_parts() -> RoommatePartsSetter:
+	return select_parts([
+		&"sid_center",
+		&"sid_up",
+		&"sid_down",
+		&"sid_left",
+		&"sid_right",
+		&"sid_forward",
+		&"sid_back",
+	])
+
+
+func select_all_walls() -> RoommatePartsSetter:
+	return select_parts([
+		&"sid_left",
+		&"sid_right",
+		&"sid_forward",
+		&"sid_back",
+	])

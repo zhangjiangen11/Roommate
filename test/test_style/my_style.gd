@@ -7,8 +7,9 @@ extends RoommateStyle
 
 
 func _build_rulesets() -> void:
-	select_all_blocks()
-	select_all_walls()
-	set_offset(new_offset)
+	var r1 := create_ruleset()
+	r1.select_all_blocks()
+	var s1 := r1.select_all_walls()
+	s1.set_offset(new_offset)
 	if new_mesh:
-		set_mesh(new_mesh)
+		s1.set_mesh(new_mesh)

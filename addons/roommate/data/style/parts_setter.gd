@@ -11,7 +11,7 @@ class_name RoommatePartsSetter
 extends RefCounted
 
 var selected_slot_ids: Array[StringName] = []
-var new_values := {}
+var _new_values := {}
 
 
 func apply(slots: Dictionary) -> void:
@@ -21,6 +21,21 @@ func apply(slots: Dictionary) -> void:
 		var current_part := slots.get(slot_id) as RoommatePart
 		if not current_part:
 			continue
-		for property_name in new_values:
-			print(new_values[property_name])
-			current_part.set(property_name, new_values[property_name])
+		for property_name in _new_values:
+			current_part.set(property_name, _new_values[property_name])
+
+
+func set_offset(offset: Vector3) -> void:
+	_new_values[&"offset_position"] = offset
+
+
+func set_euler(euler: Vector3) -> void:
+	_new_values[&"offset_euler"] = euler
+
+
+func set_scale(scale: Vector3) -> void:
+	_new_values[&"offset_scale"] = scale
+
+
+func set_mesh(mesh: Mesh) -> void:
+	_new_values[&"mesh"] = mesh

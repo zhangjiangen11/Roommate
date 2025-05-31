@@ -42,7 +42,6 @@ func generate_mesh() -> void:
 	
 	# Applying global style
 	if global_style:
-		global_style.build()
 		global_style.apply(all_blocks)
 	
 	# Applying per area style
@@ -52,7 +51,6 @@ func generate_mesh() -> void:
 		var area_blocks := {}
 		for area_block_position in area.get_block_positions(block_size):
 			area_blocks[area_block_position] = all_blocks[area_block_position]
-		area.style.build()
 		area.style.apply(area_blocks)
 	
 	# generating mesh
@@ -89,7 +87,7 @@ func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void
 		var part := block.slots.get(slot_id) as RoommatePart
 		var direction := RoommateBlock.SLOT_DIRECTIONS.get(slot_id, Vector3i.ZERO) as Vector3i
 		var adjacent_block := all_blocks.get(block.block_position + direction) as RoommateBlock
-		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds":
+		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or direction == Vector3i.ZERO:
 			_generate_part(part, block)
 
 
@@ -98,7 +96,9 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		return
 	for surface_id in part.mesh.get_surface_count():
 		var origin := _to_position(parent_block.block_position) + block_size * part.anchor
-		var part_transform := Transform3D.IDENTITY.translated_local(origin).translated_local(part.offset) * part.transform
+		var relative_transform := Transform3D.IDENTITY.translated_local(part.offset_position).translated(origin)
+		relative_transform.basis = Basis.from_euler(part.offset_euler).scaled(part.offset_scale)
+		var part_transform := relative_transform * part.transform
 		var material := part.mesh.surface_get_material(surface_id)
 		if not _tools.has(material):
 			var new_tool := SurfaceTool.new()
