@@ -3,13 +3,19 @@ class_name MyStyle
 extends RoommateStyle
 
 @export var new_mesh: Mesh
-@export var new_offset := Vector3.ZERO
 
 
 func _build_rulesets() -> void:
 	var r1 := create_ruleset()
 	r1.select_all_blocks()
 	var s1 := r1.select_all_walls()
-	s1.set_offset(new_offset)
-	if new_mesh:
-		s1.set_mesh(new_mesh)
+	s1.set_mesh(new_mesh)
+	
+	var random := RandomNumberGenerator.new()
+	random.seed = hash("Roommate")
+	
+	var s2 := r1.select_floor()
+	s2.handle_part = func (part: RoommatePart) -> void:
+		var override := RoommatePart.MaterialOverride.new()
+		override.set_uv_tile(Vector2i(random.randi_range(0, 7), random.randi_range(0, 7)), Vector2i(8, 8))
+		part.material_overrides[0] = override

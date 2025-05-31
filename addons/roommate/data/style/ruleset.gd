@@ -86,3 +86,11 @@ func select_all_walls() -> RoommatePartsSetter:
 		&"sid_forward",
 		&"sid_back",
 	])
+
+
+func select_center() -> RoommatePartsSetter:
+	return select_parts([&"sid_center"])
+
+
+func select_floor() -> RoommatePartsSetter:
+	return select_parts([&"sid_down"])

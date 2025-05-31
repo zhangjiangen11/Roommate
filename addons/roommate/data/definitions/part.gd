@@ -43,5 +43,11 @@ class MaterialOverride:
 	var uv_rotation := 0.0
 	var uv_scale := Vector2.ONE
 	
+	
 	func get_uv_transform() -> Transform2D:
-		return Transform2D(uv_rotation, uv_relative_position).scaled_local(uv_scale)
+		return Transform2D(uv_rotation, uv_scale, 0, uv_relative_position)
+	
+	
+	func set_uv_tile(tile_coord: Vector2i, tile_size: Vector2i) -> void:
+		uv_scale = Vector2.ONE / (tile_size as Vector2)
+		uv_relative_position = (tile_coord as Vector2) / (tile_size as Vector2)
