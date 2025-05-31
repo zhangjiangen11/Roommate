@@ -22,3 +22,26 @@ var collision_scale := Vector3.ONE
 
 var mesh: Mesh
 var collision_mesh: Mesh
+var material_overrides: Dictionary
+
+
+func get_transform(origin: Vector3) -> Transform3D:
+	var basis := Basis.from_euler(rotation).scaled(scale)
+	return Transform3D(basis, origin + relative_position)
+
+
+func get_collision_transform(origin: Vector3) -> Transform3D:
+	var basis := Basis.from_euler(collision_rotation).scaled(collision_scale)
+	return Transform3D(basis, origin + collision_relative_position)
+
+
+class MaterialOverride:
+	extends RefCounted
+	
+	var material: Material
+	var uv_relative_position := Vector2.ZERO
+	var uv_rotation := 0.0
+	var uv_scale := Vector2.ONE
+	
+	func get_uv_transform() -> Transform2D:
+		return Transform2D(uv_rotation, uv_relative_position).scaled_local(uv_scale)

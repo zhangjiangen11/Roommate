@@ -101,25 +101,44 @@ func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part or not part.mesh:
 		return
+	
 	var origin := _to_position(parent_block.block_position) + block_size * part.anchor
-	var part_basis := Basis.from_euler(part.rotation).scaled(part.scale)
-	var part_transform := Transform3D(part_basis, origin + part.relative_position)
-	
-	var collision_basis := Basis.from_euler(part.collision_rotation).scaled(part.collision_scale)
-	var collision_transform := Transform3D(collision_basis, origin + part.collision_relative_position)
-	
 	if part.collision_mesh:
-		var part_collision_faces := collision_transform * part.collision_mesh.get_faces()
+		var part_collision_faces := part.get_collision_transform(origin) * part.collision_mesh.get_faces()
 		_collision_faces.append_array(part_collision_faces)
 	
 	for surface_id in part.mesh.get_surface_count():
-		var material := part.mesh.surface_get_material(surface_id)
-		if not _tools.has(material):
-			var new_tool := SurfaceTool.new()
-			new_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-			_tools[material] = new_tool
-		var tool := _tools.get(material) as SurfaceTool
-		tool.append_from(part.mesh, surface_id, part_transform)
+		var part_material_override := part.material_overrides.get(surface_id) as RoommatePart.MaterialOverride
+		
+		# modifying uv
+		var part_mesh := ArrayMesh.new()
+		part_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, part.mesh.surface_get_arrays(surface_id))
+		var mesh_data_tool := MeshDataTool.new()
+		var create_error := mesh_data_tool.create_from_surface(part_mesh, 0)
+		assert(create_error == OK)
+		
+		part.material_overrides.get(surface_id)
+		for vertex_id in mesh_data_tool.get_vertex_count():
+			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
+			if part_material_override:
+				mesh_data_tool.set_vertex_uv(vertex_id, part_material_override.get_uv_transform() * uv)
+		
+		part_mesh.clear_surfaces()
+		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)
+		assert(commit_error == OK)
+		
+		# appending surface
+		var part_material := part.mesh.surface_get_material(surface_id)
+		if part_material_override and part_material_override.material:
+			part_material = part_material_override.material
+			
+		if not _tools.has(part_material):
+			var new_surface_tool := SurfaceTool.new()
+			new_surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+			new_surface_tool.set_material(part_material)
+			_tools[part_material] = new_surface_tool
+		var surface_tool := _tools.get(part_material) as SurfaceTool
+		surface_tool.append_from(part_mesh, 0, part.get_transform(origin))
 
 
 func _to_position(block_position: Vector3i) -> Vector3:
