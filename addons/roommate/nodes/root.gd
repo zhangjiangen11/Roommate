@@ -99,7 +99,7 @@ func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void
 
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
-	if not part or not part.mesh:
+	if not part:
 		return
 	
 	var origin := _to_position(parent_block.block_position) + block_size * part.anchor
@@ -107,6 +107,8 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		var part_collision_faces := part.get_collision_transform(origin) * part.collision_mesh.get_faces()
 		_collision_faces.append_array(part_collision_faces)
 	
+	if not part.mesh:
+		return
 	for surface_id in part.mesh.get_surface_count():
 		var part_material_override := part.resolve_material_override(surface_id)
 		

@@ -11,4 +11,5 @@ func _build_rulesets() -> void:
 	r1.select_edge_blocks(Vector3(0, -1, 0)).exclude()
 	
 	var s1 := r1.select_all_parts()
-	s1.set_material(preload("res://test/floor_material.tres"), 0)
+	s1.set_mesh(null)
+	s1.set_collision_mesh(null)
