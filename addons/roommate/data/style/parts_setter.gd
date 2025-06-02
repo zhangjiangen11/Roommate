@@ -8,7 +8,7 @@
 
 @tool
 class_name RoommatePartsSetter
-extends RoommateObjectSetter
+extends "./object_setter.gd"
 
 var selected_slot_ids: Array[StringName] = []
 var handle_part: Callable

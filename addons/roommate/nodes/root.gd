@@ -13,11 +13,10 @@ extends MeshInstance3D
 enum CollisionShape { CONCAVE, CONVEX }
 
 @export var block_size := 1.0:
-	get:
-		return block_size
 	set(value):
 		block_size = value
-		generate_mesh()
+		update_gizmos()
+@export var scale_with_block_size := false
 
 @export var global_style: RoommateStyle
 
@@ -46,6 +45,12 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	for area in areas:
 		var area_blocks := area.create_blocks(block_size)
 		all_blocks.merge(area_blocks, true)
+	
+	# Applying internal style
+	var internal_style := preload("../resources/internal_style.gd").new()
+	if scale_with_block_size:
+		internal_style.scale = Vector3.ONE * block_size
+	internal_style.apply(all_blocks)
 	
 	# Applying global style
 	if global_style:
@@ -123,7 +128,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part:
 		return
 	
-	var origin := _to_position(parent_block.block_position) + block_size * part.anchor
+	var origin := parent_block.block_position * block_size + block_size * part.anchor
 	if part.collision_mesh:
 		var part_collision_faces := part.get_collision_transform(origin) * part.collision_mesh.get_faces()
 		_collision_faces.append_array(part_collision_faces)
@@ -160,10 +165,6 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 			_tools[part_material] = new_surface_tool
 		var surface_tool := _tools.get(part_material) as SurfaceTool
 		surface_tool.append_from(part_mesh, 0, part.get_transform(origin))
-
-
-func _to_position(block_position: Vector3i) -> Vector3:
-		return block_position * block_size
 
 
 func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:

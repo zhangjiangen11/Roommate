@@ -7,13 +7,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name Roommate
 extends EditorPlugin
 
 const ROOT_ACTIONS_SCENE := preload("./controls/roommate_root_actions/roommate_root_actions.tscn")
 
 var _root_actions: Control
-var box_edit_gizmo_plugin := BoxEditGizmoPlugin.new()
+var box_edit_gizmo_plugin := preload("./box_edit_gizmo_plugin.gd").new()
 
 func _enter_tree() -> void:
 	get_editor_interface().get_selection().selection_changed.connect(_update_controls_visibility)

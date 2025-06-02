@@ -8,7 +8,7 @@
 
 @tool
 class_name RoommateSurfaceOverrideSetter
-extends RoommateObjectSetter
+extends "./object_setter.gd"
 
 var material: RoommateValueSetter:
 	get: return _resolve_value_setter(&"material")

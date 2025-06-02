@@ -7,7 +7,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateObjectSetter
 extends RefCounted
 
 var _value_setters := {}
