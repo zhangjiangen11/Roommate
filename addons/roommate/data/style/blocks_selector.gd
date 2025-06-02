@@ -16,6 +16,9 @@ var mode := Mode.INCLUDE
 var check_selection: Callable
 
 
-func check_block_inclusion(block: RoommateBlock, source_blocks: Dictionary) -> bool:
-	var selected := check_selection.call(block, source_blocks) as bool
-	return selected and mode == Mode.INCLUDE
+func include() -> void:
+	mode = Mode.INCLUDE
+
+
+func exclude() -> void:
+	mode = Mode.EXCLUDE

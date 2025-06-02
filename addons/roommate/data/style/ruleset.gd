@@ -23,7 +23,8 @@ func apply(source_blocks: Dictionary) -> void:
 		var include := false
 		var block := source_blocks[block_position] as RoommateBlock
 		for blocks_selector in _blocks_selectors:
-			include = blocks_selector.check_block_inclusion(block, source_blocks)
+			if blocks_selector.check_selection.call(block, source_blocks):
+				include = blocks_selector.mode == RoommateBlocksSelector.Mode.INCLUDE
 		if not include:
 			continue
 		for setter in _parts_setters:
@@ -33,21 +34,20 @@ func apply(source_blocks: Dictionary) -> void:
 			setter.apply(block.slots)
 
 
-func select_blocks(check_selection: Callable, mode := RoommateBlocksSelector.Mode.INCLUDE) -> RoommateBlocksSelector:
+func select_blocks(check_selection: Callable) -> RoommateBlocksSelector:
 	var selector := RoommateBlocksSelector.new()
 	selector.check_selection = check_selection
-	selector.mode = mode
 	_blocks_selectors.append(selector)
 	return selector
 
 
-func select_all_blocks(mode := RoommateBlocksSelector.Mode.INCLUDE) -> RoommateBlocksSelector:
+func select_all_blocks() -> RoommateBlocksSelector:
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		return true
-	return select_blocks(_check_selection, mode)
+	return select_blocks(_check_selection)
 
 
-func select_edge_blocks(edge: Vector3i, mode := RoommateBlocksSelector.Mode.INCLUDE) -> RoommateBlocksSelector:
+func select_edge_blocks(edge: Vector3i) -> RoommateBlocksSelector:
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var result := true
 		if edge.x != 0:
@@ -57,7 +57,15 @@ func select_edge_blocks(edge: Vector3i, mode := RoommateBlocksSelector.Mode.INCL
 		if edge.z != 0:
 			result = result and not source_blocks.has(block.block_position + edge * Vector3i.BACK)
 		return result
-	return select_blocks(_check_selection, mode)
+	return select_blocks(_check_selection)
+
+
+func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> RoommateBlocksSelector:
+	var clamped_density := clampf(density, 0, 1)
+	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		var random_number := rng.randf() if rng else randf()
+		return clamped_density >= random_number
+	return select_blocks(_check_selection)
 
 
 func select_parts(slot_ids: Array[StringName]) -> RoommatePartsSetter:

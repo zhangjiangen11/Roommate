@@ -78,7 +78,7 @@ func generate_mesh() -> void:
 		result.surface_set_material(result.get_surface_count() - 1, surface_material)
 	mesh = result
 	
-	# other actions
+	# applying collision
 	var this_node: Node = self
 	if Engine.is_editor_hint():
 		this_node = EditorPlugin.new().get_editor_interface().get_edited_scene_root().get_node(get_path())
@@ -108,7 +108,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		_collision_faces.append_array(part_collision_faces)
 	
 	for surface_id in part.mesh.get_surface_count():
-		var part_material_override := part.material_overrides.get(surface_id) as RoommatePart.MaterialOverride
+		var part_material_override := part.resolve_material_override(surface_id)
 		
 		# modifying uv
 		var part_mesh := ArrayMesh.new()
@@ -117,11 +117,9 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		var create_error := mesh_data_tool.create_from_surface(part_mesh, 0)
 		assert(create_error == OK)
 		
-		part.material_overrides.get(surface_id)
 		for vertex_id in mesh_data_tool.get_vertex_count():
 			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
-			if part_material_override:
-				mesh_data_tool.set_vertex_uv(vertex_id, part_material_override.get_uv_transform() * uv)
+			mesh_data_tool.set_vertex_uv(vertex_id, part_material_override.get_uv_transform() * uv)
 		
 		part_mesh.clear_surfaces()
 		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)
@@ -129,7 +127,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		
 		# appending surface
 		var part_material := part.mesh.surface_get_material(surface_id)
-		if part_material_override and part_material_override.material:
+		if part_material_override.material:
 			part_material = part_material_override.material
 			
 		if not _tools.has(part_material):

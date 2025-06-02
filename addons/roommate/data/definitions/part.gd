@@ -35,19 +35,9 @@ func get_collision_transform(origin: Vector3) -> Transform3D:
 	return Transform3D(basis, origin + collision_relative_position)
 
 
-class MaterialOverride:
-	extends RefCounted
-	
-	var material: Material
-	var uv_relative_position := Vector2.ZERO
-	var uv_rotation := 0.0
-	var uv_scale := Vector2.ONE
-	
-	
-	func get_uv_transform() -> Transform2D:
-		return Transform2D(uv_rotation, uv_scale, 0, uv_relative_position)
-	
-	
-	func set_uv_tile(tile_coord: Vector2i, tile_size: Vector2i) -> void:
-		uv_scale = Vector2.ONE / (tile_size as Vector2)
-		uv_relative_position = (tile_coord as Vector2) / (tile_size as Vector2)
+func resolve_material_override(surface_id: int) -> RoommateMaterialOverride:
+	if not material_overrides.has(surface_id):
+		var new_override := RoommateMaterialOverride.new()
+		material_overrides[surface_id] = new_override
+		return new_override
+	return material_overrides[surface_id] as RoommateMaterialOverride
