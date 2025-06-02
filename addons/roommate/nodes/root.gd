@@ -10,7 +10,7 @@
 class_name RoommateRoot
 extends MeshInstance3D
 
-enum CollisionType { CONCAVE, CONVEX }
+enum CollisionShape { CONCAVE, CONVEX }
 
 @export var block_size := 1.0:
 	get:
@@ -22,7 +22,7 @@ enum CollisionType { CONCAVE, CONVEX }
 @export var global_style: RoommateStyle
 
 @export_group("Collision")
-@export var collision_type := CollisionType.CONCAVE
+@export var collision_shape := CollisionShape.CONCAVE
 @export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
 
 @export_group("Navigation")
@@ -90,21 +90,20 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 		this_node = EditorPlugin.new().get_editor_interface().get_edited_scene_root().get_node(get_path())
 	
 	# applying collision
-	var collision_shape := this_node.get_node_or_null(linked_collision_shape) as CollisionShape3D
-	if generate_collision and collision_shape:
+	var collision_shape_node := this_node.get_node_or_null(linked_collision_shape) as CollisionShape3D
+	if generate_collision and collision_shape_node:
 		var shape: Shape3D
-		match collision_type:
-			CollisionType.CONCAVE:
+		match collision_shape:
+			CollisionShape.CONCAVE:
 				var concave := ConcavePolygonShape3D.new()
 				concave.set_faces(_collision_faces)
-				shape = concave
-			CollisionType.CONVEX:
+				collision_shape_node.shape = concave
+			CollisionShape.CONVEX:
 				var convex := ConvexPolygonShape3D.new()
 				convex.points = _collision_faces.duplicate()
-				shape = convex
+				collision_shape_node.shape = convex
 			_:
-				push_error("Unknown collision type %s" % collision_type)
-		collision_shape.shape = shape
+				push_error("Unknown collision shape %s" % collision_shape)
 	
 	# applying navigation
 	var navigation_region := this_node.get_node_or_null(linked_navigation_region) as NavigationRegion3D

@@ -12,10 +12,8 @@ func _build_rulesets() -> void:
 	r1.select_all_blocks()
 	var s1 := r1.select_all_walls()
 	s1.mesh.override(new_mesh)
+	s1.rotation.accumulate(Vector3(deg_to_rad(45),0,0))
 	s1.collision_mesh.override(new_mesh)
-	#s1.rotation.override(Vector3.ZERO)
-	s1.rotation.accumulate(Vector3.FORWARD * deg_to_rad(85))
-	s1.collision_rotation.accumulate(Vector3.FORWARD * deg_to_rad(5))
 	s1.override_surface(0).set_uv_tile(Vector2(2, 1), Vector2(8, 4), deg_to_rad(270))
 	
 	var random := RandomNumberGenerator.new()
