@@ -10,15 +10,6 @@
 class_name RoommateBlock
 extends RefCounted
 
-const SLOT_DIRECTIONS = {
-	&"sid_up": Vector3i.UP,
-	&"sid_down": Vector3i.DOWN,
-	&"sid_left": Vector3i.LEFT,
-	&"sid_right": Vector3i.RIGHT,
-	&"sid_forward": Vector3i.FORWARD,
-	&"sid_back": Vector3i.BACK,
-}
-
 @export var block_type_id: StringName
 @export var block_position: Vector3i
 @export var slots := {}

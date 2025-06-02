@@ -13,23 +13,24 @@ extends RoommateBlocksArea
 
 func _process_block(new_block: RoommateBlock) -> void:
 	new_block.block_type_id = "btid_space";
-	var center_part := _create_part(Vector3(0.5, 0.5, 0.5), Vector3.ZERO)
+	var center_part := _create_part(Vector3(0.5, 0.5, 0.5), Vector3i.ZERO, Vector3.ZERO)
 	center_part.mesh = null
 	center_part.collision_mesh = null
 	new_block.slots = {
 		&"sid_center": center_part,
-		&"sid_up": _create_part(Vector3(0.5, 1, 0.5), Vector3.RIGHT * PI / 2),
-		&"sid_down": _create_part(Vector3(0.5, 0, 0.5), Vector3.LEFT * PI / 2),
-		&"sid_left": _create_part(Vector3(0, 0.5, 0.5), Vector3.UP * PI / 2),
-		&"sid_right": _create_part(Vector3(1, 0.5, 0.5), Vector3.DOWN * PI / 2),
-		&"sid_forward": _create_part(Vector3(0.5, 0.5, 0), Vector3.ZERO),
-		&"sid_back": _create_part(Vector3(0.5, 0.5, 1), Vector3.UP * PI),
+		&"sid_up": _create_part(Vector3(0.5, 1, 0.5), Vector3i.UP, Vector3.RIGHT * PI / 2),
+		&"sid_down": _create_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, Vector3.LEFT * PI / 2),
+		&"sid_left": _create_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, Vector3.UP * PI / 2),
+		&"sid_right": _create_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, Vector3.DOWN * PI / 2),
+		&"sid_forward": _create_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, Vector3.ZERO),
+		&"sid_back": _create_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, Vector3.UP * PI),
 	}
 
 
-func _create_part(anchor: Vector3, euler: Vector3) -> RoommatePart:
+func _create_part(anchor: Vector3, direction: Vector3, euler: Vector3) -> RoommatePart:
 	var result := RoommatePart.new()
 	result.anchor = anchor
+	result.direction = direction
 	result.rotation = euler
 	result.collision_rotation = euler
 	var default_mesh := QuadMesh.new()

@@ -114,9 +114,8 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void:
 	for slot_id in block.slots:
 		var part := block.slots.get(slot_id) as RoommatePart
-		var direction := RoommateBlock.SLOT_DIRECTIONS.get(slot_id, Vector3i.ZERO) as Vector3i
-		var adjacent_block := all_blocks.get(block.block_position + direction) as RoommateBlock
-		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or direction == Vector3i.ZERO:
+		var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
+		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
 			_generate_part(part, block)
 
 

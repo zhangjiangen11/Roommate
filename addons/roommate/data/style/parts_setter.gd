@@ -13,32 +13,28 @@ extends RoommateObjectSetter
 var selected_slot_ids: Array[StringName] = []
 var handle_part: Callable
 
+var anchor: RoommateValueSetter:
+	get: return _resolve_value_setter(&"anchor")
+var direction: RoommateValueSetter:
+	get: return _resolve_value_setter(&"direction")
 var offset: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"relative_position")
+	get: return _resolve_value_setter(&"relative_position")
 var rotation: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"rotation")
+	get: return _resolve_value_setter(&"rotation")
 var scale: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"scale")
+	get: return _resolve_value_setter(&"scale")
 
 var collision_offset: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"collision_relative_position")
+	get: return _resolve_value_setter(&"collision_relative_position")
 var collision_rotation: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"collision_rotation")
+	get: return _resolve_value_setter(&"collision_rotation")
 var collision_scale: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"collision_scale")
+	get: return _resolve_value_setter(&"collision_scale")
 
 var mesh: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"mesh")
+	get: return _resolve_value_setter(&"mesh")
 var collision_mesh: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"collision_mesh")
+	get: return _resolve_value_setter(&"collision_mesh")
 
 var _surface_overrides := {}
 

@@ -11,6 +11,7 @@ class_name RoommatePart
 extends RefCounted
 
 var anchor := Vector3.ZERO
+var direction := Vector3.ZERO
 
 var relative_position := Vector3.ZERO
 var rotation := Vector3.ZERO

@@ -11,17 +11,13 @@ class_name RoommateSurfaceOverrideSetter
 extends RoommateObjectSetter
 
 var material: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"material")
+	get: return _resolve_value_setter(&"material")
 var uv_offset: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"uv_relative_position")
+	get: return _resolve_value_setter(&"uv_relative_position")
 var uv_rotation: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"uv_rotation")
+	get: return _resolve_value_setter(&"uv_rotation")
 var uv_scale: RoommateValueSetter:
-	get:
-		return _resolve_value_setter(&"uv_scale")
+	get: return _resolve_value_setter(&"uv_scale")
 
 
 func apply(target: RoommateSurfaceOverride) -> void:
