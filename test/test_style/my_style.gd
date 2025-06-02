@@ -13,7 +13,7 @@ func _build_rulesets() -> void:
 	var s1 := r1.select_all_walls()
 	s1.set_mesh(new_mesh)
 	s1.set_relative_rotation(Vector3.FORWARD * deg_to_rad(90))
-	s1.set_uv_tile(Vector2(1, 1), Vector2(8, 4), deg_to_rad(90), 0)
+	s1.set_uv_tile(Vector2(2, 1), Vector2(8, 4), deg_to_rad(270), 0)
 	
 	var random := RandomNumberGenerator.new()
 	random.seed = hash("Roommate")

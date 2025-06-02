@@ -88,13 +88,17 @@ func set_uv_scale(scale: Vector2, surface_id: int) -> void:
 	override[&"uv_scale"] = scale
 
 
-func set_uv_tile(tile_coord: Vector2i, tile_size: Vector2i, tile_rotation: float, surface_id: int) -> void:
+func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float, surface_id: int) -> void:
 	var coord := tile_coord as Vector2
-	var size := tile_size as Vector2
-	var rotated_coord := (coord + Vector2.ONE / 2).rotated(-tile_rotation) - Vector2.ONE / 2
+	var count := tile_count as Vector2
+	
+	var tile_size := Vector2.ONE / count
+	var tile_offset := coord / count
+	var rotated_offset := (tile_offset + tile_size / 2).rotated(-tile_rotation) - tile_size / 2
+	
 	set_uv_rotation(tile_rotation, surface_id)
-	set_uv_scale(Vector2.ONE / size, surface_id)
-	set_uv_offset(rotated_coord / size, surface_id)
+	set_uv_scale(tile_size, surface_id)
+	set_uv_offset(rotated_offset, surface_id)
 
 
 func set_mesh(mesh: Mesh) -> void:

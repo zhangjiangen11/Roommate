@@ -20,10 +20,14 @@ func get_uv_transform() -> Transform2D:
 	return Transform2D(uv_rotation, Vector2.ZERO) * Transform2D(0.0, uv_scale, 0.0, uv_relative_position)
 
 
-func set_uv_tile(tile_coord: Vector2i, tile_size: Vector2i, tile_rotation: float) -> void:
+func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:	
 	var coord := tile_coord as Vector2
-	var size := tile_size as Vector2
-	var rotated_coord := (coord + Vector2.ONE / 2).rotated(-tile_rotation) - Vector2.ONE / 2
+	var count := tile_count as Vector2
+	
+	var tile_size := Vector2.ONE / count
+	var tile_offset := coord / count
+	var rotated_offset := (tile_offset + tile_size / 2).rotated(-tile_rotation) - tile_size / 2
+	
 	uv_rotation = tile_rotation
-	uv_scale = Vector2.ONE / size
-	uv_relative_position = rotated_coord / size
+	uv_scale = tile_size
+	uv_relative_position = rotated_offset
