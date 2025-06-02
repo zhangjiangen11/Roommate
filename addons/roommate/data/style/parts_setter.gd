@@ -16,11 +16,11 @@ var _new_values := {}
 var _material_overrides := {}
 
 
-func apply(slots: Dictionary) -> void:
-	for slot_id in slots:
+func apply(block: RoommateBlock) -> void:
+	for slot_id in block.slots:
 		if not slot_id in selected_slot_ids:
 			continue
-		var current_part := slots.get(slot_id) as RoommatePart
+		var current_part := block.slots.get(slot_id) as RoommatePart
 		if not current_part:
 			continue
 		for property_name in _new_values:
@@ -44,6 +44,10 @@ func set_rotation(rotation: Vector3) -> void:
 	_new_values[&"rotation"] = rotation
 
 
+func set_relative_rotation(rotation: Vector3) -> void:
+	_new_values[&"relative_rotation"] = rotation
+
+
 func set_scale(scale: Vector3) -> void:
 	_new_values[&"scale"] = scale
 
@@ -54,6 +58,10 @@ func set_collision_offset(offset: Vector3) -> void:
 
 func set_collision_rotation(rotation: Vector3) -> void:
 	_new_values[&"collision_rotation"] = rotation
+
+
+func set_collision_relative_rotation(rotation: Vector3) -> void:
+	_new_values[&"collision_relative_rotation"] = rotation
 
 
 func set_collision_scale(scale: Vector3) -> void:

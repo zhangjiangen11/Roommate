@@ -23,15 +23,14 @@ func apply(source_blocks: Dictionary) -> void:
 		var include := false
 		var block := source_blocks[block_position] as RoommateBlock
 		for blocks_selector in _blocks_selectors:
-			if blocks_selector.check_selection.call(block, source_blocks):
-				include = blocks_selector.mode == RoommateBlocksSelector.Mode.INCLUDE
+			include = blocks_selector.update_inclusion(block, source_blocks, include)
 		if not include:
 			continue
 		for setter in _parts_setters:
 			if not setter:
 				push_warning("Setter is null")
 				continue
-			setter.apply(block.slots)
+			setter.apply(block)
 
 
 func select_blocks(check_selection: Callable) -> RoommateBlocksSelector:
@@ -48,14 +47,15 @@ func select_all_blocks() -> RoommateBlocksSelector:
 
 
 func select_edge_blocks(edge: Vector3i) -> RoommateBlocksSelector:
+	var clamped_edge := edge.clamp(-Vector3i.ONE, Vector3i.ONE)
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var result := true
-		if edge.x != 0:
-			result = result and not source_blocks.has(block.block_position + edge * Vector3i.RIGHT)
-		if edge.y != 0:
-			result = result and not source_blocks.has(block.block_position + edge * Vector3i.UP)
-		if edge.z != 0:
-			result = result and not source_blocks.has(block.block_position + edge * Vector3i.BACK)
+		if clamped_edge.x != 0:
+			result = result and not source_blocks.has(block.block_position + clamped_edge * Vector3i.RIGHT)
+		if clamped_edge.y != 0:
+			result = result and not source_blocks.has(block.block_position + clamped_edge * Vector3i.UP)
+		if clamped_edge.z != 0:
+			result = result and not source_blocks.has(block.block_position + clamped_edge * Vector3i.BACK)
 		return result
 	return select_blocks(_check_selection)
 

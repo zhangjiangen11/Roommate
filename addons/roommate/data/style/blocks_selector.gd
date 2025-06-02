@@ -16,6 +16,16 @@ var mode := Mode.INCLUDE
 var check_selection: Callable
 
 
+func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_included: bool) -> bool:
+	var is_selected = check_selection.call(block, source_blocks)
+	if not is_selected is bool:
+		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))
+		is_selected = false
+	if is_selected:
+		is_included = mode == Mode.INCLUDE
+	return is_included
+
+
 func include() -> void:
 	mode = Mode.INCLUDE
 

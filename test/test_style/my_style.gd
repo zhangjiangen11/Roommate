@@ -12,17 +12,20 @@ func _build_rulesets() -> void:
 	r1.select_all_blocks()
 	var s1 := r1.select_all_walls()
 	s1.set_mesh(new_mesh)
-	#s1.set_uv_rotation(deg_to_rad(), 0)10
-	s1.set_uv_scale(Vector2.ONE * 2, 0)
-	s1.set_uv_offset(Vector2.UP / 10, 0)
+	s1.set_relative_rotation(Vector3.FORWARD * deg_to_rad(90))
+	s1.set_uv_tile(Vector2(1, 1), Vector2(8, 4), deg_to_rad(90), 0)
 	
 	var random := RandomNumberGenerator.new()
 	random.seed = hash("Roommate")
 	
 	var s2 := r1.select_floor()
-	#s2.set_uv_tile(coord, Vector2(8, 8), deg_to_rad(angle), 0)
-	s2.set_uv_offset(Vector2.UP / 10, 0)
-#	s2.handle_part = func (part: RoommatePart) -> void:
-#		var override := part.material_overrides.get(0, RoommatePart.MaterialOverride.new()) as RoommatePart.MaterialOverride
-#		override.set_uv_tile(Vector2i(random.randi_range(0, 7), random.randi_range(0, 7)), Vector2i(8, 8))
-#		part.material_overrides[0] = override
+	s2.handle_part = func (part: RoommatePart) -> void:
+		const ROTATIONS := [0, PI * 0.5, PI, PI * 1.5]
+		var override := part.resolve_material_override(0)
+		override.set_uv_tile(Vector2i(random.randi_range(0, 7), random.randi_range(0, 7)), Vector2i(8, 8), ROTATIONS[random.randi_range(0, ROTATIONS.size() - 1)])
+		part.material_overrides[0] = override
+	
+	var r2 := create_ruleset()
+	r2.select_edge_blocks(Vector3(-1, 0, -1))
+	var corner := r2.select_all_walls()
+	corner.set_material(preload("res://addons/roommate/defaults/default_material.tres"), 0)
