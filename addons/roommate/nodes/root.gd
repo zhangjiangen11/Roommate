@@ -10,6 +10,8 @@
 class_name RoommateRoot
 extends MeshInstance3D
 
+enum CollisionType { CONCAVE, CONVEX }
+
 @export var block_size := 1.0:
 	get:
 		return block_size
@@ -19,14 +21,18 @@ extends MeshInstance3D
 
 @export var global_style: RoommateStyle
 
-@export_group("Editor")
+@export_group("Collision")
+@export var collision_type := CollisionType.CONCAVE
 @export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
+
+@export_group("Navigation")
+@export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 
 var _tools := {}
 var _collision_faces := PackedVector3Array()
 
 
-func generate_mesh() -> void:
+func generate_mesh(generate_collision := false, generate_navigation := false) -> void:
 	# Searching for areas
 	var nodes := find_children("*", "RoommateBlocksArea", true, false)
 	var areas: Array[RoommateBlocksArea] = []
@@ -78,15 +84,32 @@ func generate_mesh() -> void:
 		result.surface_set_material(result.get_surface_count() - 1, surface_material)
 	mesh = result
 	
-	# applying collision
+	# preparing for other actions
 	var this_node: Node = self
 	if Engine.is_editor_hint():
 		this_node = EditorPlugin.new().get_editor_interface().get_edited_scene_root().get_node(get_path())
+	
+	# applying collision
 	var collision_shape := this_node.get_node_or_null(linked_collision_shape) as CollisionShape3D
-	if collision_shape:
-		var shape := ConcavePolygonShape3D.new()
-		shape.set_faces(_collision_faces)
+	if generate_collision and collision_shape:
+		var shape: Shape3D
+		match collision_type:
+			CollisionType.CONCAVE:
+				var concave := ConcavePolygonShape3D.new()
+				concave.set_faces(_collision_faces)
+				shape = concave
+			CollisionType.CONVEX:
+				var convex := ConvexPolygonShape3D.new()
+				convex.points = _collision_faces.duplicate()
+				shape = convex
+			_:
+				push_error("Unknown collision type %s" % collision_type)
 		collision_shape.shape = shape
+	
+	# applying navigation
+	var navigation_region := this_node.get_node_or_null(linked_navigation_region) as NavigationRegion3D
+	if generate_navigation and navigation_region:
+		navigation_region.bake_navigation_mesh()
 
 
 func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void:
@@ -110,7 +133,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part.mesh:
 		return
 	for surface_id in part.mesh.get_surface_count():
-		var part_material_override := part.resolve_material_override(surface_id)
+		var part_surface_override := part.resolve_surface_override(surface_id)
 		
 		# modifying uv
 		var part_mesh := ArrayMesh.new()
@@ -121,16 +144,16 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		
 		for vertex_id in mesh_data_tool.get_vertex_count():
 			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
-			mesh_data_tool.set_vertex_uv(vertex_id, part_material_override.get_uv_transform() * uv)
+			mesh_data_tool.set_vertex_uv(vertex_id, part_surface_override.get_uv_transform() * uv)
 		
 		part_mesh.clear_surfaces()
 		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)
 		assert(commit_error == OK)
 		
-		# appending surface
+		# appending surfaces
 		var part_material := part.mesh.surface_get_material(surface_id)
-		if part_material_override.material:
-			part_material = part_material_override.material
+		if part_surface_override.material:
+			part_material = part_surface_override.material
 			
 		if not _tools.has(part_material):
 			var new_surface_tool := SurfaceTool.new()

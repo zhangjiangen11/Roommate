@@ -7,7 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateMaterialOverride
+class_name RoommateSurfaceOverride
 extends RefCounted
 
 var material: Material
@@ -20,7 +20,7 @@ func get_uv_transform() -> Transform2D:
 	return Transform2D(uv_rotation, Vector2.ZERO) * Transform2D(0.0, uv_scale, 0.0, uv_relative_position)
 
 
-func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:	
+func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:
 	var coord := tile_coord as Vector2
 	var count := tile_count as Vector2
 	

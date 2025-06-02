@@ -14,32 +14,30 @@ var anchor := Vector3.ZERO
 
 var relative_position := Vector3.ZERO
 var rotation := Vector3.ZERO
-var relative_rotation := Vector3.ZERO
 var scale := Vector3.ONE
 
 var collision_relative_position := Vector3.ZERO
 var collision_rotation := Vector3.ZERO
-var collision_relative_rotation := Vector3.ZERO
 var collision_scale := Vector3.ONE
 
 var mesh: Mesh
 var collision_mesh: Mesh
-var material_overrides: Dictionary
+var _surface_overrides: Dictionary
 
 
 func get_transform(origin: Vector3) -> Transform3D:
-	var basis := Basis.from_euler(rotation + relative_rotation).scaled(scale)
+	var basis := Basis.from_euler(rotation).scaled(scale)
 	return Transform3D(basis, origin + relative_position)
 
 
 func get_collision_transform(origin: Vector3) -> Transform3D:
-	var basis := Basis.from_euler(collision_rotation + collision_relative_rotation).scaled(collision_scale)
+	var basis := Basis.from_euler(collision_rotation).scaled(collision_scale)
 	return Transform3D(basis, origin + collision_relative_position)
 
 
-func resolve_material_override(surface_id: int) -> RoommateMaterialOverride:
-	if not material_overrides.has(surface_id):
-		var new_override := RoommateMaterialOverride.new()
-		material_overrides[surface_id] = new_override
+func resolve_surface_override(surface_id: int) -> RoommateSurfaceOverride:
+	if not _surface_overrides.has(surface_id):
+		var new_override := RoommateSurfaceOverride.new()
+		_surface_overrides[surface_id] = new_override
 		return new_override
-	return material_overrides[surface_id] as RoommateMaterialOverride
+	return _surface_overrides[surface_id] as RoommateSurfaceOverride

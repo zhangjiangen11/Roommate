@@ -21,6 +21,8 @@ func _on_popup_menu_id_pressed(id: int) -> void:
 	var filtered := nodes.filter(is_extends)
 	if filtered.size() == 0:
 		return
+	var add_collision := id in [0, 1]
+	var add_navigation := id in [0, 2]
 	for node in filtered:
 		var root := node as RoommateRoot
-		root.generate_mesh()
+		root.generate_mesh(add_collision, add_navigation)
