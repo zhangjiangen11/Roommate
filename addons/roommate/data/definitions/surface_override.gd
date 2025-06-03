@@ -11,23 +11,18 @@ class_name RoommateSurfaceOverride
 extends RefCounted
 
 var material: Material
-var uv_relative_position := Vector2.ZERO
-var uv_rotation := 0.0
-var uv_scale := Vector2.ONE
-
-
-func get_uv_transform() -> Transform2D:
-	return Transform2D(uv_rotation, Vector2.ZERO) * Transform2D(0.0, uv_scale, 0.0, uv_relative_position)
+var uv_transform := Transform2D.IDENTITY
 
 
 func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:
+	uv_transform = get_uv_tile_transform(tile_coord, tile_count, tile_rotation)
+
+
+static func get_uv_tile_transform(tile_coord: Vector2i, tile_count: Vector2i, 
+		tile_rotation: float) -> Transform2D:
 	var coord := tile_coord as Vector2
 	var count := tile_count as Vector2
-	
 	var tile_size := Vector2.ONE / count
 	var tile_offset := coord / count
 	var rotated_offset := (tile_offset + tile_size / 2).rotated(-tile_rotation) - tile_size / 2
-	
-	uv_rotation = tile_rotation
-	uv_scale = tile_size
-	uv_relative_position = rotated_offset
+	return Transform2D(tile_rotation, Vector2.ZERO) * Transform2D(0, tile_size, 0, rotated_offset)

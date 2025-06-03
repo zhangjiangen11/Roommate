@@ -30,9 +30,9 @@ func _process_block(new_block: RoommateBlock) -> void:
 func _create_part(anchor: Vector3, direction: Vector3, euler: Vector3) -> RoommatePart:
 	var result := RoommatePart.new()
 	result.anchor = anchor
-	result.direction = direction
-	result.rotation = euler
-	result.collision_rotation = euler
+	result.direction = Transform3D.IDENTITY.translated(direction)
+	result.transform.basis = Basis.from_euler(euler)
+	result.collision_transform.basis = Basis.from_euler(euler)
 	var default_mesh := QuadMesh.new()
 	default_mesh.material = preload("../defaults/default_material.tres")
 	result.mesh = default_mesh

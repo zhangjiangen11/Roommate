@@ -17,6 +17,9 @@ var check_selection: Callable
 
 
 func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_included: bool) -> bool:
+	if not check_selection.is_valid():
+		push_error("check_selection is not valid")
+		return is_included
 	var is_selected = check_selection.call(block, source_blocks)
 	if not is_selected is bool:
 		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))

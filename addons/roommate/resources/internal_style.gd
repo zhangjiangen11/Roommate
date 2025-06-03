@@ -15,4 +15,4 @@ var scale := Vector3.ONE
 func _build_rulesets() -> void:
 	var ruleset := create_ruleset()
 	ruleset.select_all_blocks()
-	ruleset.select_all_parts().scale.override(scale)
+	ruleset.select_all_parts().transform.accumulate(Transform3D.IDENTITY.scaled(scale))

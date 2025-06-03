@@ -119,8 +119,8 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void:
 	for slot_id in block.slots:
 		var part := block.slots.get(slot_id) as RoommatePart
-		var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
-		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
+		var adjacent_block := all_blocks.get(block.block_position + (part.direction.origin as Vector3i)) as RoommateBlock
+		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction.origin == Vector3.ZERO:
 			_generate_part(part, block)
 
 
@@ -130,7 +130,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	
 	var origin := parent_block.block_position * block_size + block_size * part.anchor
 	if part.collision_mesh:
-		var part_collision_faces := part.get_collision_transform(origin) * part.collision_mesh.get_faces()
+		var part_collision_faces := part.collision_transform.translated(origin) * part.collision_mesh.get_faces()
 		_collision_faces.append_array(part_collision_faces)
 	
 	if not part.mesh:
@@ -147,7 +147,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		
 		for vertex_id in mesh_data_tool.get_vertex_count():
 			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
-			mesh_data_tool.set_vertex_uv(vertex_id, part_surface_override.get_uv_transform() * uv)
+			mesh_data_tool.set_vertex_uv(vertex_id, part_surface_override.uv_transform * uv)
 		
 		part_mesh.clear_surfaces()
 		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)
@@ -164,7 +164,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 			new_surface_tool.set_material(part_material)
 			_tools[part_material] = new_surface_tool
 		var surface_tool := _tools.get(part_material) as SurfaceTool
-		surface_tool.append_from(part_mesh, 0, part.get_transform(origin))
+		surface_tool.append_from(part_mesh, 0, part.transform.translated(origin))
 
 
 func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:

@@ -12,12 +12,8 @@ extends "./object_setter.gd"
 
 var material: RoommateValueSetter:
 	get: return _resolve_value_setter(&"material")
-var uv_offset: RoommateValueSetter:
-	get: return _resolve_value_setter(&"uv_relative_position")
-var uv_rotation: RoommateValueSetter:
-	get: return _resolve_value_setter(&"uv_rotation")
-var uv_scale: RoommateValueSetter:
-	get: return _resolve_value_setter(&"uv_scale")
+var uv_transform: RoommateValueSetter:
+	get: return _resolve_value_setter(&"uv_transform")
 
 
 func apply(target: RoommateSurfaceOverride) -> void:
@@ -25,13 +21,5 @@ func apply(target: RoommateSurfaceOverride) -> void:
 
 
 func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:
-	var coord := tile_coord as Vector2
-	var count := tile_count as Vector2
-	
-	var tile_size := Vector2.ONE / count
-	var tile_offset := coord / count
-	var rotated_offset := (tile_offset + tile_size / 2).rotated(-tile_rotation) - tile_size / 2
-	
-	uv_rotation.override(tile_rotation)
-	uv_scale.override(tile_size)
-	uv_offset.override(rotated_offset)
+	var transform := RoommateSurfaceOverride.get_uv_tile_transform(tile_coord, tile_count, tile_rotation)
+	uv_transform.override(transform)

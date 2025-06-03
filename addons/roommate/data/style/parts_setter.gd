@@ -17,19 +17,11 @@ var anchor: RoommateValueSetter:
 	get: return _resolve_value_setter(&"anchor")
 var direction: RoommateValueSetter:
 	get: return _resolve_value_setter(&"direction")
-var offset: RoommateValueSetter:
-	get: return _resolve_value_setter(&"relative_position")
-var rotation: RoommateValueSetter:
-	get: return _resolve_value_setter(&"rotation")
-var scale: RoommateValueSetter:
-	get: return _resolve_value_setter(&"scale")
 
-var collision_offset: RoommateValueSetter:
-	get: return _resolve_value_setter(&"collision_relative_position")
-var collision_rotation: RoommateValueSetter:
-	get: return _resolve_value_setter(&"collision_rotation")
-var collision_scale: RoommateValueSetter:
-	get: return _resolve_value_setter(&"collision_scale")
+var transform: RoommateValueSetter:
+	get: return _resolve_value_setter(&"transform")
+var collision_transform: RoommateValueSetter:
+	get: return _resolve_value_setter(&"collision_transform")
 
 var mesh: RoommateValueSetter:
 	get: return _resolve_value_setter(&"mesh")
@@ -53,7 +45,7 @@ func apply(block: RoommateBlock) -> void:
 			var current_override := current_part.resolve_surface_override(surface_id)
 			override_setter.apply(current_override)
 		
-		if handle_part:
+		if handle_part.is_valid():
 			handle_part.call(current_part)
 
 

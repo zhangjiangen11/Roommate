@@ -11,29 +11,14 @@ class_name RoommatePart
 extends RefCounted
 
 var anchor := Vector3.ZERO
-var direction := Vector3.ZERO
+var direction := Transform3D.IDENTITY
 
-var relative_position := Vector3.ZERO
-var rotation := Vector3.ZERO
-var scale := Vector3.ONE
-
-var collision_relative_position := Vector3.ZERO
-var collision_rotation := Vector3.ZERO
-var collision_scale := Vector3.ONE
+var transform := Transform3D.IDENTITY
+var collision_transform := Transform3D.IDENTITY
 
 var mesh: Mesh
 var collision_mesh: Mesh
 var _surface_overrides: Dictionary
-
-
-func get_transform(origin: Vector3) -> Transform3D:
-	var basis := Basis.from_euler(rotation).scaled(scale)
-	return Transform3D(basis, origin + relative_position)
-
-
-func get_collision_transform(origin: Vector3) -> Transform3D:
-	var basis := Basis.from_euler(collision_rotation).scaled(collision_scale)
-	return Transform3D(basis, origin + collision_relative_position)
 
 
 func resolve_surface_override(surface_id: int) -> RoommateSurfaceOverride:
