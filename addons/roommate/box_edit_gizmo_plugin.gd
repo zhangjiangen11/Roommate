@@ -32,7 +32,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	var selected_nodes := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
 	if area in selected_nodes:
 		var block_size := _get_block_size(area)
-		var blocks_box := RoommateBlocksArea.get_blocks_range(area.position, area.area_size, block_size)
+		var blocks_box := RoommateBlocksArea.get_blocks_range(area.global_transform, area.area_size, block_size)
 		blocks_box.size *= block_size
 		blocks_box.position = blocks_box.position * block_size - area.position
 		gizmo.add_lines(_get_aabb_lines(blocks_box), get_material("blocks", gizmo), false)

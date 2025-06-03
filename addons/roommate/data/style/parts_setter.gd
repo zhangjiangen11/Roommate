@@ -15,8 +15,10 @@ var handle_part: Callable
 
 var anchor: RoommateVector3ValueSetter:
 	get: return resolve_value_setter(&"anchor", preload("./value_setters/vector3_value_setter.gd"))
-var direction: RoommateTransform3DValueSetter:
+var direction: RoommateVector3ValueSetter:
 	get: return resolve_value_setter(&"direction", preload("./value_setters/transform3d_value_setter.gd"))
+var roll_rotation: RoommateFloatValueSetter:
+	get: return resolve_value_setter(&"roll_rotation", preload("./value_setters/float_value_setter.gd"))
 
 var transform: RoommateTransform3DValueSetter:
 	get: return resolve_value_setter(&"transform", preload("./value_setters/transform3d_value_setter.gd"))

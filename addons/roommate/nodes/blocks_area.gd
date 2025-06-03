@@ -19,7 +19,7 @@ extends Node3D
 
 func get_block_positions(block_size: float) -> Array[Vector3i]:
 	var result: Array[Vector3i] = []
-	var range := get_blocks_range(position, area_size, block_size)
+	var range := get_blocks_range(global_transform, area_size, block_size)
 	for x in range(range.position.x, range.end.x):
 		for y in range(range.position.y, range.end.y):
 			for z in range(range.position.z, range.end.z):
@@ -38,11 +38,16 @@ func create_blocks(block_size: float) -> Dictionary:
 	return result
 
 
-static func get_blocks_range(position: Vector3, area_size: Vector3, block_size: float) -> AABB:
-	var start_space_position := position - area_size / 2
-	var box := AABB(start_space_position, area_size)
-	var start_block_position := (box.position / block_size).floor() as Vector3i
-	var end_block_position := (box.end / block_size).ceil() as Vector3i
+static func get_blocks_range(transform: Transform3D, area_size: Vector3, block_size: float) -> AABB:
+	var box := AABB(-area_size / 2, area_size)
+	var start := Vector3.INF
+	var end := -Vector3.INF
+	for i in 8:
+		var corner := transform * box.get_endpoint(i)
+		start = Vector3(minf(start.x, corner.x), minf(start.y, corner.y), minf(start.z, corner.z))
+		end = Vector3(maxf(end.x, corner.x), maxf(end.y, corner.y), maxf(end.z, corner.z))
+	var start_block_position := (start / block_size).floor() as Vector3i
+	var end_block_position := (end / block_size).ceil() as Vector3i
 	return AABB(start_block_position, Vector3.ZERO).expand(end_block_position)
 
 
