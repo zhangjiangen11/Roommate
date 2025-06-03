@@ -10,9 +10,7 @@
 class_name RoommateBlocksSelector
 extends RefCounted
 
-enum Mode { INCLUDE, EXCLUDE }
-
-var mode := Mode.INCLUDE
+var include_mode := true
 var check_selection: Callable
 
 
@@ -25,13 +23,13 @@ func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_includ
 		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))
 		is_selected = false
 	if is_selected:
-		is_included = mode == Mode.INCLUDE
+		is_included = include_mode
 	return is_included
 
 
 func include() -> void:
-	mode = Mode.INCLUDE
+	include_mode = true
 
 
 func exclude() -> void:
-	mode = Mode.EXCLUDE
+	include_mode = false

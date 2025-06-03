@@ -7,20 +7,19 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
+class_name RoommateObjectSetter
 extends RefCounted
 
 var _value_setters := {}
 
 
-func _apply_to_object(target: Object) -> void:
-	for property_name in _value_setters:
-		var value_setter := _value_setters[property_name] as RoommateValueSetter
-		value_setter.apply(target)
-
-
-func _resolve_value_setter(property_name: StringName) -> RoommateValueSetter:
+func resolve_value_setter(property_name: StringName, setter_script: Script) -> RoommateValueSetter:
 	if _value_setters.has(property_name):
-		return _value_setters[property_name] as RoommateValueSetter
-	var new_setter := RoommateValueSetter.new(property_name)
+		var existing_setter := _value_setters[property_name] as RoommateValueSetter
+		if not setter_script.instance_has(existing_setter):
+			push_error("setter %s doesnt have exprected type" % property_name)
+		return existing_setter
+	var new_setter := setter_script.new() as RoommateValueSetter
+	new_setter.property_name = property_name
 	_value_setters[property_name] = new_setter
 	return new_setter

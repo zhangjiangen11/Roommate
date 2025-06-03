@@ -8,25 +8,25 @@
 
 @tool
 class_name RoommatePartsSetter
-extends "./object_setter.gd"
+extends RoommateObjectSetter
 
 var selected_slot_ids: Array[StringName] = []
 var handle_part: Callable
 
-var anchor: RoommateValueSetter:
-	get: return _resolve_value_setter(&"anchor")
-var direction: RoommateValueSetter:
-	get: return _resolve_value_setter(&"direction")
+var anchor: RoommateVector3ValueSetter:
+	get: return resolve_value_setter(&"anchor", preload("./value_setters/vector3_value_setter.gd"))
+var direction: RoommateTransform3DValueSetter:
+	get: return resolve_value_setter(&"direction", preload("./value_setters/transform3d_value_setter.gd"))
 
-var transform: RoommateValueSetter:
-	get: return _resolve_value_setter(&"transform")
-var collision_transform: RoommateValueSetter:
-	get: return _resolve_value_setter(&"collision_transform")
+var transform: RoommateTransform3DValueSetter:
+	get: return resolve_value_setter(&"transform", preload("./value_setters/transform3d_value_setter.gd"))
+var collision_transform: RoommateTransform3DValueSetter:
+	get: return resolve_value_setter(&"collision_transform", preload("./value_setters/transform3d_value_setter.gd"))
 
-var mesh: RoommateValueSetter:
-	get: return _resolve_value_setter(&"mesh")
-var collision_mesh: RoommateValueSetter:
-	get: return _resolve_value_setter(&"collision_mesh")
+var mesh: RoommateMeshValueSetter:
+	get: return resolve_value_setter(&"mesh", preload("./value_setters/mesh_value_setter.gd"))
+var collision_mesh: RoommateMeshValueSetter:
+	get: return resolve_value_setter(&"collision_mesh", preload("./value_setters/mesh_value_setter.gd"))
 
 var _surface_overrides := {}
 
@@ -38,8 +38,10 @@ func apply(block: RoommateBlock) -> void:
 		var current_part := block.slots.get(slot_id) as RoommatePart
 		if not current_part:
 			continue
-		_apply_to_object(current_part)
 		
+		for property_name in _value_setters:
+			var setter := _value_setters[property_name] as RoommateValueSetter
+			setter.apply(current_part)
 		for surface_id in _surface_overrides:
 			var override_setter := _surface_overrides[surface_id] as RoommateSurfaceOverrideSetter
 			var current_override := current_part.resolve_surface_override(surface_id)

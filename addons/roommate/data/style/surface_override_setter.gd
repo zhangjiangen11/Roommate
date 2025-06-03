@@ -8,16 +8,18 @@
 
 @tool
 class_name RoommateSurfaceOverrideSetter
-extends "./object_setter.gd"
+extends RoommateObjectSetter
 
-var material: RoommateValueSetter:
-	get: return _resolve_value_setter(&"material")
-var uv_transform: RoommateValueSetter:
-	get: return _resolve_value_setter(&"uv_transform")
+var material: RoommateMaterialValueSetter:
+	get: return resolve_value_setter(&"material", preload("./value_setters/material_value_setter.gd"))
+var uv_transform: RoommateTransform2DValueSetter:
+	get: return resolve_value_setter(&"uv_transform", preload("./value_setters/transform2d_value_setter.gd"))
 
 
 func apply(target: RoommateSurfaceOverride) -> void:
-	_apply_to_object(target)
+	for property_name in _value_setters:
+		var setter := _value_setters[property_name] as RoommateValueSetter
+		setter.apply(target)
 
 
 func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:
