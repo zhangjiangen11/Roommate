@@ -27,6 +27,10 @@ enum CollisionShape { CONCAVE, CONVEX }
 @export_group("Navigation")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 
+var _part_filters := {
+	&"btid_space": _filter_space_block_part,
+	&"btid_out_of_bounds": func() -> bool: return false,
+}
 var _tools := {}
 var _collision_faces := PackedVector3Array()
 
@@ -79,14 +83,15 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	_collision_faces.clear()
 	for block_position in all_blocks:
 		var block := all_blocks[block_position] as RoommateBlock
-		match block.block_type_id:
-			&"btid_space":
-				_generate_space_block(block, all_blocks)
-			&"btid_out_of_bounds":
-				pass
-			_:
-				push_error("Unknown block type: %s" % block.block_type_id)
-				return
+		if not _part_filters.has(block.block_type_id):
+			push_error("Unknown block type: %s" % block.block_type_id)
+			continue
+		var part_filter := _part_filters[block.block_type_id] as Callable
+		for slot_id in block.slots:
+			var part := block.slots.get(slot_id) as RoommatePart
+			var passed := part_filter.call(part, block, all_blocks, slot_id) as bool
+			if passed:
+				_generate_part(part, block)
 	
 	# stitching it all together
 	for surface_material in _tools:
@@ -126,12 +131,17 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 		navigation_region.bake_navigation_mesh()
 
 
-func _generate_space_block(block: RoommateBlock, all_blocks: Dictionary) -> void:
-	for slot_id in block.slots:
-		var part := block.slots.get(slot_id) as RoommatePart
-		var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
-		if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
-			_generate_part(part, block)
+func add_custom_part_filter(block_type_id: StringName, filter: Callable) -> void:
+	if _part_filters.has(block_type_id):
+		push_error("Filter for block type %s already exists" % block_type_id)
+		return
+	_part_filters[block_type_id] = filter
+
+
+func _filter_space_block_part(part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary, slot_id: StringName) -> bool:
+	var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
+	return not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO
 
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
