@@ -25,17 +25,19 @@ func _get_gizmo_name() -> String:
 
 func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.clear()
-	var area = gizmo.get_node_3d() as RoommateBlocksArea
+	var area := gizmo.get_node_3d() as RoommateBlocksArea
 	var area_box := AABB(-area.area_size / 2, area.area_size)
 	gizmo.add_lines(_get_aabb_lines(area_box), get_material("area", gizmo), false)
 	
 	var selected_nodes := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
-	if area in selected_nodes:
-		var root := _get_root(area)
-		var blocks_box := area.get_blocks_range(root.global_transform, root.block_size)
-		blocks_box.size *= root.block_size
-		blocks_box.position = blocks_box.position * root.block_size - area.position
-		gizmo.add_lines(_get_aabb_lines(blocks_box), get_material("blocks", gizmo), false)
+	if not area in selected_nodes:
+		return
+	var root := _get_root(area)
+	var blocks_box := area.get_blocks_range(root.global_transform, root.block_size)
+	blocks_box.size *= root.block_size
+	blocks_box.position *= root.block_size
+	var blocks_box_lines := area.global_transform.affine_inverse() * (root.global_transform * _get_aabb_lines(blocks_box))
+	gizmo.add_lines(blocks_box_lines, get_material("blocks", gizmo), false)
 
 
 func _get_aabb_lines(aabb: AABB) -> PackedVector3Array:

@@ -17,6 +17,15 @@ extends Node3D
 @export var style: RoommateStyle
 
 
+func _ready():
+	set_notify_transform(true)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSFORM_CHANGED:
+		update_gizmos()
+
+
 func get_block_positions(root_transform: Transform3D, block_size: float) -> Array[Vector3i]:
 	var result: Array[Vector3i] = []
 	var range := get_blocks_range(root_transform, block_size)
