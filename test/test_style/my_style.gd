@@ -12,7 +12,7 @@ func _build_rulesets() -> void:
 	r1.select_all_blocks()
 	var s1 := r1.select_all_walls()
 	s1.mesh.override(new_mesh)
-	s1.transform.accumulate(Transform3D(Basis.from_euler(Vector3.RIGHT * 45), Vector3.ZERO), false)
+	s1.transform.accumulate(Transform3D(Basis.from_euler(Vector3(deg_to_rad(10), 0, 0)), Vector3.ZERO))
 	s1.collision_mesh.override(new_mesh)
 	s1.override_surface(0).set_uv_tile(Vector2(2, 1), Vector2(8, 8), deg_to_rad(270))
 	

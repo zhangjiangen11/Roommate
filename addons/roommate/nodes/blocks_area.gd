@@ -17,9 +17,9 @@ extends Node3D
 @export var style: RoommateStyle
 
 
-func get_block_positions(block_size: float) -> Array[Vector3i]:
+func get_block_positions(root_transform: Transform3D, block_size: float) -> Array[Vector3i]:
 	var result: Array[Vector3i] = []
-	var range := get_blocks_range(transform, area_size, block_size)
+	var range := get_blocks_range(root_transform, block_size)
 	for x in range(range.position.x, range.end.x):
 		for y in range(range.position.y, range.end.y):
 			for z in range(range.position.z, range.end.z):
@@ -27,9 +27,9 @@ func get_block_positions(block_size: float) -> Array[Vector3i]:
 	return result
 
 
-func create_blocks(block_size: float) -> Dictionary:
+func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary:
 	var result := {}
-	for block_position in get_block_positions(block_size):
+	for block_position in get_block_positions(root_transform, block_size):
 		var new_block := RoommateBlock.new()
 		new_block.block_type_id = "btid_none"
 		new_block.block_position = block_position
@@ -38,16 +38,17 @@ func create_blocks(block_size: float) -> Dictionary:
 	return result
 
 
-static func get_blocks_range(transform: Transform3D, area_size: Vector3, block_size: float) -> AABB:
+func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 	var box := AABB(-area_size / 2, area_size)
 	var start := Vector3.INF
 	var end := -Vector3.INF
 	for i in 8:
-		var corner := transform * box.get_endpoint(i)
+		var corner := root_transform.affine_inverse() * global_transform * box.get_endpoint(i)
 		start = Vector3(minf(start.x, corner.x), minf(start.y, corner.y), minf(start.z, corner.z))
 		end = Vector3(maxf(end.x, corner.x), maxf(end.y, corner.y), maxf(end.z, corner.z))
-	var start_block_position := (start / block_size).floor() as Vector3i
-	var end_block_position := (end / block_size).ceil() as Vector3i
+	# no floor or ceil because of rounding error
+	var start_block_position := (start / block_size).round()
+	var end_block_position := (end / block_size).round()
 	return AABB(start_block_position, Vector3.ZERO).expand(end_block_position)
 
 

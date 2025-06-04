@@ -31,10 +31,10 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	
 	var selected_nodes := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
 	if area in selected_nodes:
-		var block_size := _get_block_size(area)
-		var blocks_box := RoommateBlocksArea.get_blocks_range(area.transform, area.area_size, block_size)
-		blocks_box.size *= block_size
-		blocks_box.position = blocks_box.position * block_size - area.position
+		var root := _get_root(area)
+		var blocks_box := area.get_blocks_range(root.global_transform, root.block_size)
+		blocks_box.size *= root.block_size
+		blocks_box.position = blocks_box.position * root.block_size - area.position
 		gizmo.add_lines(_get_aabb_lines(blocks_box), get_material("blocks", gizmo), false)
 
 
@@ -56,10 +56,10 @@ func _get_aabb_lines(aabb: AABB) -> PackedVector3Array:
 	return result
 
 
-func _get_block_size(node: Node) -> float:
+func _get_root(node: Node) -> RoommateRoot:
 	var parent := node.get_parent()
 	while not parent is RoommateRoot:
 		parent = parent.get_parent()
 		if not parent:
-			return 0
-	return (parent as RoommateRoot).block_size
+			return null
+	return parent as RoommateRoot

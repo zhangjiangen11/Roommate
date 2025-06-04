@@ -51,7 +51,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	# Creating all the blocks that defined by areas and applying styles
 	var all_blocks := {}
 	for area in areas:
-		var area_blocks := area.create_blocks(block_size)
+		var area_blocks := area.create_blocks(global_transform, block_size)
 		all_blocks.merge(area_blocks, true)
 	
 	# Applying internal style
@@ -69,7 +69,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	areas_with_style.sort_custom(_sort_by_style)
 	for area in areas_with_style:
 		var area_blocks := {}
-		for area_block_position in area.get_block_positions(block_size):
+		for area_block_position in area.get_block_positions(global_transform, block_size):
 			area_blocks[area_block_position] = all_blocks[area_block_position]
 		area.style.apply(area_blocks)
 	
