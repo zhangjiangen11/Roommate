@@ -19,7 +19,7 @@ extends Node3D
 
 func get_block_positions(block_size: float) -> Array[Vector3i]:
 	var result: Array[Vector3i] = []
-	var range := get_blocks_range(global_transform, area_size, block_size)
+	var range := get_blocks_range(transform, area_size, block_size)
 	for x in range(range.position.x, range.end.x):
 		for y in range(range.position.y, range.end.y):
 			for z in range(range.position.z, range.end.z):
