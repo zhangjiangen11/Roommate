@@ -49,7 +49,11 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 	# no floor or ceil because of rounding error
 	var start_block_position := (start / block_size).round()
 	var end_block_position := (end / block_size).round()
-	return AABB(start_block_position, Vector3.ZERO).expand(end_block_position)
+	var range := AABB(start_block_position, Vector3.ZERO).expand(end_block_position)
+	range.size.x = 1 if range.size.x == 0 and area_size.x != 0 else range.size.x
+	range.size.y = 1 if range.size.y == 0 and area_size.y != 0 else range.size.y
+	range.size.z = 1 if range.size.z == 0 and area_size.z != 0 else range.size.z
+	return range
 
 
 func _process_block(new_block: RoommateBlock) -> void: # virtual method
