@@ -27,9 +27,9 @@ enum CollisionShape { CONCAVE, CONVEX }
 @export_group("Navigation")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 
-var _part_filters := {
-	&"btid_space": _filter_space_block_part,
-	&"btid_out_of_bounds": func() -> bool: return false,
+var _part_processors := {
+	&"btid_space": _process_space_block_part,
+	&"btid_out_of_bounds": _process_out_of_bounds_block_part,
 }
 var _tools := {}
 var _collision_faces := PackedVector3Array()
@@ -49,7 +49,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	areas.assign(child_areas.filter(filter_areas))
 	areas.sort_custom(_sort_by_type)
 	if areas.size() == 0:
-		push_warning("RoommateRoot doesnt own any blocks areas")
+		push_warning("RoommateRoot doesnt own any blocks areas.")
 		return
 	
 	# Creating all the blocks that defined by areas and applying styles
@@ -68,7 +68,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	if global_style:
 		global_style.apply(all_blocks)
 	
-	# Applying per area style
+	# Applying area styles
 	var areas_with_style := areas.filter(_filter_by_style) as Array[RoommateBlocksArea]
 	areas_with_style.sort_custom(_sort_by_style)
 	for area in areas_with_style:
@@ -83,15 +83,15 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	_collision_faces.clear()
 	for block_position in all_blocks:
 		var block := all_blocks[block_position] as RoommateBlock
-		if not _part_filters.has(block.block_type_id):
-			push_error("Unknown block type: %s" % block.block_type_id)
+		if not _part_processors.has(block.block_type_id):
+			push_error("Unknown block type: %s." % block.block_type_id)
 			continue
-		var part_filter := _part_filters[block.block_type_id] as Callable
+		var processor := _part_processors[block.block_type_id] as Callable
 		for slot_id in block.slots:
 			var part := block.slots.get(slot_id) as RoommatePart
-			var passed := part_filter.call(part, block, all_blocks, slot_id) as bool
-			if passed:
-				_generate_part(part, block)
+			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
+			if processed_part:
+				_generate_part(processed_part, block)
 	
 	# stitching it all together
 	for surface_material in _tools:
@@ -123,7 +123,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 				convex.points = _collision_faces.duplicate()
 				collision_shape_node.shape = convex
 			_:
-				push_error("Unknown collision shape %s" % collision_shape)
+				push_error("Unknown collision shape %s." % collision_shape)
 	
 	# applying navigation
 	var navigation_region := this_node.get_node_or_null(linked_navigation_region) as NavigationRegion3D
@@ -131,17 +131,11 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 		navigation_region.bake_navigation_mesh()
 
 
-func add_custom_part_filter(block_type_id: StringName, filter: Callable) -> void:
-	if _part_filters.has(block_type_id):
-		push_error("Filter for block type %s already exists" % block_type_id)
+func add_custom_part_processor(block_type_id: StringName, processor: Callable) -> void:
+	if _part_processors.has(block_type_id):
+		push_error("Processor for block type %s already exists." % block_type_id)
 		return
-	_part_filters[block_type_id] = filter
-
-
-func _filter_space_block_part(part: RoommatePart, block: RoommateBlock, 
-		all_blocks: Dictionary, slot_id: StringName) -> bool:
-	var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
-	return not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO
+	_part_processors[block_type_id] = processor
 
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
@@ -185,6 +179,18 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 			_tools[part_material] = new_surface_tool
 		var surface_tool := _tools.get(part_material) as SurfaceTool
 		surface_tool.append_from(part_mesh, 0, part.transform.translated(part_origin))
+
+
+func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary) -> RoommatePart:
+	var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
+	if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
+		return part
+	return null
+
+
+func _process_out_of_bounds_block_part() -> RoommatePart:
+	return null
 
 
 func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
