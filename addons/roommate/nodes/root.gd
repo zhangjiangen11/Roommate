@@ -27,9 +27,14 @@ enum CollisionShape { CONCAVE, CONVEX }
 @export_group("Navigation")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 
+var _blocks_area_apply_order: Array[Script] = [
+	RoommateSpace, 
+	RoommateOutOfBounds,
+]
 var _part_processors := {
 	&"btid_space": _process_space_block_part,
-	&"btid_out_of_bounds": _process_out_of_bounds_block_part,
+	&"btid_out_of_bounds": _process_skip_part,
+	&"btid_none": _process_skip_part,
 }
 var _tools := {}
 var _collision_faces := PackedVector3Array()
@@ -47,7 +52,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(child_areas.filter(filter_areas))
-	areas.sort_custom(_sort_by_type)
+	areas.sort_custom(_sort_by_area_apply_order)
 	if areas.size() == 0:
 		push_warning("RoommateRoot doesnt own any blocks areas.")
 		return
@@ -74,7 +79,9 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	for area in areas_with_style:
 		var area_blocks := {}
 		for area_block_position in area.get_block_positions(global_transform, block_size):
-			area_blocks[area_block_position] = all_blocks[area_block_position]
+			var area_block := all_blocks.get(area_block_position) as RoommateBlock
+			if area_block:
+				area_blocks[area_block_position] = area_block
 		area.style.apply(area_blocks)
 	
 	# generating mesh
@@ -131,11 +138,24 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 		navigation_region.bake_navigation_mesh()
 
 
-func add_custom_part_processor(block_type_id: StringName, processor: Callable) -> void:
+func register_block_type_id(block_type_id: StringName, part_processor: Callable) -> void:
 	if _part_processors.has(block_type_id):
-		push_error("Processor for block type %s already exists." % block_type_id)
+		push_error("block type %s already registered." % block_type_id)
 		return
-	_part_processors[block_type_id] = processor
+	_part_processors[block_type_id] = part_processor
+
+
+func register_blocks_area(block_area_script: Script, insert_before_block_area_script: Script) -> void:
+	if not block_area_script:
+		push_error("blocks area script is null.")
+		return
+	if _blocks_area_apply_order.has(block_area_script):
+		push_error("blocks area %s already registered." % block_area_script)
+		return
+	var insert_index := _blocks_area_apply_order.find(insert_before_block_area_script)
+	if insert_index < 0:
+		insert_index = _blocks_area_apply_order.size()
+	_blocks_area_apply_order.insert(insert_index, block_area_script)
 
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
@@ -189,14 +209,15 @@ func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: R
 	return null
 
 
-func _process_out_of_bounds_block_part() -> RoommatePart:
+func _process_skip_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary) -> RoommatePart:
 	return null
 
 
-func _sort_by_type(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
-	if a is RoommateOutOfBounds:
-		return false
-	return true
+func _sort_by_area_apply_order(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
+	var a_index := _blocks_area_apply_order.find(a.get_script())
+	var b_index := _blocks_area_apply_order.find(b.get_script())
+	return b_index > a_index
 
 
 func _sort_by_style(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
