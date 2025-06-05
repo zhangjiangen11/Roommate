@@ -11,7 +11,7 @@ class_name RoommateSpace
 extends RoommateBlocksArea
 
 
-func _process_block(new_block: RoommateBlock) -> void:
+func _process_block(new_block: RoommateBlock) -> RoommateBlock:
 	new_block.block_type_id = "btid_space";
 	var center_part := _create_part(Vector3(0.5, 0.5, 0.5), Vector3i.ZERO, Vector3.ZERO)
 	center_part.mesh = null
@@ -25,6 +25,7 @@ func _process_block(new_block: RoommateBlock) -> void:
 		&"sid_forward": _create_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, Vector3.ZERO),
 		&"sid_back": _create_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, Vector3.UP * PI),
 	}
+	return new_block
 
 
 func _create_part(anchor: Vector3, direction: Vector3, euler: Vector3) -> RoommatePart:

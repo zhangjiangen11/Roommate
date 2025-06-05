@@ -42,8 +42,9 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 		var new_block := RoommateBlock.new()
 		new_block.block_type_id = "btid_none"
 		new_block.block_position = block_position
-		_process_block(new_block)
-		result[block_position] = new_block
+		var processed_block := _process_block(new_block)
+		if processed_block:
+			result[block_position] = new_block
 	return result
 
 
@@ -65,5 +66,5 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 	return range
 
 
-func _process_block(new_block: RoommateBlock) -> void: # virtual method
-	push_error("Not Implemented")
+func _process_block(new_block: RoommateBlock) -> RoommateBlock: # virtual method
+	return null
