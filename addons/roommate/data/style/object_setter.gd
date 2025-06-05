@@ -7,19 +7,26 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateObjectSetter
 extends RefCounted
+
+const BASE_VALUE_SETTER := preload("./value_setters/value_setter.gd")
+const MATERIAL_SETTER := preload("./value_setters/material_value_setter.gd")
+const TRANSFORM2D_SETTER := preload("./value_setters/transform2d_value_setter.gd")
+const VECTOR3_SETTER := preload("./value_setters/vector3_value_setter.gd")
+const TRANSFORM3D_SETTER := preload("./value_setters/transform3d_value_setter.gd")
+const FLOAT_SETTER := preload("./value_setters/float_value_setter.gd")
+const MESH_SETTER := preload("./value_setters/mesh_value_setter.gd")
 
 var _value_setters := {}
 
 
-func resolve_value_setter(property_name: StringName, setter_script: Script) -> RoommateValueSetter:
+func resolve_value_setter(property_name: StringName, setter_script: Script) -> BASE_VALUE_SETTER:
 	if _value_setters.has(property_name):
-		var existing_setter := _value_setters[property_name] as RoommateValueSetter
+		var existing_setter := _value_setters[property_name] as BASE_VALUE_SETTER
 		if not setter_script.instance_has(existing_setter):
 			push_error("setter %s doesnt have exprected type" % property_name)
 		return existing_setter
-	var new_setter := setter_script.new() as RoommateValueSetter
+	var new_setter := setter_script.new() as BASE_VALUE_SETTER
 	new_setter.property_name = property_name
 	_value_setters[property_name] = new_setter
 	return new_setter

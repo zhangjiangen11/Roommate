@@ -7,7 +7,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateBlocksSelector
 extends RefCounted
 
 var include_mode := true
@@ -18,7 +17,7 @@ func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_includ
 	if not check_selection.is_valid():
 		push_error("check_selection is not valid")
 		return is_included
-	var is_selected = check_selection.call(block, source_blocks)
+	var is_selected := check_selection.call(block, source_blocks)
 	if not is_selected is bool:
 		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))
 		is_selected = false

@@ -7,18 +7,20 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateRuleset
 extends RefCounted
 
-var _blocks_selectors: Array[RoommateBlocksSelector] = []
-var _parts_setters: Array[RoommatePartsSetter] = []
+const BLOCKS_SELECTOR := preload("./blocks_selector.gd")
+const PARTS_SETTER := preload("./parts_setter.gd")
+
+var _blocks_selectors: Array[BLOCKS_SELECTOR] = []
+var _parts_setters: Array[PARTS_SETTER] = []
 
 
 func apply(source_blocks: Dictionary) -> void:
 	if _blocks_selectors.size() == 0:
-		push_warning("Ruleset doesnt have blocks selectors")
+		push_warning("Ruleset doesnt have blocks selectors.")
 	if _parts_setters.size() == 0:
-		push_warning("Ruleset doesnt have parts setters")
+		push_warning("Ruleset doesnt have parts setters.")
 	for block_position in source_blocks:
 		var include := false
 		var block := source_blocks[block_position] as RoommateBlock
@@ -28,25 +30,25 @@ func apply(source_blocks: Dictionary) -> void:
 			continue
 		for setter in _parts_setters:
 			if not setter:
-				push_warning("Setter is null")
+				push_warning("Parts setter is null.")
 				continue
 			setter.apply(block)
 
 
-func select_blocks(check_selection: Callable) -> RoommateBlocksSelector:
-	var selector := RoommateBlocksSelector.new()
+func select_blocks(check_selection: Callable) -> BLOCKS_SELECTOR:
+	var selector := BLOCKS_SELECTOR.new()
 	selector.check_selection = check_selection
 	_blocks_selectors.append(selector)
 	return selector
 
 
-func select_all_blocks() -> RoommateBlocksSelector:
+func select_all_blocks() -> BLOCKS_SELECTOR:
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		return true
 	return select_blocks(_check_selection)
 
 
-func select_edge_blocks(edge: Vector3i) -> RoommateBlocksSelector:
+func select_edge_blocks(edge: Vector3i) -> BLOCKS_SELECTOR:
 	var clamped_edge := edge.clamp(-Vector3i.ONE, Vector3i.ONE)
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var result := true
@@ -60,7 +62,7 @@ func select_edge_blocks(edge: Vector3i) -> RoommateBlocksSelector:
 	return select_blocks(_check_selection)
 
 
-func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> RoommateBlocksSelector:
+func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> BLOCKS_SELECTOR:
 	var clamped_density := clampf(density, 0, 1)
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var random_number := rng.randf() if rng else randf()
@@ -68,14 +70,14 @@ func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> 
 	return select_blocks(_check_selection)
 
 
-func select_parts(slot_ids: Array[StringName]) -> RoommatePartsSetter:
-	var new_setter = RoommatePartsSetter.new()
+func select_parts(slot_ids: Array[StringName]) -> PARTS_SETTER:
+	var new_setter = PARTS_SETTER.new()
 	new_setter.selected_slot_ids = slot_ids
 	_parts_setters.append(new_setter)
 	return new_setter
 
 
-func select_all_parts() -> RoommatePartsSetter:
+func select_all_parts() -> PARTS_SETTER:
 	return select_parts([
 		&"sid_center",
 		&"sid_up",
@@ -87,7 +89,7 @@ func select_all_parts() -> RoommatePartsSetter:
 	])
 
 
-func select_all_walls() -> RoommatePartsSetter:
+func select_all_walls() -> PARTS_SETTER:
 	return select_parts([
 		&"sid_left",
 		&"sid_right",
@@ -96,9 +98,9 @@ func select_all_walls() -> RoommatePartsSetter:
 	])
 
 
-func select_center() -> RoommatePartsSetter:
+func select_center() -> PARTS_SETTER:
 	return select_parts([&"sid_center"])
 
 
-func select_floor() -> RoommatePartsSetter:
+func select_floor() -> PARTS_SETTER:
 	return select_parts([&"sid_down"])

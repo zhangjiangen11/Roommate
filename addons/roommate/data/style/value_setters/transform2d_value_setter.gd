@@ -7,8 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateTransform2DValueSetter
-extends RoommateValueSetter
+extends "./value_setter.gd"
 
 var _local := true
 

@@ -10,6 +10,6 @@
 class_name RoommateBlock
 extends RefCounted
 
-@export var block_type_id: StringName
-@export var block_position: Vector3i
-@export var slots := {}
+var block_type_id: StringName
+var block_position: Vector3i
+var slots := {}

@@ -7,8 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateFloatValueSetter
-extends RoommateValueSetter
+extends "./value_setter.gd"
 
 
 func override(number: float) -> void:

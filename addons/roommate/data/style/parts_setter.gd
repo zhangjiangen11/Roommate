@@ -7,30 +7,31 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommatePartsSetter
-extends RoommateObjectSetter
+extends "./object_setter.gd"
+
+const SURFACE_OVERRIDE_SETTER := preload("./surface_override_setter.gd")
 
 var selected_slot_ids: Array[StringName] = []
 var handle_part: Callable
 
-var anchor: RoommateVector3ValueSetter:
-	get: return resolve_value_setter(&"anchor", preload("./value_setters/vector3_value_setter.gd"))
-var direction: RoommateVector3ValueSetter:
-	get: return resolve_value_setter(&"direction", preload("./value_setters/transform3d_value_setter.gd"))
-var roll_rotation: RoommateFloatValueSetter:
-	get: return resolve_value_setter(&"roll_rotation", preload("./value_setters/float_value_setter.gd"))
+var anchor: VECTOR3_SETTER:
+	get: return resolve_value_setter(&"anchor", VECTOR3_SETTER)
+var direction: VECTOR3_SETTER:
+	get: return resolve_value_setter(&"direction", VECTOR3_SETTER)
+var roll_rotation: FLOAT_SETTER:
+	get: return resolve_value_setter(&"roll_rotation", FLOAT_SETTER)
 
-var transform: RoommateTransform3DValueSetter:
-	get: return resolve_value_setter(&"transform", preload("./value_setters/transform3d_value_setter.gd"))
-var collision_transform: RoommateTransform3DValueSetter:
-	get: return resolve_value_setter(&"collision_transform", preload("./value_setters/transform3d_value_setter.gd"))
+var transform: TRANSFORM3D_SETTER:
+	get: return resolve_value_setter(&"transform", TRANSFORM3D_SETTER)
+var collision_transform: TRANSFORM3D_SETTER:
+	get: return resolve_value_setter(&"collision_transform", TRANSFORM3D_SETTER)
 
-var mesh: RoommateMeshValueSetter:
-	get: return resolve_value_setter(&"mesh", preload("./value_setters/mesh_value_setter.gd"))
-var collision_mesh: RoommateMeshValueSetter:
-	get: return resolve_value_setter(&"collision_mesh", preload("./value_setters/mesh_value_setter.gd"))
+var mesh: MESH_SETTER:
+	get: return resolve_value_setter(&"mesh", MESH_SETTER)
+var collision_mesh: MESH_SETTER:
+	get: return resolve_value_setter(&"collision_mesh", MESH_SETTER)
 
-var _surface_overrides := {}
+var surface_overrides := {}
 
 
 func apply(block: RoommateBlock) -> void:
@@ -42,10 +43,13 @@ func apply(block: RoommateBlock) -> void:
 			continue
 		
 		for property_name in _value_setters:
-			var setter := _value_setters[property_name] as RoommateValueSetter
+			var setter := _value_setters[property_name] as BASE_VALUE_SETTER
 			setter.apply(current_part)
-		for surface_id in _surface_overrides:
-			var override_setter := _surface_overrides[surface_id] as RoommateSurfaceOverrideSetter
+		for surface_id in surface_overrides:
+			var override_setter := surface_overrides[surface_id] as SURFACE_OVERRIDE_SETTER
+			if not override_setter:
+				push_error("Surface override setter is null.")
+				continue
 			var current_override := current_part.resolve_surface_override(surface_id)
 			override_setter.apply(current_override)
 		
@@ -53,9 +57,9 @@ func apply(block: RoommateBlock) -> void:
 			handle_part.call(current_part)
 
 
-func override_surface(surface_id: int) -> RoommateSurfaceOverrideSetter:
-	if _surface_overrides.has(surface_id):
-		return _surface_overrides[surface_id] as RoommateSurfaceOverrideSetter
-	var new_override := RoommateSurfaceOverrideSetter.new()
-	_surface_overrides[surface_id] = new_override
+func override_surface(surface_id: int) -> SURFACE_OVERRIDE_SETTER:
+	if surface_overrides.has(surface_id):
+		return surface_overrides[surface_id] as SURFACE_OVERRIDE_SETTER
+	var new_override := SURFACE_OVERRIDE_SETTER.new()
+	surface_overrides[surface_id] = new_override
 	return new_override

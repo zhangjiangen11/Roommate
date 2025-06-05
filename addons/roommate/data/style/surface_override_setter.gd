@@ -7,18 +7,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateSurfaceOverrideSetter
-extends RoommateObjectSetter
+extends "./object_setter.gd"
 
-var material: RoommateMaterialValueSetter:
-	get: return resolve_value_setter(&"material", preload("./value_setters/material_value_setter.gd"))
-var uv_transform: RoommateTransform2DValueSetter:
-	get: return resolve_value_setter(&"uv_transform", preload("./value_setters/transform2d_value_setter.gd"))
+var material: MATERIAL_SETTER:
+	get: return resolve_value_setter(&"material", MATERIAL_SETTER)
+var uv_transform: TRANSFORM2D_SETTER:
+	get: return resolve_value_setter(&"uv_transform", TRANSFORM2D_SETTER)
 
 
 func apply(target: RoommateSurfaceOverride) -> void:
 	for property_name in _value_setters:
-		var setter := _value_setters[property_name] as RoommateValueSetter
+		var setter := _value_setters[property_name] as BASE_VALUE_SETTER
 		setter.apply(target)
 
 

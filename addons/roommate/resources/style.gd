@@ -10,9 +10,11 @@
 class_name RoommateStyle
 extends Resource
 
+const RULESET := preload("../data/style/ruleset.gd")
+
 @export var apply_order := 0
 
-var _current_rulesets: Array[RoommateRuleset] = []
+var _current_rulesets: Array[RULESET] = []
 
 
 func apply(source_blocks: Dictionary) -> void:
@@ -22,8 +24,8 @@ func apply(source_blocks: Dictionary) -> void:
 		ruleset.apply(source_blocks)
 
 
-func create_ruleset() -> RoommateRuleset:
-	var new_ruleset = RoommateRuleset.new()
+func create_ruleset() -> RULESET:
+	var new_ruleset = RULESET.new()
 	_current_rulesets.append(new_ruleset)
 	return new_ruleset
 

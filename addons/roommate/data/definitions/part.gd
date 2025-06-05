@@ -19,12 +19,12 @@ var collision_transform := Transform3D.IDENTITY
 
 var mesh: Mesh
 var collision_mesh: Mesh
-var _surface_overrides: Dictionary
+var surface_overrides := {}
 
 
 func resolve_surface_override(surface_id: int) -> RoommateSurfaceOverride:
-	if not _surface_overrides.has(surface_id):
+	if not surface_overrides.has(surface_id):
 		var new_override := RoommateSurfaceOverride.new()
-		_surface_overrides[surface_id] = new_override
+		surface_overrides[surface_id] = new_override
 		return new_override
-	return _surface_overrides[surface_id] as RoommateSurfaceOverride
+	return surface_overrides[surface_id] as RoommateSurfaceOverride
