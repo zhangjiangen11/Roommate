@@ -1,0 +1,8 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://dqsgmbws3jtj4"]
+
+[ext_resource type="Script" path="res://test/test_style/my_skip_style.gd" id="1_7jlhw"]
+
+[resource]
+script = ExtResource("1_7jlhw")
+test = 0
+apply_order = 0

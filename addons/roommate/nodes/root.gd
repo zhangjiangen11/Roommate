@@ -15,7 +15,9 @@ enum CollisionShape { CONCAVE, CONVEX }
 @export var block_size := 1.0:
 	set(value):
 		block_size = value
-		update_gizmos()
+		for node in find_children("*", "RoommateBlocksArea"):
+			var area := node as RoommateBlocksArea
+			area.update_gizmos()
 @export var scale_with_block_size := false
 
 @export var global_style: RoommateStyle
@@ -53,6 +55,9 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(child_areas.filter(filter_areas))
 	areas.sort_custom(_sort_by_area_apply_order)
+	if child_roots.size() > 0:
+		push_warning("RoommateRoot has other RoommateRoots as a children. " + 
+				"Their BlocksAreas are ignored.")
 	if areas.size() == 0:
 		push_warning("RoommateRoot doesnt own any blocks areas.")
 		return
