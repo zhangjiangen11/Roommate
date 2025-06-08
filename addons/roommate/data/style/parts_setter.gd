@@ -25,6 +25,8 @@ var transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"transform", TRANSFORM3D_SETTER)
 var collision_transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"collision_transform", TRANSFORM3D_SETTER)
+var flip_faces: BOOL_SETTER:
+	get: return resolve_value_setter(&"flip_faces", BOOL_SETTER)
 
 var mesh: MESH_SETTER:
 	get: return resolve_value_setter(&"mesh", MESH_SETTER)

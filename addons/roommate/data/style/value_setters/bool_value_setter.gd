@@ -10,6 +10,6 @@
 extends "./value_setter.gd"
 
 
-func override(material: Material) -> void:
+func override(new_bool: bool) -> void:
 	_override_requested = true
-	_override_value = material
+	_override_value = new_bool

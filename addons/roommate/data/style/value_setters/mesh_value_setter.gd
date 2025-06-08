@@ -13,7 +13,3 @@ extends "./value_setter.gd"
 func override(mesh: Mesh) -> void:
 	_override_requested = true
 	_override_value = mesh
-
-
-func _handle_accumulation(current_value: Variant) -> Variant: # virtual method
-	return current_value

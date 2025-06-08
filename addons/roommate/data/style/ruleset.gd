@@ -61,6 +61,13 @@ func select_edge_blocks(edge: Vector3i) -> BLOCKS_SELECTOR:
 	return select_blocks(_check_selection)
 
 
+func select_interval_blocks(interval: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
+	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		var offset_position := block.position - offset
+		return offset_position.snapped(interval) == offset_position
+	return select_blocks(_check_selection)
+
+
 func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> BLOCKS_SELECTOR:
 	var clamped_density := clampf(density, 0, 1)
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:

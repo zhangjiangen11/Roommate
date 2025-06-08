@@ -113,8 +113,8 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	for surface_material in _tools:
 		var tool := _tools[surface_material] as SurfaceTool
 		tool.index()
-		tool.generate_normals()
 		tool.generate_tangents()
+		tool.generate_normals()
 		var mesh_surface := tool.commit_to_arrays()
 		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_surface)
 		result.surface_set_material(result.get_surface_count() - 1, surface_material)
@@ -181,9 +181,12 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	for surface_id in part.mesh.get_surface_count():
 		var part_surface_override := part.resolve_surface_override(surface_id)
 		
-		# modifying uv
+		# modifying mesh
 		var part_mesh := ArrayMesh.new()
-		part_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, part.mesh.surface_get_arrays(surface_id))
+		var mesh_arrays := part.mesh.surface_get_arrays(surface_id)
+		if part.flip_faces and mesh_arrays[Mesh.ARRAY_INDEX]:
+			mesh_arrays[Mesh.ARRAY_INDEX].reverse()
+		part_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
 		var mesh_data_tool := MeshDataTool.new()
 		var create_error := mesh_data_tool.create_from_surface(part_mesh, 0)
 		assert(create_error == OK)

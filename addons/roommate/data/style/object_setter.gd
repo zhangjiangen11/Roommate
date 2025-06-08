@@ -14,6 +14,7 @@ const MATERIAL_SETTER := preload("./value_setters/material_value_setter.gd")
 const TRANSFORM2D_SETTER := preload("./value_setters/transform2d_value_setter.gd")
 const VECTOR3_SETTER := preload("./value_setters/vector3_value_setter.gd")
 const TRANSFORM3D_SETTER := preload("./value_setters/transform3d_value_setter.gd")
+const BOOL_SETTER := preload("./value_setters/bool_value_setter.gd")
 const FLOAT_SETTER := preload("./value_setters/float_value_setter.gd")
 const MESH_SETTER := preload("./value_setters/mesh_value_setter.gd")
 

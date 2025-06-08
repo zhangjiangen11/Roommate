@@ -16,6 +16,7 @@ var roll_rotation := 0.0
 
 var transform := Transform3D.IDENTITY
 var collision_transform := Transform3D.IDENTITY
+var flip_faces := false
 
 var mesh: Mesh
 var collision_mesh: Mesh
