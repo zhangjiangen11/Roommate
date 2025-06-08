@@ -9,5 +9,4 @@
 
 [node name="RoommateSpace" type="Node3D" parent="Node3D"]
 script = ExtResource("1_k3x5r")
-area_size = Vector3(1, 2, 1)
 style = ExtResource("2_cx3uu")

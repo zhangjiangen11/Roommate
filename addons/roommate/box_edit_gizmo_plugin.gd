@@ -85,8 +85,8 @@ func _get_handle_value(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool
 	if _original_area_global_transform == null:
 		_original_area_global_transform = area.global_transform
 	if _original_area_size == null:
-		_original_area_size = area.area_size
-	return area.area_size
+		_original_area_size = area.size
+	return area.size
 
 
 func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, 
@@ -121,7 +121,7 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool,
 		var new_area_size := delta_to_center * 2
 		if Input.is_physical_key_pressed(KEY_CTRL):
 			new_area_size = snappedf(new_area_size, 1)
-		area.area_size[handle.axis_index] = maxf(new_area_size, MIN_AREA_SIZE)
+		area.size[handle.axis_index] = maxf(new_area_size, MIN_AREA_SIZE)
 		return
 #
 #	# growing in one side
@@ -131,7 +131,7 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool,
 	new_area_size = maxf(new_area_size, MIN_AREA_SIZE)
 	var grow_start := original_area_transform.origin - local_handle_normal * area.scale * original_area_size[handle.axis_index] / 2
 	area.position = grow_start + local_handle_normal * area.scale * new_area_size / 2
-	area.area_size[handle.axis_index] = new_area_size
+	area.size[handle.axis_index] = new_area_size
 
 
 func _commit_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, 

@@ -12,5 +12,5 @@ extends RoommateBlocksArea
 
 
 func _process_block(new_block: RoommateBlock) -> RoommateBlock:
-	new_block.block_type_id = "btid_out_of_bounds";
+	new_block.type_id = "btid_out_of_bounds";
 	return new_block

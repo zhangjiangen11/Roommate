@@ -95,10 +95,10 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	_collision_faces.clear()
 	for block_position in all_blocks:
 		var block := all_blocks[block_position] as RoommateBlock
-		if not _part_processors.has(block.block_type_id):
-			push_error("Unknown block type: %s." % block.block_type_id)
+		if not _part_processors.has(block.type_id):
+			push_error("Unknown block type: %s." % block.type_id)
 			continue
-		var processor := _part_processors[block.block_type_id] as Callable
+		var processor := _part_processors[block.type_id] as Callable
 		for slot_id in block.slots:
 			var part := block.slots.get(slot_id) as RoommatePart
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
@@ -209,7 +209,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
 	var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
-	if not adjacent_block or adjacent_block.block_type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
+	if not adjacent_block or adjacent_block.type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
 		return part
 	return null
 

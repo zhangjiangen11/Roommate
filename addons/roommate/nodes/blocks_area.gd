@@ -10,15 +10,15 @@
 class_name RoommateBlocksArea
 extends Node3D
 
-@export var area_size := Vector3.ONE:
+@export var size := Vector3.ONE:
 	set(value):
-		area_size = value
+		size = value
 		update_gizmos()
 @export var style: RoommateStyle
 
 var box: AABB:
 	get:
-		return AABB(-area_size / 2, area_size)
+		return AABB(-size / 2, size)
 
 
 func _ready():
@@ -44,7 +44,7 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 	var result := {}
 	for block_position in get_block_positions(root_transform, block_size):
 		var new_block := RoommateBlock.new()
-		new_block.block_type_id = "btid_none"
+		new_block.type_id = "btid_none"
 		new_block.block_position = block_position
 		var processed_block := _process_block(new_block)
 		if processed_block:
@@ -53,7 +53,6 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 
 
 func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
-	var box := AABB(-area_size / 2, area_size)
 	var start := Vector3.INF
 	var end := -Vector3.INF
 	for i in 8:
@@ -64,9 +63,9 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 	var start_block_position := (start / block_size).round()
 	var end_block_position := (end / block_size).round()
 	var range := AABB(start_block_position, Vector3.ZERO).expand(end_block_position)
-	range.size.x = 1 if range.size.x == 0 and area_size.x != 0 else range.size.x
-	range.size.y = 1 if range.size.y == 0 and area_size.y != 0 else range.size.y
-	range.size.z = 1 if range.size.z == 0 and area_size.z != 0 else range.size.z
+	range.size.x = 1 if range.size.x == 0 and size.x != 0 else range.size.x
+	range.size.y = 1 if range.size.y == 0 and size.y != 0 else range.size.y
+	range.size.z = 1 if range.size.z == 0 and size.z != 0 else range.size.z
 	return range
 
 
