@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_7jlhw")
-test = 0
+edge = Vector3i(3, -2, 1)
 apply_order = 0

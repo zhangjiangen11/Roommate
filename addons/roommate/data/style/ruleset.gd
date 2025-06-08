@@ -49,15 +49,14 @@ func select_all_blocks() -> BLOCKS_SELECTOR:
 
 
 func select_edge_blocks(edge: Vector3i) -> BLOCKS_SELECTOR:
-	var clamped_edge := edge.clamp(-Vector3i.ONE, Vector3i.ONE)
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var result := true
-		if clamped_edge.x != 0:
-			result = result and not source_blocks.has(block.block_position + clamped_edge * Vector3i.RIGHT)
-		if clamped_edge.y != 0:
-			result = result and not source_blocks.has(block.block_position + clamped_edge * Vector3i.UP)
-		if clamped_edge.z != 0:
-			result = result and not source_blocks.has(block.block_position + clamped_edge * Vector3i.BACK)
+		if edge.x != 0:
+			result = result and not source_blocks.has(block.block_position + edge * Vector3i.RIGHT)
+		if edge.y != 0:
+			result = result and not source_blocks.has(block.block_position + edge * Vector3i.UP)
+		if edge.z != 0:
+			result = result and not source_blocks.has(block.block_position + edge * Vector3i.BACK)
 		return result
 	return select_blocks(_check_selection)
 
