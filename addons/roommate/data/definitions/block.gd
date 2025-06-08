@@ -11,5 +11,5 @@ class_name RoommateBlock
 extends RefCounted
 
 var type_id: StringName
-var block_position: Vector3i
+var position: Vector3i
 var slots := {}

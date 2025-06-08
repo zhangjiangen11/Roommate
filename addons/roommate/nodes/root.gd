@@ -10,7 +10,11 @@
 class_name RoommateRoot
 extends MeshInstance3D
 
-enum CollisionShape { CONCAVE, CONVEX }
+enum CollisionShape 
+{ 
+	CONCAVE, 
+	CONVEX, 
+}
 
 @export var block_size := 1.0:
 	set(value):
@@ -167,7 +171,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part:
 		return
 	
-	var part_origin := parent_block.block_position * block_size + block_size * part.anchor
+	var part_origin := parent_block.position * block_size + block_size * part.anchor
 	if part.collision_mesh:
 		var part_collision_faces := part.collision_transform.translated(part_origin) * part.collision_mesh.get_faces()
 		_collision_faces.append_array(part_collision_faces)
@@ -208,7 +212,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
-	var adjacent_block := all_blocks.get(block.block_position + (part.direction as Vector3i)) as RoommateBlock
+	var adjacent_block := all_blocks.get(block.position + (part.direction as Vector3i)) as RoommateBlock
 	if not adjacent_block or adjacent_block.type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
 		return part
 	return null

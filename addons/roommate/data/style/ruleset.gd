@@ -52,11 +52,11 @@ func select_edge_blocks(edge: Vector3i) -> BLOCKS_SELECTOR:
 	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var result := true
 		if edge.x != 0:
-			result = result and not source_blocks.has(block.block_position + edge * Vector3i.RIGHT)
+			result = result and not source_blocks.has(block.position + edge * Vector3i.RIGHT)
 		if edge.y != 0:
-			result = result and not source_blocks.has(block.block_position + edge * Vector3i.UP)
+			result = result and not source_blocks.has(block.position + edge * Vector3i.UP)
 		if edge.z != 0:
-			result = result and not source_blocks.has(block.block_position + edge * Vector3i.BACK)
+			result = result and not source_blocks.has(block.position + edge * Vector3i.BACK)
 		return result
 	return select_blocks(_check_selection)
 
