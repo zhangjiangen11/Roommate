@@ -9,19 +9,27 @@
 @tool
 extends EditorNode3DGizmoPlugin
 
-const HANDLE_NAMES: Array[String] = [
-	"Area Size Y",
-	"Area Size Y",
-	"Area Size X",
-	"Area Size X",
-	"Area Size Z",
-	"Area Size Z",
+const MIN_AREA_SIZE := 0.002
+
+var handles_3d_size: float = 0.0
+var _handle_infos: Array[HandleInfo] = [
+	HandleInfo.new(Vector3.UP),
+	HandleInfo.new(Vector3.DOWN),
+	HandleInfo.new(Vector3.LEFT),
+	HandleInfo.new(Vector3.RIGHT),
+	HandleInfo.new(Vector3.FORWARD),
+	HandleInfo.new(Vector3.BACK),
 ]
+var _original_area_transform: Variant = null
+var _original_area_global_transform: Variant = null
+var _original_area_size: Variant = null
 
 
 func _init() -> void:
+	_handle_infos.make_read_only()
 	create_material("area", Color.AQUA)
 	create_material("blocks", Color.GREEN)
+	create_material("handles_3d", Color.YELLOW)
 	create_handle_material("handles")
 
 
@@ -40,8 +48,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	var area_selected := area in EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
 	
 	# area
-	var area_box := AABB(-area.area_size / 2, area.area_size)
-	gizmo.add_lines(_get_aabb_lines(area_box), get_material("area", gizmo), false)
+	gizmo.add_lines(_get_aabb_lines(area.box), get_material("area", gizmo))
 	
 	# blocks range
 	if root:
@@ -49,54 +56,89 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		blocks_box.size *= root.block_size
 		blocks_box.position *= root.block_size
 		var blocks_box_lines := area.global_transform.affine_inverse() * (root.global_transform * _get_aabb_lines(blocks_box))
-		gizmo.add_lines(blocks_box_lines, get_material("blocks", gizmo), false)
+		gizmo.add_lines(blocks_box_lines, get_material("blocks", gizmo))
 	
 	if not area_selected:
 		return
 	
 	# handles
-	var handles := [
-		area_box.get_center() + area_box.size * Vector3.UP * 0.5,
-		area_box.get_center() + area_box.size * Vector3.DOWN * 0.5,
-		area_box.get_center() + area_box.size * Vector3.LEFT * 0.5,
-		area_box.get_center() + area_box.size * Vector3.RIGHT * 0.5,
-		area_box.get_center() + area_box.size * Vector3.FORWARD * 0.5,
-		area_box.get_center() + area_box.size * Vector3.BACK * 0.5,
-	]
-	gizmo.add_handles(handles, get_material("handles", gizmo), [])
+	var info_to_point := func (handle: HandleInfo) -> Vector3: 
+		return handle.get_position(area.box)
+	var handles_positions := _handle_infos.map(info_to_point)
+	if handles_3d_size > 0:
+		for handle_position in handles_positions:
+			var mesh := SphereMesh.new()
+			mesh.height = handles_3d_size
+			mesh.radius = handles_3d_size / 2
+			gizmo.add_mesh(mesh, get_material("handles_3d", gizmo), Transform3D.IDENTITY.translated(handle_position))
+	gizmo.add_handles(handles_positions, get_material("handles", gizmo), [])
 
 
 func _get_handle_name(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool) -> String:
-	return HANDLE_NAMES[handle_id]
+	return _handle_infos[handle_id].name
 
 
 func _get_handle_value(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool) -> Variant:
 	var area := gizmo.get_node_3d() as RoommateBlocksArea
+	if _original_area_transform == null:
+		_original_area_transform = area.transform
+	if _original_area_global_transform == null:
+		_original_area_global_transform = area.global_transform
+	if _original_area_size == null:
+		_original_area_size = area.area_size
 	return area.area_size
 
 
 func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, 
 		camera: Camera3D, screen_pos: Vector2) -> void:
 	var area := gizmo.get_node_3d() as RoommateBlocksArea
-	var plane := Plane()
-	match handle_id:
-		0, 1:
-			plane = area.global_transform * Plane.PLANE_XY
-		2, 3:
-			plane = area.global_transform * Plane.PLANE_XZ
-		4, 5:
-			plane = area.global_transform * Plane.PLANE_XZ
-	
-	var ray_from := camera.project_ray_origin(screen_pos)
+	var original_area_transform := _original_area_transform as Transform3D
+	var original_area_global_transform := _original_area_global_transform as Transform3D
+	var original_area_size := _original_area_size as Vector3
+	var handle := _handle_infos[handle_id]
+	var handle_position := area.global_transform * handle.get_position(area.box)
+	var handle_normal := (area.global_transform.basis * handle.direction).normalized()
+	var projected_cam := (camera.global_position - handle_position).project(handle_normal) + handle_position
+	var to_cam_normal := projected_cam.direction_to(camera.global_position)
+	var plane := Plane(to_cam_normal, handle_position)
+	var ray_origin := camera.project_ray_origin(screen_pos)
 	var ray_direction := camera.project_ray_normal(screen_pos)
-	
-	var hit_result := plane.intersects_ray(ray_from, ray_direction)
+	var hit_result := plane.intersects_ray(ray_origin, ray_direction)
 	if hit_result == null:
 		return
-	var relative_hit := (hit_result as Vector3) - area.global_position
-	var new_size := area.area_size
-	new_size.z = relative_hit.z
-	area.area_size = new_size
+	var hit_position := hit_result as Vector3
+	var projected_hit := (hit_position - handle_position).project(handle_normal) + handle_position
+	
+	var local_hit := original_area_global_transform.affine_inverse() * projected_hit
+	var local_handle_normal := (area.transform.basis * handle.direction).normalized()
+	
+	var distance_sign := signf((projected_hit - original_area_global_transform.origin).dot(handle_normal))
+	var delta_to_center := local_hit.length() * distance_sign
+	
+	if Input.is_physical_key_pressed(KEY_ALT):
+		# growing in both sides
+		area.global_position = original_area_global_transform.origin
+		var new_area_size := delta_to_center * 2
+		if Input.is_physical_key_pressed(KEY_CTRL):
+			new_area_size = snappedf(new_area_size, 1)
+		area.area_size[handle.axis_index] = maxf(new_area_size, MIN_AREA_SIZE)
+		return
+#
+#	# growing in one side
+	var new_area_size := delta_to_center + original_area_size[handle.axis_index] / 2
+	if Input.is_physical_key_pressed(KEY_CTRL):
+		new_area_size = snappedf(new_area_size, 1)
+	new_area_size = maxf(new_area_size, MIN_AREA_SIZE)
+	var grow_start := original_area_transform.origin - local_handle_normal * area.scale * original_area_size[handle.axis_index] / 2
+	area.position = grow_start + local_handle_normal * area.scale * new_area_size / 2
+	area.area_size[handle.axis_index] = new_area_size
+
+
+func _commit_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, 
+		restore, cancel: bool) -> void:
+	_original_area_transform = null
+	_original_area_global_transform = null
+	_original_area_size = null
 
 
 func _get_aabb_lines(aabb: AABB) -> PackedVector3Array:
@@ -124,3 +166,29 @@ func _get_root(node: Node) -> RoommateRoot:
 		if not parent:
 			return null
 	return parent as RoommateRoot
+
+
+class HandleInfo:
+	extends RefCounted
+	
+	const AXIS_NAMES: Array[String] = ["X", "Y", "Z"]
+	
+	var direction := Vector3.ZERO
+	var axis_index := 0
+	var name: String:
+		get:
+			return "Axis Size %s" % AXIS_NAMES[axis_index]
+	
+	
+	func _init(init_direction: Vector3) -> void:
+		direction = init_direction
+		if direction.x != 0:
+			axis_index = 0
+		elif direction.y != 0:
+			axis_index = 1
+		elif direction.z != 0:
+			axis_index = 2
+	
+	
+	func get_position(box: AABB) -> Vector3:
+		return box.get_center() + box.size * direction * 0.5

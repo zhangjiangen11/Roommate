@@ -16,6 +16,10 @@ extends Node3D
 		update_gizmos()
 @export var style: RoommateStyle
 
+var box: AABB:
+	get:
+		return AABB(-area_size / 2, area_size)
+
 
 func _ready():
 	set_notify_transform(true)
