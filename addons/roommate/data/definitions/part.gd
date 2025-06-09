@@ -16,15 +16,17 @@ var roll_rotation := 0.0
 
 var transform := Transform3D.IDENTITY
 var collision_transform := Transform3D.IDENTITY
-var flip_faces := false
 
 var mesh: Mesh
 var collision_mesh: Mesh
+var global_surface_override := RoommateSurfaceOverride.new()
 var surface_overrides := {}
 
 
-func resolve_surface_override(surface_id: int) -> RoommateSurfaceOverride:
+func resolve_surface_override(surface_id: int, create_if_missing: bool) -> RoommateSurfaceOverride:
 	if not surface_overrides.has(surface_id):
+		if not create_if_missing:
+			return global_surface_override
 		var new_override := RoommateSurfaceOverride.new()
 		surface_overrides[surface_id] = new_override
 		return new_override

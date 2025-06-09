@@ -26,6 +26,11 @@ enum CollisionShape
 
 @export var global_style: RoommateStyle
 
+@export_group("Mesh")
+@export var index_mesh := true
+@export var generate_normals := true
+@export var generate_tangents := true
+
 @export_group("Collision")
 @export var collision_shape := CollisionShape.CONCAVE
 @export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
@@ -112,11 +117,13 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	# stitching it all together
 	for surface_material in _tools:
 		var tool := _tools[surface_material] as SurfaceTool
-		tool.index()
-		tool.generate_tangents()
-		tool.generate_normals()
-		var mesh_surface := tool.commit_to_arrays()
-		result.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_surface)
+		if index_mesh:
+			tool.index()
+		if generate_normals:
+			tool.generate_normals()
+		if generate_tangents:
+			tool.generate_tangents()
+		tool.commit(result)
 		result.surface_set_material(result.get_surface_count() - 1, surface_material)
 	mesh = result
 	
@@ -149,17 +156,17 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 
 func register_block_type_id(block_type_id: StringName, part_processor: Callable) -> void:
 	if _part_processors.has(block_type_id):
-		push_error("block type %s already registered." % block_type_id)
+		push_error("Block type %s already registered." % block_type_id)
 		return
 	_part_processors[block_type_id] = part_processor
 
 
 func register_blocks_area(block_area_script: Script, insert_before_block_area_script: Script) -> void:
 	if not block_area_script:
-		push_error("blocks area script is null.")
+		push_error("Blocks area script is null.")
 		return
 	if _blocks_area_apply_order.has(block_area_script):
-		push_error("blocks area %s already registered." % block_area_script)
+		push_error("Blocks area %s already registered." % block_area_script)
 		return
 	var insert_index := _blocks_area_apply_order.find(insert_before_block_area_script)
 	if insert_index < 0:
@@ -179,13 +186,16 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part.mesh:
 		return
 	for surface_id in part.mesh.get_surface_count():
-		var part_surface_override := part.resolve_surface_override(surface_id)
+		var part_surface_override := part.resolve_surface_override(surface_id, false)
 		
 		# modifying mesh
 		var part_mesh := ArrayMesh.new()
 		var mesh_arrays := part.mesh.surface_get_arrays(surface_id)
-		if part.flip_faces and mesh_arrays[Mesh.ARRAY_INDEX]:
-			mesh_arrays[Mesh.ARRAY_INDEX].reverse()
+		if part_surface_override.flip_faces:
+			if mesh_arrays[Mesh.ARRAY_INDEX] and mesh_arrays[Mesh.ARRAY_INDEX].size() > 0:
+				mesh_arrays[Mesh.ARRAY_INDEX].reverse()
+			else:
+				push_warning("Cant flip faces. Mesh array doesnt have indexes.")
 		part_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
 		var mesh_data_tool := MeshDataTool.new()
 		var create_error := mesh_data_tool.create_from_surface(part_mesh, 0)

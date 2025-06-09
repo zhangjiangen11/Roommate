@@ -25,14 +25,13 @@ var transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"transform", TRANSFORM3D_SETTER)
 var collision_transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"collision_transform", TRANSFORM3D_SETTER)
-var flip_faces: BOOL_SETTER:
-	get: return resolve_value_setter(&"flip_faces", BOOL_SETTER)
 
 var mesh: MESH_SETTER:
 	get: return resolve_value_setter(&"mesh", MESH_SETTER)
 var collision_mesh: MESH_SETTER:
 	get: return resolve_value_setter(&"collision_mesh", MESH_SETTER)
 
+var global_surface_override := SURFACE_OVERRIDE_SETTER.new()
 var surface_overrides := {}
 
 
@@ -47,12 +46,14 @@ func apply(block: RoommateBlock) -> void:
 		for property_name in _value_setters:
 			var setter := _value_setters[property_name] as BASE_VALUE_SETTER
 			setter.apply(current_part)
+		global_surface_override.apply(current_part.global_surface_override)
 		for surface_id in surface_overrides:
+			var current_override := current_part.resolve_surface_override(surface_id, true)
+			global_surface_override.apply(current_override)
 			var override_setter := surface_overrides[surface_id] as SURFACE_OVERRIDE_SETTER
 			if not override_setter:
 				push_error("Surface override setter is null.")
 				continue
-			var current_override := current_part.resolve_surface_override(surface_id)
 			override_setter.apply(current_override)
 		
 		if handle_part.is_valid():

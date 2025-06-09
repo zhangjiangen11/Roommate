@@ -12,6 +12,7 @@ extends RefCounted
 
 var material: Material
 var uv_transform := Transform2D.IDENTITY
+var flip_faces := false
 var color := Color.WHITE
 
 
