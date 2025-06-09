@@ -194,6 +194,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		for vertex_id in mesh_data_tool.get_vertex_count():
 			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
 			mesh_data_tool.set_vertex_uv(vertex_id, part_surface_override.uv_transform * uv)
+			mesh_data_tool.set_vertex_color(vertex_id, part_surface_override.color)
 		
 		part_mesh.clear_surfaces()
 		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)

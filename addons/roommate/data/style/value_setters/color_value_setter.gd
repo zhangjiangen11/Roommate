@@ -10,15 +10,16 @@
 extends "./value_setter.gd"
 
 
-func override(vector: Vector3) -> void:
+func override(color: Color) -> void:
 	_override_requested = true
-	_override_value = vector
+	_override_value = color
 
 
-func accumulate(vector: Vector3) -> void:
+func accumulate(color: Color) -> void:
 	_accumulation_requested = true
-	_accumulation_value = vector
+	_accumulation_value = color
 
 
 func _handle_accumulation(current_value: Variant) -> Variant:
+	print(current_value + _accumulation_value)
 	return current_value + _accumulation_value

@@ -12,6 +12,7 @@ extends RefCounted
 
 var material: Material
 var uv_transform := Transform2D.IDENTITY
+var color := Color.WHITE
 
 
 func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:

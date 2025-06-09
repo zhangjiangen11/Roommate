@@ -20,5 +20,5 @@ func accumulate(number: float) -> void:
 	_accumulation_value = number
 
 
-func _handle_accumulation(current_value: Variant) -> Variant: # virtual method
+func _handle_accumulation(current_value: Variant) -> Variant:
 	return current_value + _accumulation_value

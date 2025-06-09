@@ -30,6 +30,7 @@ func _build_rulesets() -> void:
 	var r2 := create_ruleset()
 	r2.select_edge_blocks(Vector3(-1, 0, -1))
 	var corner := r2.select_all_walls()
+	corner.override_surface(0).color.override(Color.BLACK)
 	corner.override_surface(0).material.override(preload("res://addons/roommate/defaults/default_material.tres"))
 	
 	var r3 := create_ruleset()

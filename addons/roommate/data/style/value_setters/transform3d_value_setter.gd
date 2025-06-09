@@ -23,7 +23,7 @@ func accumulate(transform: Transform3D, local := true) -> void:
 	_local = local
 
 
-func _handle_accumulation(current_value: Variant) -> Variant: # virtual method
+func _handle_accumulation(current_value: Variant) -> Variant:
 	if _local:
 		return current_value * _accumulation_value
 	return _accumulation_value * current_value

@@ -13,6 +13,8 @@ var material: MATERIAL_SETTER:
 	get: return resolve_value_setter(&"material", MATERIAL_SETTER)
 var uv_transform: TRANSFORM2D_SETTER:
 	get: return resolve_value_setter(&"uv_transform", TRANSFORM2D_SETTER)
+var color: COLOR_SETTER:
+	get: return resolve_value_setter(&"color", COLOR_SETTER)
 
 
 func apply(target: RoommateSurfaceOverride) -> void:

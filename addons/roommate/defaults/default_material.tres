@@ -3,4 +3,5 @@
 [ext_resource type="Texture2D" uid="uid://bs0m5tc3rxh1a" path="res://addons/roommate/defaults/default_texture.png" id="1_gkp0m"]
 
 [resource]
+vertex_color_use_as_albedo = true
 albedo_texture = ExtResource("1_gkp0m")
