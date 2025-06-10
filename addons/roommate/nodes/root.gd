@@ -22,7 +22,8 @@ enum CollisionShape
 		for node in find_children("*", "RoommateBlocksArea"):
 			var area := node as RoommateBlocksArea
 			area.update_gizmos()
-@export var scale_with_block_size := false
+@export var scale_with_block_size := true
+@export var force_white_vertex_color := true
 
 @export var global_style: RoommateStyle
 
@@ -81,6 +82,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 	var internal_style := preload("../resources/internal_style.gd").new()
 	if scale_with_block_size:
 		internal_style.scale = Vector3.ONE * block_size
+	internal_style.force_white_vertex_color = force_white_vertex_color
 	internal_style.apply(all_blocks)
 	
 	# Applying global style
@@ -109,7 +111,7 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 			continue
 		var processor := _part_processors[block.type_id] as Callable
 		for slot_id in block.slots:
-			var part := block.slots.get(slot_id) as RoommatePart
+			var part := block.slots[slot_id] as RoommatePart
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
 				_generate_part(processed_part, block)
@@ -186,7 +188,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part.mesh:
 		return
 	for surface_id in part.mesh.get_surface_count():
-		var part_surface_override := part.resolve_surface_override(surface_id, false)
+		var part_surface_override := part.resolve_surface_override_with_fallback(surface_id)
 		
 		# modifying mesh
 		var part_mesh := ArrayMesh.new()
@@ -204,7 +206,8 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		for vertex_id in mesh_data_tool.get_vertex_count():
 			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
 			mesh_data_tool.set_vertex_uv(vertex_id, part_surface_override.uv_transform * uv)
-			mesh_data_tool.set_vertex_color(vertex_id, part_surface_override.color)
+			var color := mesh_data_tool.get_vertex_color(vertex_id)
+			mesh_data_tool.set_vertex_color(vertex_id, color.lerp(part_surface_override.color, part_surface_override.color_weight))
 		
 		part_mesh.clear_surfaces()
 		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)
@@ -220,7 +223,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 			new_surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 			new_surface_tool.set_material(part_material)
 			_tools[part_material] = new_surface_tool
-		var surface_tool := _tools.get(part_material) as SurfaceTool
+		var surface_tool := _tools[part_material] as SurfaceTool
 		surface_tool.append_from(part_mesh, 0, part.transform.translated(part_origin))
 
 

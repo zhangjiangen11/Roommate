@@ -31,8 +31,8 @@ var mesh: MESH_SETTER:
 var collision_mesh: MESH_SETTER:
 	get: return resolve_value_setter(&"collision_mesh", MESH_SETTER)
 
-var global_surface_override := SURFACE_OVERRIDE_SETTER.new()
 var surface_overrides := {}
+var fallback_surface_override: SURFACE_OVERRIDE_SETTER = null
 
 
 func apply(block: RoommateBlock) -> void:
@@ -46,18 +46,18 @@ func apply(block: RoommateBlock) -> void:
 		for property_name in _value_setters:
 			var setter := _value_setters[property_name] as BASE_VALUE_SETTER
 			setter.apply(current_part)
-		global_surface_override.apply(current_part.global_surface_override)
+		if fallback_surface_override:
+			fallback_surface_override.apply(current_part.fallback_surface_override)
 		for surface_id in surface_overrides:
-			var current_override := current_part.resolve_surface_override(surface_id, true)
-			global_surface_override.apply(current_override)
 			var override_setter := surface_overrides[surface_id] as SURFACE_OVERRIDE_SETTER
 			if not override_setter:
-				push_error("Surface override setter is null.")
+				push_warning("Surface override setter is null.")
 				continue
+			var current_override := current_part.resolve_surface_override(surface_id)
 			override_setter.apply(current_override)
 		
 		if handle_part.is_valid():
-			handle_part.call(current_part)
+			handle_part.call(slot_id, current_part, block)
 
 
 func override_surface(surface_id: int) -> SURFACE_OVERRIDE_SETTER:
@@ -66,3 +66,9 @@ func override_surface(surface_id: int) -> SURFACE_OVERRIDE_SETTER:
 	var new_override := SURFACE_OVERRIDE_SETTER.new()
 	surface_overrides[surface_id] = new_override
 	return new_override
+
+
+func override_fallback_surface() -> SURFACE_OVERRIDE_SETTER:
+	if not fallback_surface_override:
+		fallback_surface_override = SURFACE_OVERRIDE_SETTER.new()
+	return fallback_surface_override

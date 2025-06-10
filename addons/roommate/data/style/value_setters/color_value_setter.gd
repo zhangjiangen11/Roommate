@@ -21,5 +21,4 @@ func accumulate(color: Color) -> void:
 
 
 func _handle_accumulation(current_value: Variant) -> Variant:
-	print(current_value + _accumulation_value)
 	return current_value + _accumulation_value

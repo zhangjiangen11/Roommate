@@ -19,15 +19,23 @@ var collision_transform := Transform3D.IDENTITY
 
 var mesh: Mesh
 var collision_mesh: Mesh
-var global_surface_override := RoommateSurfaceOverride.new()
+var fallback_surface_override := RoommateSurfaceOverride.new()
 var surface_overrides := {}
 
 
-func resolve_surface_override(surface_id: int, create_if_missing: bool) -> RoommateSurfaceOverride:
-	if not surface_overrides.has(surface_id):
-		if not create_if_missing:
-			return global_surface_override
-		var new_override := RoommateSurfaceOverride.new()
-		surface_overrides[surface_id] = new_override
-		return new_override
-	return surface_overrides[surface_id] as RoommateSurfaceOverride
+func resolve_surface_override(surface_id: int) -> RoommateSurfaceOverride:
+	if surface_overrides.has(surface_id):
+		return surface_overrides[surface_id] as RoommateSurfaceOverride
+	var new_override := RoommateSurfaceOverride.new()
+	surface_overrides[surface_id] = new_override
+	return new_override
+
+
+func resolve_surface_override_with_fallback(surface_id: int) -> RoommateSurfaceOverride:
+	if not fallback_surface_override:
+		push_warning("fallback_surface_override is null. Creating new one.")
+		fallback_surface_override = RoommateSurfaceOverride.new()
+	if surface_overrides.has(surface_id):
+		var override := surface_overrides[surface_id] as RoommateSurfaceOverride
+		return override.get_copy_with_fallback(fallback_surface_override)
+	return fallback_surface_override

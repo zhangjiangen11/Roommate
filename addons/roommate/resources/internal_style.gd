@@ -10,9 +10,13 @@
 extends RoommateStyle
 
 var scale := Vector3.ONE
+var force_white_vertex_color := false
 
 
 func _build_rulesets() -> void:
 	var ruleset := create_ruleset()
 	ruleset.select_all_blocks()
-	ruleset.select_all_parts().transform.accumulate(Transform3D.IDENTITY.scaled(scale))
+	var parts := ruleset.select_all_parts()
+	parts.transform.accumulate(Transform3D.IDENTITY.scaled(scale))
+	if force_white_vertex_color:
+		parts.override_fallback_surface().set_color(Color.WHITE)

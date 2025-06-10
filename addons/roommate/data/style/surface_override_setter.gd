@@ -17,6 +17,8 @@ var flip_faces: BOOL_SETTER:
 	get: return resolve_value_setter(&"flip_faces", BOOL_SETTER)
 var color: COLOR_SETTER:
 	get: return resolve_value_setter(&"color", COLOR_SETTER)
+var color_weight: FLOAT_SETTER:
+	get: return resolve_value_setter(&"color_weight", FLOAT_SETTER)
 
 
 func apply(target: RoommateSurfaceOverride) -> void:
@@ -28,3 +30,8 @@ func apply(target: RoommateSurfaceOverride) -> void:
 func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:
 	var transform := RoommateSurfaceOverride.get_uv_tile_transform(tile_coord, tile_count, tile_rotation)
 	uv_transform.override(transform)
+
+
+func set_color(new_color: Color) -> void:
+	color.override(new_color)
+	color_weight.override(1)
