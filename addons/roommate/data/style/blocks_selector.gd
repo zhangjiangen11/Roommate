@@ -9,8 +9,14 @@
 @tool
 extends RefCounted
 
-var include_mode := true
-var invert_mode := false
+enum Mode {
+	INCLUDE,
+	EXCLUDE,
+	INVERT,
+	INTERSECT,
+}
+
+var mode := Mode.INCLUDE
 var check_selection: Callable
 
 
@@ -22,22 +28,36 @@ func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_includ
 	if not is_selected is bool:
 		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))
 		is_selected = false
-	if is_selected:
-		if invert_mode:
+	
+	if not is_selected:
+		if mode == Mode.INTERSECT:
+			return false
+		return is_included
+	
+	match mode:
+		Mode.INCLUDE:
+			return true
+		Mode.EXCLUDE:
+			return false
+		Mode.INVERT:
 			return not is_included
-		is_included = include_mode
+		Mode.INTERSECT:
+			return is_included
+	
 	return is_included
 
 
 func include() -> void:
-	include_mode = true
-	invert_mode = false
+	mode = Mode.INCLUDE
 
 
 func exclude() -> void:
-	include_mode = false
-	invert_mode = false
+	mode = Mode.EXCLUDE
 
 
 func invert() -> void:
-	invert_mode = true
+	mode = Mode.INVERT
+
+
+func intersect() -> void:
+	mode = Mode.INTERSECT

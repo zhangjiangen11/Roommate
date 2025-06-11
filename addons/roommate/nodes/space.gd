@@ -12,7 +12,7 @@ extends RoommateBlocksArea
 
 
 func _process_block(new_block: RoommateBlock) -> RoommateBlock:
-	new_block.type_id = "btid_space";
+	new_block.type_id = RoommateBlock.SPACE_TYPE;
 	var center_part := _create_part(Vector3(0.5, 0.5, 0.5), Vector3i.ZERO, Vector3.ZERO)
 	center_part.mesh = null
 	center_part.collision_mesh = null

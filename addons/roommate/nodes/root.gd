@@ -44,9 +44,9 @@ var _blocks_area_apply_order: Array[Script] = [
 	RoommateOutOfBounds,
 ]
 var _part_processors := {
-	&"btid_space": _process_space_block_part,
-	&"btid_out_of_bounds": _process_skip_part,
-	&"btid_none": _process_skip_part,
+	RoommateBlock.SPACE_TYPE: _process_space_block_part,
+	RoommateBlock.OUT_OF_BOUNDS_TYPE: _process_skip_part,
+	RoommateBlock.NONE_TYPE: _process_skip_part,
 }
 var _tools := {}
 var _collision_faces := PackedVector3Array()
@@ -230,7 +230,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
 	var adjacent_block := all_blocks.get(block.position + (part.direction as Vector3i)) as RoommateBlock
-	if not adjacent_block or adjacent_block.type_id == &"btid_out_of_bounds" or part.direction == Vector3.ZERO:
+	if not adjacent_block or adjacent_block.type_id == RoommateBlock.OUT_OF_BOUNDS_TYPE or part.direction == Vector3.ZERO:
 		return part
 	return null
 

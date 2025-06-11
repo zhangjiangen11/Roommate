@@ -10,6 +10,10 @@
 class_name RoommateBlock
 extends RefCounted
 
+const NONE_TYPE := &"btid_none"
+const SPACE_TYPE := &"btid_space"
+const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
+
 const CEIL := &"sid_up"
 const FLOOR := &"sid_down"
 const WALL_LEFT := &"sid_left"
