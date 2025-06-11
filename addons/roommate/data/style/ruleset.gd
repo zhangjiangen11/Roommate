@@ -85,28 +85,48 @@ func select_parts(slot_ids: Array[StringName]) -> PARTS_SETTER:
 
 func select_all_parts() -> PARTS_SETTER:
 	return select_parts([
-		&"sid_center",
-		&"sid_up",
-		&"sid_down",
-		&"sid_left",
-		&"sid_right",
-		&"sid_forward",
-		&"sid_back",
+		RoommateBlock.CEIL,
+		RoommateBlock.FLOOR,
+		RoommateBlock.WALL_LEFT,
+		RoommateBlock.WALL_RIGHT,
+		RoommateBlock.WALL_FORWARD,
+		RoommateBlock.WALL_BACK,
+		RoommateBlock.CENTER,
 	])
 
 
 func select_all_walls() -> PARTS_SETTER:
 	return select_parts([
-		&"sid_left",
-		&"sid_right",
-		&"sid_forward",
-		&"sid_back",
+		RoommateBlock.WALL_LEFT,
+		RoommateBlock.WALL_RIGHT,
+		RoommateBlock.WALL_FORWARD,
+		RoommateBlock.WALL_BACK,
 	])
 
 
-func select_center() -> PARTS_SETTER:
-	return select_parts([&"sid_center"])
+func select_ceil() -> PARTS_SETTER:
+	return select_parts([RoommateBlock.CEIL])
 
 
 func select_floor() -> PARTS_SETTER:
-	return select_parts([&"sid_down"])
+	return select_parts([RoommateBlock.FLOOR])
+
+
+func select_wall_left() -> PARTS_SETTER:
+	return select_parts([RoommateBlock.WALL_LEFT])
+
+
+func select_wall_right() -> PARTS_SETTER:
+	return select_parts([RoommateBlock.WALL_RIGHT])
+
+
+func select_wall_forward() -> PARTS_SETTER:
+	return select_parts([RoommateBlock.WALL_FORWARD])
+
+
+func select_wall_back() -> PARTS_SETTER:
+	return select_parts([RoommateBlock.WALL_BACK])
+
+
+func select_center() -> PARTS_SETTER:
+	return select_parts([RoommateBlock.CENTER])

@@ -17,13 +17,13 @@ func _process_block(new_block: RoommateBlock) -> RoommateBlock:
 	center_part.mesh = null
 	center_part.collision_mesh = null
 	new_block.slots = {
-		&"sid_center": center_part,
-		&"sid_up": _create_part(Vector3(0.5, 1, 0.5), Vector3i.UP, Vector3.RIGHT * PI / 2),
-		&"sid_down": _create_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, Vector3.LEFT * PI / 2),
-		&"sid_left": _create_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, Vector3.UP * PI / 2),
-		&"sid_right": _create_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, Vector3.DOWN * PI / 2),
-		&"sid_forward": _create_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, Vector3.ZERO),
-		&"sid_back": _create_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, Vector3.UP * PI),
+		RoommateBlock.CENTER: center_part,
+		RoommateBlock.CEIL: _create_part(Vector3(0.5, 1, 0.5), Vector3i.UP, Vector3.RIGHT * PI / 2),
+		RoommateBlock.FLOOR: _create_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, Vector3.LEFT * PI / 2),
+		RoommateBlock.WALL_LEFT: _create_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, Vector3.UP * PI / 2),
+		RoommateBlock.WALL_RIGHT: _create_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, Vector3.DOWN * PI / 2),
+		RoommateBlock.WALL_FORWARD: _create_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, Vector3.ZERO),
+		RoommateBlock.WALL_BACK: _create_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, Vector3.UP * PI),
 	}
 	return new_block
 

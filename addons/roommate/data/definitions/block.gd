@@ -10,6 +10,14 @@
 class_name RoommateBlock
 extends RefCounted
 
+const CEIL := &"sid_up"
+const FLOOR := &"sid_down"
+const WALL_LEFT := &"sid_left"
+const WALL_RIGHT := &"sid_right"
+const WALL_FORWARD := &"sid_forward"
+const WALL_BACK := &"sid_back"
+const CENTER := &"sid_center"
+
 var type_id: StringName
 var position: Vector3i
 var slots := {}
