@@ -68,31 +68,43 @@ func select_interval_blocks(interval: Vector3i, offset := Vector3i.ZERO) -> BLOC
 	return select_blocks(check_selection)
 
 
-func select_inner_blocks(tolerance: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
-	var count_blocks := func (start: Vector3i, direction: Vector3i, source_blocks: Dictionary) -> int:
+func select_inner_blocks(position_changes: Array[Vector3i], tolerances: Array[int], offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
+	var count_blocks := func (start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
 		var result := 0
-		var block := source_blocks.get(start) as RoommateBlock
+		var block := source_blocks.get(start + position_change) as RoommateBlock
 		while RoommateBlock.in_bounds(block):
 			result += 1
-			block = source_blocks.get(block.position + direction) as RoommateBlock
+			block = source_blocks.get(block.position + position_change) as RoommateBlock
 		return result
-	var get_difference := func (start: Vector3i, direction: Vector3i, source_blocks: Dictionary) -> int:
-		var forward_count := count_blocks.call(start, direction, source_blocks)
-		var back_count := count_blocks.call(start, -direction, source_blocks)
+	var get_difference := func (start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
+		var forward_count := count_blocks.call(start, position_change, source_blocks)
+		var back_count := count_blocks.call(start, -position_change, source_blocks)
 		return absi(forward_count - back_count)
 	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var offset_position := block.position - offset
 		var offset_block := source_blocks.get(offset_position) as RoommateBlock
 		if not RoommateBlock.in_bounds(offset_block):
 			return false
-		if tolerance.x >= 0 and get_difference.call(offset_position, Vector3i.RIGHT, source_blocks) > tolerance.x:
-			return false
-		if tolerance.y >= 0 and get_difference.call(offset_position, Vector3i.UP, source_blocks) > tolerance.y:
-			return false
-		if tolerance.z >= 0 and get_difference.call(offset_position, Vector3i.BACK, source_blocks) > tolerance.z:
-			return false
+		for i in position_changes.size():
+			if tolerances.is_empty() or i != clampi(i, 0, tolerances.size() - 1) or tolerances[i] < 0:
+				continue
+			if get_difference.call(offset_position, position_changes[i], source_blocks) > tolerances[i]:
+				return false
 		return true
 	return select_blocks(check_selection)
+
+
+func select_inner_blocks_uniform(position_changes: Array[Vector3i], uniform_tolerance: int, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
+	var tolerances: Array[int] = []
+	tolerances.resize(position_changes.size())
+	tolerances.fill(uniform_tolerance)
+	return select_inner_blocks(position_changes, tolerances, offset)
+
+
+func select_inner_blocks_axis(axis_tolerances: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
+	var position_changes: Array[Vector3i] = [Vector3i.RIGHT, Vector3i.UP, Vector3i.BACK]
+	var tolerances: Array[int] = [axis_tolerances.x, axis_tolerances.y, axis_tolerances.z]
+	return select_inner_blocks(position_changes, tolerances, offset)
 
 
 func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> BLOCKS_SELECTOR:

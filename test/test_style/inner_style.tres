@@ -1,0 +1,7 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://b02fkxysqwoyi"]
+
+[ext_resource type="Script" path="res://test/test_style/inner_style.gd" id="1_fsqa0"]
+
+[resource]
+script = ExtResource("1_fsqa0")
+apply_order = 0
