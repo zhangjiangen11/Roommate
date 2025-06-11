@@ -47,12 +47,8 @@ func _build_rulesets() -> void:
 		#Vector2i(random.randi_range(1, 7), random.randi_range(1, 7))
 		override.set_uv_tile(Vector2i(7, 7), Vector2i(8, 8), ROTATIONS[random.randi_range(0, ROTATIONS.size() - 1)])
 	
-#	var r2 := create_ruleset()
-#	r2.select_edge_blocks(Vector3(-1, 0, -1))
-#	var corner := r2.select_all_walls()
-#	corner.override_surface(0).material.override(preload("res://addons/roommate/defaults/default_material.tres"))
 	
-	#var r3 := create_ruleset()
-	#r3.select_interval_blocks(Vector3i(2, 0, 2))
-	#r3.select_interval_blocks(Vector3i(2, 0, 2), Vector3i(1, 0, 1))
-	#r3.select_all_parts().override_surface(0).set_uv_tile(Vector2i.ZERO, Vector2i(8, 8), 0)
+	var r_inverse := create_ruleset()
+	r_inverse.select_interval_blocks(Vector3i(2, 0, 2))
+	r_inverse.select_all_blocks().invert()
+	r_inverse.select_floor().override_fallback_surface().set_color(Color.ORANGE_RED)

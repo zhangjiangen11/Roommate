@@ -10,6 +10,7 @@
 extends RefCounted
 
 var include_mode := true
+var invert_mode := false
 var check_selection: Callable
 
 
@@ -22,13 +23,21 @@ func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_includ
 		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))
 		is_selected = false
 	if is_selected:
+		if invert_mode:
+			return not is_included
 		is_included = include_mode
 	return is_included
 
 
 func include() -> void:
 	include_mode = true
+	invert_mode = false
 
 
 func exclude() -> void:
 	include_mode = false
+	invert_mode = false
+
+
+func invert() -> void:
+	invert_mode = true
