@@ -43,13 +43,13 @@ func select_blocks(check_selection: Callable) -> BLOCKS_SELECTOR:
 
 
 func select_all_blocks() -> BLOCKS_SELECTOR:
-	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		return true
-	return select_blocks(_check_selection)
+	return select_blocks(check_selection)
 
 
 func select_edge_blocks(edge: Vector3i) -> BLOCKS_SELECTOR:
-	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var result := true
 		if edge.x != 0:
 			result = result and not source_blocks.has(block.position + edge * Vector3i.RIGHT)
@@ -58,22 +58,49 @@ func select_edge_blocks(edge: Vector3i) -> BLOCKS_SELECTOR:
 		if edge.z != 0:
 			result = result and not source_blocks.has(block.position + edge * Vector3i.BACK)
 		return result
-	return select_blocks(_check_selection)
+	return select_blocks(check_selection)
 
 
 func select_interval_blocks(interval: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
-	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var offset_position := block.position - offset
 		return offset_position.snapped(interval) == offset_position
-	return select_blocks(_check_selection)
+	return select_blocks(check_selection)
+
+
+func select_inner_blocks(tolerance: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
+	var count_blocks := func (start: Vector3i, direction: Vector3i, source_blocks: Dictionary) -> int:
+		var result := 0
+		var block := source_blocks.get(start) as RoommateBlock
+		while RoommateBlock.in_bounds(block):
+			result += 1
+			block = source_blocks.get(block.position + direction) as RoommateBlock
+		return result
+	var get_difference := func (start: Vector3i, direction: Vector3i, source_blocks: Dictionary) -> int:
+		var forward_count := count_blocks.call(start, direction, source_blocks)
+		var back_count := count_blocks.call(start, -direction, source_blocks)
+		return absi(forward_count - back_count)
+	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		var offset_position := block.position - offset
+		var offset_block := source_blocks.get(offset_position) as RoommateBlock
+		if not RoommateBlock.in_bounds(offset_block):
+			return false
+		if tolerance.x >= 0 and get_difference.call(offset_position, Vector3i.RIGHT, source_blocks) > tolerance.x:
+			return false
+		if tolerance.y >= 0 and get_difference.call(offset_position, Vector3i.UP, source_blocks) > tolerance.y:
+			return false
+		if tolerance.z >= 0 and get_difference.call(offset_position, Vector3i.BACK, source_blocks) > tolerance.z:
+			return false
+		return true
+	return select_blocks(check_selection)
 
 
 func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> BLOCKS_SELECTOR:
 	var clamped_density := clampf(density, 0, 1)
-	var _check_selection = func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var random_number := rng.randf() if rng else randf()
 		return clamped_density >= random_number
-	return select_blocks(_check_selection)
+	return select_blocks(check_selection)
 
 
 func select_parts(slot_ids: Array[StringName]) -> PARTS_SETTER:

@@ -230,7 +230,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
 	var adjacent_block := all_blocks.get(block.position + (part.direction as Vector3i)) as RoommateBlock
-	if not adjacent_block or adjacent_block.type_id == RoommateBlock.OUT_OF_BOUNDS_TYPE or part.direction == Vector3.ZERO:
+	if not RoommateBlock.in_bounds(adjacent_block) or part.direction == Vector3.ZERO:
 		return part
 	return null
 

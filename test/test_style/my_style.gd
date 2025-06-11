@@ -49,7 +49,6 @@ func _build_rulesets() -> void:
 	
 	
 	var r_inverse := create_ruleset()
-	r_inverse.select_interval_blocks(Vector3i(2, 0, 2))
-	r_inverse.select_all_blocks().invert()
-	r_inverse.select_edge_blocks(Vector3i(3, 0, 0)).intersect()
+	r_inverse.select_inner_blocks(Vector3i(0, -1, -1))
+	r_inverse.select_edge_blocks(Vector3i(0, 0, -2)).intersect()
 	r_inverse.select_floor().override_fallback_surface().set_color(Color.ORANGE_RED)

@@ -25,3 +25,7 @@ const CENTER := &"sid_center"
 var type_id: StringName
 var position: Vector3i
 var slots := {}
+
+
+static func in_bounds(block: RoommateBlock) -> bool:
+	return block != null and block.type_id != OUT_OF_BOUNDS_TYPE
