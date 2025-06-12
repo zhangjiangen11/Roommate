@@ -48,25 +48,31 @@ func select_all_blocks() -> BLOCKS_SELECTOR:
 	return select_blocks(check_selection)
 
 
-func select_edge_blocks(relative_positions: Array[Vector3i]) -> BLOCKS_SELECTOR:
+func select_edge_blocks(position_changes: Array[Vector3i], max_counts: Array[int]) -> BLOCKS_SELECTOR:
 	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
-		for relative_position in relative_positions:
-			var next_block := source_blocks.get(block.position + relative_position) as RoommateBlock
-			if RoommateBlock.in_bounds(next_block):
+		for i in position_changes.size():
+			if max_counts.is_empty() or i != clampi(i, 0, max_counts.size() - 1) or max_counts[i] < 0:
+				continue
+			var count := RoommateBlock.raycast_count(block.position, position_changes[i], source_blocks)
+			if count > max_counts[i]:
 				return false
 		return true
 	return select_blocks(check_selection)
 
 
-func select_edge_blocks_axis(edge: Vector3i) -> BLOCKS_SELECTOR:
+func select_edge_blocks_axis(max_counts: Vector3i) -> void:
 	var positions: Array[Vector3i] = []
-	if edge.x != 0:
-		positions.append(edge * Vector3i.RIGHT)
-	if edge.y != 0:
-		positions.append(edge * Vector3i.UP)
-	if edge.z != 0:
-		positions.append(edge * Vector3i.BACK)
-	return select_edge_blocks(positions)
+	var counts: Array[int] = []
+	if max_counts.x != 0:
+		positions.append(Vector3i.RIGHT * max_counts.sign())
+		counts.append(absi(max_counts.x) - 1)
+	if max_counts.y != 0:
+		positions.append(Vector3i.UP * max_counts.sign())
+		counts.append(absi(max_counts.y) - 1)
+	if max_counts.z != 0:
+		positions.append(Vector3i.BACK * max_counts.sign())
+		counts.append(absi(max_counts.z) - 1)
+	return select_edge_blocks(positions, counts)
 
 
 func select_interval_blocks(interval: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
@@ -77,17 +83,6 @@ func select_interval_blocks(interval: Vector3i, offset := Vector3i.ZERO) -> BLOC
 
 
 func select_inner_blocks(position_changes: Array[Vector3i], tolerances: Array[int], offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
-	var count_blocks := func (start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
-		var result := 0
-		var block := source_blocks.get(start + position_change) as RoommateBlock
-		while RoommateBlock.in_bounds(block):
-			result += 1
-			block = source_blocks.get(block.position + position_change) as RoommateBlock
-		return result
-	var get_difference := func (start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
-		var forward_count := count_blocks.call(start, position_change, source_blocks)
-		var back_count := count_blocks.call(start, -position_change, source_blocks)
-		return absi(forward_count - back_count)
 	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var offset_position := block.position - offset
 		var offset_block := source_blocks.get(offset_position) as RoommateBlock
@@ -96,7 +91,9 @@ func select_inner_blocks(position_changes: Array[Vector3i], tolerances: Array[in
 		for i in position_changes.size():
 			if tolerances.is_empty() or i != clampi(i, 0, tolerances.size() - 1) or tolerances[i] < 0:
 				continue
-			if get_difference.call(offset_position, position_changes[i], source_blocks) > tolerances[i]:
+			var forward_count := RoommateBlock.raycast_count(offset_position, position_changes[i], source_blocks)
+			var back_count := RoommateBlock.raycast_count(offset_position, -position_changes[i], source_blocks)
+			if absi(forward_count - back_count) > tolerances[i]:
 				return false
 		return true
 	return select_blocks(check_selection)

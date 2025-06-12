@@ -29,3 +29,12 @@ var slots := {}
 
 static func in_bounds(block: RoommateBlock) -> bool:
 	return block != null and block.type_id != OUT_OF_BOUNDS_TYPE
+
+
+static func raycast_count(start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
+	var result := 0
+	var block := source_blocks.get(start + position_change) as RoommateBlock
+	while RoommateBlock.in_bounds(block):
+		result += 1
+		block = source_blocks.get(block.position + position_change) as RoommateBlock
+	return result
