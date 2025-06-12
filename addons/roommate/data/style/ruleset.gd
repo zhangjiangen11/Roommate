@@ -43,50 +43,49 @@ func select_blocks(check_selection: Callable) -> BLOCKS_SELECTOR:
 
 
 func select_all_blocks() -> BLOCKS_SELECTOR:
-	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		return true
 	return select_blocks(check_selection)
 
 
 func select_edge_blocks(position_changes: Array[Vector3i], max_counts: Array[int]) -> BLOCKS_SELECTOR:
-	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		if not RoommateBlock.position_in_bounds(offset_position, source_blocks):
+			return false
 		for i in position_changes.size():
 			if max_counts.is_empty() or i != clampi(i, 0, max_counts.size() - 1) or max_counts[i] < 0:
 				continue
-			var count := RoommateBlock.raycast_count(block.position, position_changes[i], source_blocks)
+			var count := RoommateBlock.raycast_count(offset_position, position_changes[i], source_blocks)
 			if count > max_counts[i]:
 				return false
 		return true
 	return select_blocks(check_selection)
 
 
-func select_edge_blocks_axis(max_counts: Vector3i) -> void:
+func select_edge_blocks_axis(edge_size: Vector3i) -> BLOCKS_SELECTOR:
 	var positions: Array[Vector3i] = []
 	var counts: Array[int] = []
-	if max_counts.x != 0:
-		positions.append(Vector3i.RIGHT * max_counts.sign())
-		counts.append(absi(max_counts.x) - 1)
-	if max_counts.y != 0:
-		positions.append(Vector3i.UP * max_counts.sign())
-		counts.append(absi(max_counts.y) - 1)
-	if max_counts.z != 0:
-		positions.append(Vector3i.BACK * max_counts.sign())
-		counts.append(absi(max_counts.z) - 1)
+	if edge_size.x != 0:
+		positions.append(Vector3i.RIGHT * edge_size.sign())
+		counts.append(absi(edge_size.x) - 1)
+	if edge_size.y != 0:
+		positions.append(Vector3i.UP * edge_size.sign())
+		counts.append(absi(edge_size.y) - 1)
+	if edge_size.z != 0:
+		positions.append(Vector3i.BACK * edge_size.sign())
+		counts.append(absi(edge_size.z) - 1)
 	return select_edge_blocks(positions, counts)
 
 
-func select_interval_blocks(interval: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
-	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
-		var offset_position := block.position - offset
+func select_interval_blocks(interval: Vector3i) -> BLOCKS_SELECTOR:
+	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		return offset_position.snapped(interval) == offset_position
 	return select_blocks(check_selection)
 
 
-func select_inner_blocks(position_changes: Array[Vector3i], tolerances: Array[int], offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
-	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
-		var offset_position := block.position - offset
-		var offset_block := source_blocks.get(offset_position) as RoommateBlock
-		if not RoommateBlock.in_bounds(offset_block):
+func select_inner_blocks(position_changes: Array[Vector3i], tolerances: Array[int]) -> BLOCKS_SELECTOR:
+	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		if not RoommateBlock.position_in_bounds(offset_position, source_blocks):
 			return false
 		for i in position_changes.size():
 			if tolerances.is_empty() or i != clampi(i, 0, tolerances.size() - 1) or tolerances[i] < 0:
@@ -99,22 +98,22 @@ func select_inner_blocks(position_changes: Array[Vector3i], tolerances: Array[in
 	return select_blocks(check_selection)
 
 
-func select_inner_blocks_uniform(position_changes: Array[Vector3i], uniform_tolerance: int, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
+func select_inner_blocks_uniform(position_changes: Array[Vector3i], uniform_tolerance: int) -> BLOCKS_SELECTOR:
 	var tolerances: Array[int] = []
 	tolerances.resize(position_changes.size())
 	tolerances.fill(uniform_tolerance)
-	return select_inner_blocks(position_changes, tolerances, offset)
+	return select_inner_blocks(position_changes, tolerances)
 
 
-func select_inner_blocks_axis(axis_tolerances: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
+func select_inner_blocks_axis(axis_tolerances: Vector3i) -> BLOCKS_SELECTOR:
 	var position_changes: Array[Vector3i] = [Vector3i.RIGHT, Vector3i.UP, Vector3i.BACK]
 	var tolerances: Array[int] = [axis_tolerances.x, axis_tolerances.y, axis_tolerances.z]
-	return select_inner_blocks(position_changes, tolerances, offset)
+	return select_inner_blocks(position_changes, tolerances)
 
 
 func select_random_blocks(density: float, rng: RandomNumberGenerator = null) -> BLOCKS_SELECTOR:
 	var clamped_density := clampf(density, 0, 1)
-	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
+	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		var random_number := rng.randf() if rng else randf()
 		return clamped_density >= random_number
 	return select_blocks(check_selection)

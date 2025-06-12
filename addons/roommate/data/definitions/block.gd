@@ -31,6 +31,10 @@ static func in_bounds(block: RoommateBlock) -> bool:
 	return block != null and block.type_id != OUT_OF_BOUNDS_TYPE
 
 
+static func position_in_bounds(position: Vector3i, source_blocks: Dictionary) -> bool:
+	return in_bounds(source_blocks.get(position) as RoommateBlock)
+
+
 static func raycast_count(start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
 	var result := 0
 	var block := source_blocks.get(start + position_change) as RoommateBlock

@@ -17,14 +17,19 @@ enum Mode {
 }
 
 var mode := Mode.INCLUDE
+var out_of_bounds_allowed := false
+var offset := Vector3i.ZERO
 var check_selection: Callable
 
 
 func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_included: bool) -> bool:
+	if not out_of_bounds_allowed and not RoommateBlock.in_bounds(block):
+		return is_included
 	if not check_selection.is_valid():
 		push_error("check_selection is not valid")
 		return is_included
-	var is_selected := check_selection.call(block, source_blocks)
+	var offset_position := block.position - offset
+	var is_selected := check_selection.call(offset_position, block, source_blocks)
 	if not is_selected is bool:
 		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))
 		is_selected = false
@@ -61,3 +66,11 @@ func invert() -> void:
 
 func intersect() -> void:
 	mode = Mode.INTERSECT
+
+
+func allow_out_of_bounds() -> void:
+	out_of_bounds_allowed = true
+
+
+func set_offset(new_offset: Vector3i) -> void:
+	offset = new_offset
