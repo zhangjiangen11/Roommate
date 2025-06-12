@@ -48,17 +48,25 @@ func select_all_blocks() -> BLOCKS_SELECTOR:
 	return select_blocks(check_selection)
 
 
-func select_edge_blocks(edge: Vector3i) -> BLOCKS_SELECTOR:
+func select_edge_blocks(relative_positions: Array[Vector3i]) -> BLOCKS_SELECTOR:
 	var check_selection := func (block: RoommateBlock, source_blocks: Dictionary) -> bool:
-		var result := true
-		if edge.x != 0:
-			result = result and not source_blocks.has(block.position + edge * Vector3i.RIGHT)
-		if edge.y != 0:
-			result = result and not source_blocks.has(block.position + edge * Vector3i.UP)
-		if edge.z != 0:
-			result = result and not source_blocks.has(block.position + edge * Vector3i.BACK)
-		return result
+		for relative_position in relative_positions:
+			var next_block := source_blocks.get(block.position + relative_position) as RoommateBlock
+			if RoommateBlock.in_bounds(next_block):
+				return false
+		return true
 	return select_blocks(check_selection)
+
+
+func select_edge_blocks_axis(edge: Vector3i) -> BLOCKS_SELECTOR:
+	var positions: Array[Vector3i] = []
+	if edge.x != 0:
+		positions.append(edge * Vector3i.RIGHT)
+	if edge.y != 0:
+		positions.append(edge * Vector3i.UP)
+	if edge.z != 0:
+		positions.append(edge * Vector3i.BACK)
+	return select_edge_blocks(positions)
 
 
 func select_interval_blocks(interval: Vector3i, offset := Vector3i.ZERO) -> BLOCKS_SELECTOR:
