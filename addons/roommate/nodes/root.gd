@@ -39,7 +39,8 @@ enum CollisionShape
 @export_group("Scenes")
 @export var scenes_group := &"roommate_generated_scenes"
 @export var transform_scene_relative_to_part := true
-@export var use_fallback_parent := true
+@export var use_scenes_fallback_parent := true
+@export var scenes_fallback_parent_name := &"RoommateFallbackContainer"
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
@@ -164,12 +165,12 @@ func generate() -> void:
 			push_warning("Scene creation. There is no valid node on path %s" % info.parent_path)
 		
 		if info.parent_path.is_empty() or not valid_parent:
-			if not use_fallback_parent:
+			if not use_scenes_fallback_parent:
 				continue
-			var fallback := this_node.get_node_or_null(^"./RoommateFallbackContainer")
+			var fallback := this_node.get_node_or_null(NodePath(scenes_fallback_parent_name))
 			if not fallback:
-				fallback = Node.new()
-				fallback.name = "RoommateFallbackContainer"
+				fallback = Node3D.new()
+				fallback.name = scenes_fallback_parent_name
 				this_node.add_child(fallback)
 				fallback.owner = this_node.owner
 				fallback.add_to_group(scenes_group, true)
