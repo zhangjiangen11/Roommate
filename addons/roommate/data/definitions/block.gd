@@ -35,10 +35,25 @@ static func position_in_bounds(position: Vector3i, source_blocks: Dictionary) ->
 	return in_bounds(source_blocks.get(position) as RoommateBlock)
 
 
-static func raycast_count(start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
+static func raycast(start: Vector3i, position_change: Vector3i, 
+		source_blocks: Dictionary, predicate: Callable) -> int:
 	var result := 0
 	var block := source_blocks.get(start + position_change) as RoommateBlock
-	while RoommateBlock.in_bounds(block):
+	while block != null and predicate.call(block):
 		result += 1
 		block = source_blocks.get(block.position + position_change) as RoommateBlock
 	return result
+
+
+static func raycast_until(start: Vector3i, position_change: Vector3i, 
+		source_blocks: Dictionary, stop_type := OUT_OF_BOUNDS_TYPE) -> int:
+	var predicate := func (block: RoommateBlock) -> bool:
+		return block.type_id != stop_type
+	return raycast(start, position_change, source_blocks, predicate)
+
+
+static func raycast_while(start: Vector3i, position_change: Vector3i, 
+		source_blocks: Dictionary, continue_type: StringName) -> int:
+	var predicate := func (block: RoommateBlock) -> bool:
+		return block.type_id == continue_type
+	return raycast(start, position_change, source_blocks, predicate)

@@ -18,8 +18,6 @@ var anchor: VECTOR3_SETTER:
 	get: return resolve_value_setter(&"anchor", VECTOR3_SETTER)
 var direction: VECTOR3_SETTER:
 	get: return resolve_value_setter(&"direction", VECTOR3_SETTER)
-var roll_rotation: FLOAT_SETTER:
-	get: return resolve_value_setter(&"roll_rotation", FLOAT_SETTER)
 
 var mesh_transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"mesh_transform", TRANSFORM3D_SETTER)
