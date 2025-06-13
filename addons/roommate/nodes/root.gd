@@ -300,7 +300,10 @@ func _process_skip_part(slot_id: StringName, part: RoommatePart, block: Roommate
 
 func _resolve_self() -> RoommateRoot:
 	if Engine.is_editor_hint():
-		return EditorPlugin.new().get_editor_interface().get_edited_scene_root().get_node(get_path()) as RoommateRoot
+		# Workaround for error
+		# Parser Error: Native class "EditorPlugin" cannot be constructed as it is abstract.
+		var editor_plugin := (EditorPlugin as Variant).new() as EditorPlugin
+		return editor_plugin.get_editor_interface().get_edited_scene_root().get_node(get_path()) as RoommateRoot
 	return self
 
 
