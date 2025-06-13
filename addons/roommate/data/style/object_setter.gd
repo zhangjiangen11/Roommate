@@ -14,10 +14,13 @@ const BOOL_SETTER := preload("./value_setters/bool_value_setter.gd")
 const FLOAT_SETTER := preload("./value_setters/float_value_setter.gd")
 const VECTOR3_SETTER := preload("./value_setters/vector3_value_setter.gd")
 const COLOR_SETTER := preload("./value_setters/color_value_setter.gd")
+const NODE_PATH_SETTER := preload("./value_setters/node_path_value_setter.gd")
 const TRANSFORM2D_SETTER := preload("./value_setters/transform2d_value_setter.gd")
 const TRANSFORM3D_SETTER := preload("./value_setters/transform3d_value_setter.gd")
 const MATERIAL_SETTER := preload("./value_setters/material_value_setter.gd")
 const MESH_SETTER := preload("./value_setters/mesh_value_setter.gd")
+const PACKED_SCENE_SETTER := preload("./value_setters/packed_scene_value_setter.gd")
+
 var _value_setters := {}
 
 

@@ -17,6 +17,9 @@ func _build_rulesets() -> void:
 	var ruleset := create_ruleset()
 	ruleset.select_all_blocks()
 	var parts := ruleset.select_all_parts()
-	parts.transform.accumulate(Transform3D.IDENTITY.scaled(scale))
+	var transform_scale := Transform3D.IDENTITY.scaled(scale)
+	parts.mesh_transform.accumulate(transform_scale)
+	parts.collision_transform.accumulate(transform_scale)
+	parts.scene_transform.accumulate(transform_scale)
 	if force_white_vertex_color:
 		parts.override_fallback_surface().set_color(Color.WHITE)

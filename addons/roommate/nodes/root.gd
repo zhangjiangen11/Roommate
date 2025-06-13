@@ -25,7 +25,7 @@ enum CollisionShape
 @export var scale_with_block_size := true
 @export var force_white_vertex_color := true
 
-@export var global_style: RoommateStyle
+@export var global_style: RoommateStyle = null
 
 @export_group("Mesh")
 @export var index_mesh := true
@@ -35,6 +35,12 @@ enum CollisionShape
 @export_group("Collision")
 @export var collision_shape := CollisionShape.CONCAVE
 @export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
+
+@export_group("Scenes")
+@export var scenes_group := &"roommate_generated_scenes"
+@export var transform_scene_relative_to_part := true
+@export var use_fallback_parent := true
+@export var force_readable_scene_names := true
 
 @export_group("Navigation")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
@@ -48,22 +54,21 @@ var _part_processors := {
 	RoommateBlock.OUT_OF_BOUNDS_TYPE: _process_skip_part,
 	RoommateBlock.NONE_TYPE: _process_skip_part,
 }
+
 var _tools := {}
 var _collision_faces := PackedVector3Array()
+var _scene_infos: Array[SceneInfo] = []
 
 
-func generate_mesh(generate_collision := false, generate_navigation := false) -> void:
-	# Searching for areas which are not children of other root nodes
-	var child_areas := find_children("*", "RoommateBlocksArea")
-	var child_roots := find_children("*", "RoommateRoot")
-	var filter_areas := func (area: Node) -> bool:
-		for root in child_roots:
-			if root.is_ancestor_of(area):
-				return false
-		return true
+func generate() -> void:
+	var this_node := _resolve_self()
 	
+	# Searching for areas which are not children of other root nodes
+	var child_areas := this_node.find_children("*", "RoommateBlocksArea")
+	var child_roots := this_node.find_children("*", "RoommateRoot")
+
 	var areas: Array[RoommateBlocksArea] = []
-	areas.assign(child_areas.filter(filter_areas))
+	areas.assign(child_areas.filter(_filter_by_parents.bind(child_roots)))
 	areas.sort_custom(_sort_by_area_apply_order)
 	if child_roots.size() > 0:
 		push_warning("RoommateRoot has other RoommateRoots as a children. " + 
@@ -100,10 +105,13 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 				area_blocks[area_block_position] = area_block
 		area.style.apply(area_blocks)
 	
-	# generating mesh
-	var result := ArrayMesh.new()
+	# clearing
 	_tools.clear()
 	_collision_faces.clear()
+	_scene_infos.clear()
+	clear_scenes()
+	
+	# generating everything
 	for block_position in all_blocks:
 		var block := all_blocks[block_position] as RoommateBlock
 		if not _part_processors.has(block.type_id):
@@ -116,7 +124,8 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 			if processed_part:
 				_generate_part(processed_part, block)
 	
-	# stitching it all together
+	# applying mesh
+	var result_mesh := ArrayMesh.new()
 	for surface_material in _tools:
 		var tool := _tools[surface_material] as SurfaceTool
 		if index_mesh:
@@ -125,18 +134,13 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 			tool.generate_normals()
 		if generate_tangents:
 			tool.generate_tangents()
-		tool.commit(result)
-		result.surface_set_material(result.get_surface_count() - 1, surface_material)
-	mesh = result
-	
-	# preparing for other actions
-	var this_node: Node = self
-	if Engine.is_editor_hint():
-		this_node = EditorPlugin.new().get_editor_interface().get_edited_scene_root().get_node(get_path())
+		tool.commit(result_mesh)
+		result_mesh.surface_set_material(result_mesh.get_surface_count() - 1, surface_material)
+	mesh = result_mesh
 	
 	# applying collision
 	var collision_shape_node := this_node.get_node_or_null(linked_collision_shape) as CollisionShape3D
-	if generate_collision and collision_shape_node:
+	if collision_shape_node:
 		var shape: Shape3D
 		match collision_shape:
 			CollisionShape.CONCAVE:
@@ -150,9 +154,43 @@ func generate_mesh(generate_collision := false, generate_navigation := false) ->
 			_:
 				push_error("Unknown collision shape %s." % collision_shape)
 	
+	#applying scenes
+	for info in _scene_infos:
+		var scene_parent := this_node.get_node_or_null(info.parent_path)
+		var valid_parent := scene_parent and (this_node.is_ancestor_of(scene_parent) or this_node == scene_parent)
+		if info.parent_path.is_empty():
+			push_warning("Scene creation. Path is empty")
+		elif not valid_parent:
+			push_warning("Scene creation. There is no valid node on path %s" % info.parent_path)
+		
+		if info.parent_path.is_empty() or not valid_parent:
+			if not use_fallback_parent:
+				continue
+			var fallback := this_node.get_node_or_null(^"./RoommateFallbackContainer")
+			if not fallback:
+				fallback = Node.new()
+				fallback.name = "RoommateFallbackContainer"
+				this_node.add_child(fallback)
+				fallback.owner = this_node.owner
+				fallback.add_to_group(scenes_group, true)
+			scene_parent = fallback
+		
+		var new_scene := info.scene.instantiate()
+		scene_parent.add_child(new_scene, force_readable_scene_names)
+		new_scene.owner = this_node.owner
+		new_scene.add_to_group(scenes_group, true)
+		
+		var node3d_scene := new_scene as Node3D
+		if not node3d_scene:
+			continue
+		if transform_scene_relative_to_part:
+			node3d_scene.global_transform = this_node.global_transform * info.scene_transform
+		else:
+			node3d_scene.transform = info.scene_transform
+	
 	# applying navigation
 	var navigation_region := this_node.get_node_or_null(linked_navigation_region) as NavigationRegion3D
-	if generate_navigation and navigation_region:
+	if navigation_region:
 		navigation_region.bake_navigation_mesh()
 
 
@@ -176,14 +214,33 @@ func register_blocks_area(block_area_script: Script, insert_before_block_area_sc
 	_blocks_area_apply_order.insert(insert_index, block_area_script)
 
 
+func clear_scenes() -> void:
+	var this_node := _resolve_self()
+	var all_scenes := this_node.get_tree().get_nodes_in_group(scenes_group)
+	var child_roots := this_node.find_children("*", "RoommateRoot")
+	var filter_by_self := func (target: Node) -> bool:
+		return this_node.is_ancestor_of(target)
+	var scenes := all_scenes.filter(filter_by_self).filter(_filter_by_parents.bind(child_roots)) as Array[Node]
+	for scene in scenes:
+		scene.get_parent().remove_child(scene)
+		scene.queue_free()
+
+
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 	if not part:
 		return
-	
 	var part_origin := parent_block.position * block_size + block_size * part.anchor
+	
 	if part.collision_mesh:
 		var part_collision_faces := part.collision_transform.translated(part_origin) * part.collision_mesh.get_faces()
 		_collision_faces.append_array(part_collision_faces)
+	
+	if part.scene:
+		var info := SceneInfo.new()
+		info.scene = part.scene
+		info.scene_transform = part.scene_transform.translated(part_origin)
+		info.parent_path = part.scene_parent_path
+		_scene_infos.append(info)
 	
 	if not part.mesh:
 		return
@@ -224,7 +281,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 			new_surface_tool.set_material(part_material)
 			_tools[part_material] = new_surface_tool
 		var surface_tool := _tools[part_material] as SurfaceTool
-		surface_tool.append_from(part_mesh, 0, part.transform.translated(part_origin))
+		surface_tool.append_from(part_mesh, 0, part.mesh_transform.translated(part_origin))
 
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
@@ -240,6 +297,12 @@ func _process_skip_part(slot_id: StringName, part: RoommatePart, block: Roommate
 	return null
 
 
+func _resolve_self() -> RoommateRoot:
+	if Engine.is_editor_hint():
+		return EditorPlugin.new().get_editor_interface().get_edited_scene_root().get_node(get_path()) as RoommateRoot
+	return self
+
+
 func _sort_by_area_apply_order(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
 	var a_index := _blocks_area_apply_order.find(a.get_script())
 	var b_index := _blocks_area_apply_order.find(b.get_script())
@@ -250,5 +313,20 @@ func _sort_by_style(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
 	return a.style.apply_order < b.style.apply_order
 
 
-func _filter_by_style(a: RoommateBlocksArea) -> bool:
-	return a.style != null
+func _filter_by_style(target: RoommateBlocksArea) -> bool:
+	return target.style != null
+
+
+func _filter_by_parents(target: Node, parents: Array[Node]) -> bool:
+	for parent in parents:
+		if parent.is_ancestor_of(target):
+			return false
+	return true
+
+
+class SceneInfo:
+	extends RefCounted
+	
+	var scene: PackedScene
+	var parent_path: NodePath
+	var scene_transform: Transform3D

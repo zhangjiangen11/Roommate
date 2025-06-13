@@ -34,7 +34,7 @@ var color_weight := 0.0:
 var _changed_properties: Array[String] = []
 
 
-func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:
+func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation := 0.0) -> void:
 	uv_transform = get_uv_tile_transform(tile_coord, tile_count, tile_rotation)
 
 

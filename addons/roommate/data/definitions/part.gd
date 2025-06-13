@@ -14,11 +14,16 @@ var anchor := Vector3.ZERO
 var direction := Vector3.ZERO
 var roll_rotation := 0.0
 
-var transform := Transform3D.IDENTITY
+var mesh_transform := Transform3D.IDENTITY
 var collision_transform := Transform3D.IDENTITY
+var scene_transform := Transform3D.IDENTITY
 
 var mesh: Mesh
 var collision_mesh: Mesh
+var scene: PackedScene
+
+var scene_parent_path := NodePath()
+
 var fallback_surface_override := RoommateSurfaceOverride.new()
 var surface_overrides := {}
 

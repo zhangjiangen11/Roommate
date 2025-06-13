@@ -11,18 +11,20 @@ extends MenuButton
 
 
 func _ready() -> void:
-	get_popup().id_pressed.connect(_on_popup_menu_id_pressed)
+	get_popup().index_pressed.connect(_on_popup_menu_index_pressed)
 
 
-func _on_popup_menu_id_pressed(id: int) -> void:
+func _on_popup_menu_index_pressed(index: int) -> void:
 	var nodes := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
 	var is_extends := func (node: Node) -> bool:
 		return node is RoommateRoot
 	var filtered := nodes.filter(is_extends)
 	if filtered.size() == 0:
 		return
-	var add_collision := id in [0, 1]
-	var add_navigation := id in [0, 2]
 	for node in filtered:
 		var root := node as RoommateRoot
-		root.generate_mesh(add_collision, add_navigation)
+		match index:
+			0:
+				root.generate()
+			1:
+				root.clear_scenes()

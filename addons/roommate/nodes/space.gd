@@ -32,8 +32,9 @@ func _create_part(anchor: Vector3, direction: Vector3, euler: Vector3) -> Roomma
 	var result := RoommatePart.new()
 	result.anchor = anchor
 	result.direction = direction
-	result.transform.basis = Basis.from_euler(euler)
+	result.mesh_transform.basis = Basis.from_euler(euler)
 	result.collision_transform.basis = Basis.from_euler(euler)
+	result.scene_transform.basis = Basis.from_euler(euler)
 	var default_mesh := QuadMesh.new()
 	default_mesh.material = preload("../defaults/default_material.tres")
 	result.mesh = default_mesh

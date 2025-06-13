@@ -13,7 +13,7 @@ func _build_rulesets() -> void:
 	r1.select_all_blocks()
 	var s1 := r1.select_all_walls()
 	s1.mesh.override(new_mesh)
-	s1.transform.accumulate(Transform3D.IDENTITY.rotated(Vector3.RIGHT, deg_to_rad(10)))
+	s1.mesh_transform.accumulate(Transform3D.IDENTITY.rotated(Vector3.RIGHT, deg_to_rad(10)))
 	s1.collision_mesh.override(new_mesh)
 	s1.override_fallback_surface().material.override(preload("res://test/floor_material.tres"))
 	s1.override_fallback_surface().flip_faces.override(true)

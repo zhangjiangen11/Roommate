@@ -27,7 +27,7 @@ func apply(target: RoommateSurfaceOverride) -> void:
 		setter.apply(target)
 
 
-func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation: float) -> void:
+func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation := 0.0) -> void:
 	var transform := RoommateSurfaceOverride.get_uv_tile_transform(tile_coord, tile_count, tile_rotation)
 	uv_transform.override(transform)
 
