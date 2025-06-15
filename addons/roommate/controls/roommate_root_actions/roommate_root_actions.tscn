@@ -6,7 +6,7 @@
 [node name="RoommateRootActions" type="MenuButton"]
 offset_right = 116.0
 offset_bottom = 31.0
-text = "Roommate"
+text = "RoommateRoot"
 icon = ExtResource("1_7buf0")
 alignment = 0
 item_count = 2

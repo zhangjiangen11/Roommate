@@ -10,7 +10,7 @@ Roommate is hassle-free and easy to use 3D level builder plugin for Godot 4. Ori
 
 - Simple layout edit, akin to putting CSGBox3D on scene and setting it's size.
 
-- Automatically apply properties to level by defined rules using the RoommateStyle derived resources.
+- Automatically change properties of a level by user-created rules using the RoommateStyle derived resources. Styles are defined declaratively, like in CSS or SQL.
 
 - Plugin doesn't affect your game's performance. Roommate doesn't run background tasks, periodic checks etc. After generating level it will idle until next generation is requested.
 
@@ -21,3 +21,4 @@ Roommate is hassle-free and easy to use 3D level builder plugin for Godot 4. Ori
 ## Credits
 
 - [Hoork](https://github.com/Hoork) - Original author of Roommate plugin
+- [Kamenka](https://vk.com/club174676862) - Logo, icons and default texture
