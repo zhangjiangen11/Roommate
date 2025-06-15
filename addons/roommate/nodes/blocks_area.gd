@@ -21,6 +21,10 @@ var box: AABB:
 		return AABB(-size / 2, size)
 
 
+static func get_class_name() -> StringName:
+	return &"RoommateBlocksArea"
+
+
 func _ready():
 	set_notify_transform(true)
 

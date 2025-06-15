@@ -7,6 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
+@icon("../icons/root_icon.svg")
 class_name RoommateRoot
 extends MeshInstance3D
 
@@ -19,7 +20,7 @@ enum CollisionShape
 @export var block_size := 1.0:
 	set(value):
 		block_size = value
-		for node in find_children("*", "RoommateBlocksArea"):
+		for node in find_children("*", RoommateBlocksArea.get_class_name()):
 			var area := node as RoommateBlocksArea
 			area.update_gizmos()
 @export var scale_with_block_size := true
@@ -61,12 +62,16 @@ var _collision_faces := PackedVector3Array()
 var _scene_infos: Array[SceneInfo] = []
 
 
+static func get_class_name() -> StringName:
+	return &"RoommateRoot"
+
+
 func generate() -> void:
 	var this_node := _resolve_self()
 	
 	# Searching for areas which are not children of other root nodes
-	var child_areas := this_node.find_children("*", "RoommateBlocksArea")
-	var child_roots := this_node.find_children("*", "RoommateRoot")
+	var child_areas := this_node.find_children("*", RoommateBlocksArea.get_class_name())
+	var child_roots := this_node.find_children("*", get_class_name())
 
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(child_areas.filter(_filter_by_parents.bind(child_roots)))
@@ -218,7 +223,7 @@ func register_blocks_area(block_area_script: Script, insert_before_block_area_sc
 func clear_scenes() -> void:
 	var this_node := _resolve_self()
 	var all_scenes := this_node.get_tree().get_nodes_in_group(scenes_group)
-	var child_roots := this_node.find_children("*", "RoommateRoot")
+	var child_roots := this_node.find_children("*", get_class_name())
 	var filter_by_self := func (target: Node) -> bool:
 		return this_node.is_ancestor_of(target)
 	var scenes := all_scenes.filter(filter_by_self).filter(_filter_by_parents.bind(child_roots)) as Array[Node]

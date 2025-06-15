@@ -2,9 +2,10 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csaeh6bsfct0t"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://gw2ptpi76es7"
+path="res://.godot/imported/root_icon.svg-c0e62bf1c20e75270fabc55dadaee23b.ctex"
 metadata={
+"editor_dark_theme": true,
 "editor_scale": 1.0,
 "has_editor_variant": true,
 "vram_texture": false
@@ -12,8 +13,8 @@ metadata={
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://addons/roommate/icons/root_icon.svg"
+dest_files=["res://.godot/imported/root_icon.svg-c0e62bf1c20e75270fabc55dadaee23b.ctex"]
 
 [params]
 
@@ -34,6 +35,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=0.15
+svg/scale=1.0
 editor/scale_with_editor_scale=true
-editor/convert_colors_with_editor_theme=false
+editor/convert_colors_with_editor_theme=true
