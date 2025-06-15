@@ -9,6 +9,13 @@
 @tool
 class_name RoommateStyle
 extends Resource
+## Base class for generating rulesets and changing [RoommatePart]
+## 
+## On it's own it doesn't do anything. Extend this class, override 
+## [method RoommateStyle._build_rulesets] and create rulesets to change 
+## [RoommatePart] properties.
+## [br][br]
+## It can be used in [RoommateRoot], [RoommateBlocksArea] and it's derived classes.
 
 const RULESET := preload("../data/style/ruleset.gd")
 

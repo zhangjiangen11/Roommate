@@ -9,6 +9,11 @@
 @tool
 class_name RoommateBlocksArea
 extends Node3D
+## Base class for creating multiple [RoommateBlock] and applying styles over 
+## occupied area.
+##
+## This node doesn't create blocks on it's own, but it still can be used to 
+## apply style on certain area.
 
 @export var size := Vector3.ONE:
 	set(value):

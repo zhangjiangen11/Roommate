@@ -9,6 +9,10 @@
 @tool
 class_name RoommateOutOfBounds
 extends RoommateBlocksArea
+## Area that represents filled space of a room.
+## 
+## Creates multiple [RoommateBlock] of type [i]btid_out_of_bounds[/i]. This type 
+## of block will be threated as it doesn't exists. No parts created by a default.
 
 
 func _process_block(new_block: RoommateBlock) -> RoommateBlock:

@@ -10,6 +10,9 @@
 @icon("../icons/root_icon.svg")
 class_name RoommateRoot
 extends MeshInstance3D
+## Node that creates mesh, collision and scenes. 
+## 
+## Set [RoommateBlocksArea] or it's derived nodes as a child to affect generation.
 
 enum CollisionShape 
 { 
@@ -333,6 +336,7 @@ func _filter_by_parents(target: Node, parents: Array[Node]) -> bool:
 	return true
 
 
+## Internal class used by [RoommateRoot].
 class SceneInfo:
 	extends RefCounted
 	

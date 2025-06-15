@@ -9,6 +9,11 @@
 @tool
 class_name RoommateSpace
 extends RoommateBlocksArea
+## Area that represents empty space of a room.
+## 
+## Creates multiple [RoommateBlock] of type [i]btid_space[/i]. By default these 
+## blocks will be generated as flat surfaces visible part of which will be 
+## directed inwards block.
 
 
 func _process_block(new_block: RoommateBlock) -> RoommateBlock:
