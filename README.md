@@ -1,4 +1,4 @@
-<img src="./images/roommate_logo_full.png" title="" alt="" data-align="center">
+![Roommate Plugin Logo](./images/roommate_logo_full.png)
 
 # Roommate: Procedural 3D Level Builder
 
