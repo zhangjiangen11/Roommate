@@ -12,6 +12,7 @@ extends "./object_setter.gd"
 const SURFACE_OVERRIDE_SETTER := preload("./surface_override_setter.gd")
 
 var selected_slot_ids: Array[StringName] = []
+var inverse_selection := false
 var handle_part: Callable
 
 var anchor: VECTOR3_SETTER:
@@ -42,7 +43,8 @@ var fallback_surface_override: SURFACE_OVERRIDE_SETTER = null
 
 func apply(block: RoommateBlock) -> void:
 	for slot_id in block.slots:
-		if not slot_id in selected_slot_ids:
+		var selected := selected_slot_ids.has(slot_id)
+		if (not inverse_selection and not selected) or (inverse_selection and selected):
 			continue
 		var current_part := block.slots.get(slot_id) as RoommatePart
 		if not current_part:

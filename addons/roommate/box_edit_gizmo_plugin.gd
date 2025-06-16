@@ -45,7 +45,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.clear()
 	var area := gizmo.get_node_3d() as RoommateBlocksArea
 	var root := _get_root(area)
-	var area_selected := area in EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
+	var area_selected := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes().has(area)
 	
 	# area
 	gizmo.add_lines(_get_aabb_lines(area.box), get_material("area", gizmo))

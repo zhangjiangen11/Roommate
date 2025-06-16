@@ -127,15 +127,9 @@ func select_parts(slot_ids: Array[StringName]) -> PARTS_SETTER:
 
 
 func select_all_parts() -> PARTS_SETTER:
-	return select_parts([
-		RoommateBlock.CEIL,
-		RoommateBlock.FLOOR,
-		RoommateBlock.WALL_LEFT,
-		RoommateBlock.WALL_RIGHT,
-		RoommateBlock.WALL_FORWARD,
-		RoommateBlock.WALL_BACK,
-		RoommateBlock.CENTER,
-	])
+	var setter := select_parts([])
+	setter.inverse_selection = true
+	return setter
 
 
 func select_all_walls() -> PARTS_SETTER:
