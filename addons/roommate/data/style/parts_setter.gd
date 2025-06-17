@@ -17,8 +17,8 @@ var handle_part: Callable
 
 var anchor: VECTOR3_SETTER:
 	get: return resolve_value_setter(&"anchor", VECTOR3_SETTER)
-var direction: VECTOR3_SETTER:
-	get: return resolve_value_setter(&"direction", VECTOR3_SETTER)
+var flow: VECTOR3_SETTER:
+	get: return resolve_value_setter(&"flow", VECTOR3_SETTER)
 
 var mesh_transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"mesh_transform", TRANSFORM3D_SETTER)

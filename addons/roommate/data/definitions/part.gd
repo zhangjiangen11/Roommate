@@ -11,7 +11,7 @@ class_name RoommatePart
 extends RefCounted
 
 var anchor := Vector3.ZERO
-var direction := Vector3.ZERO
+var flow := Vector3.ZERO
 
 var mesh_transform := Transform3D.IDENTITY
 var collision_transform := Transform3D.IDENTITY

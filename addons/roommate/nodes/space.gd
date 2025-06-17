@@ -33,10 +33,10 @@ func _process_block(new_block: RoommateBlock) -> RoommateBlock:
 	return new_block
 
 
-func _create_part(anchor: Vector3, direction: Vector3, euler: Vector3) -> RoommatePart:
+func _create_part(anchor: Vector3, flow: Vector3, euler: Vector3) -> RoommatePart:
 	var result := RoommatePart.new()
 	result.anchor = anchor
-	result.direction = direction
+	result.flow = flow
 	result.mesh_transform.basis = Basis.from_euler(euler)
 	result.collision_transform.basis = Basis.from_euler(euler)
 	result.scene_transform.basis = Basis.from_euler(euler)
