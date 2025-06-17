@@ -22,10 +22,12 @@ const SNAP_STEP := Vector3.ONE * 0.5
 		size = value
 		update_gizmos()
 @export var style: RoommateStyle
+@export var apply_order := 0
 
 var box: AABB:
 	get:
 		return AABB(-size / 2, size)
+var _default_apply_order := 0
 
 
 static func get_class_name() -> StringName:
@@ -39,6 +41,16 @@ func _ready():
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED:
 		update_gizmos()
+
+
+func _property_can_revert(property: StringName) -> bool:
+	return true
+
+
+func _property_get_revert(property: StringName) -> Variant:
+	if property == &"apply_order":
+		return _default_apply_order
+	return (RoommateBlocksArea as Script).get_property_default_value(property)
 
 
 func get_block_positions(root_transform: Transform3D, block_size: float) -> Array[Vector3i]:

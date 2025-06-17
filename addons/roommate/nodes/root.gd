@@ -50,10 +50,6 @@ enum CollisionShape
 @export_group("Navigation")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 
-var _blocks_area_apply_order: Array[Script] = [
-	RoommateSpace, 
-	RoommateOutOfBounds,
-]
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
 	RoommateBlock.OUT_OF_BOUNDS_TYPE: _process_skip_part,
@@ -210,19 +206,6 @@ func register_block_type_id(block_type_id: StringName, part_processor: Callable)
 	_part_processors[block_type_id] = part_processor
 
 
-func register_blocks_area(block_area_script: Script, insert_before_block_area_script: Script) -> void:
-	if not block_area_script:
-		push_error("Blocks area script is null.")
-		return
-	if _blocks_area_apply_order.has(block_area_script):
-		push_error("Blocks area %s already registered." % block_area_script)
-		return
-	var insert_index := _blocks_area_apply_order.find(insert_before_block_area_script)
-	if insert_index < 0:
-		insert_index = _blocks_area_apply_order.size()
-	_blocks_area_apply_order.insert(insert_index, block_area_script)
-
-
 func clear_scenes() -> void:
 	var this_node := _resolve_self()
 	var all_scenes := this_node.get_tree().get_nodes_in_group(scenes_group)
@@ -316,9 +299,7 @@ func _resolve_self() -> RoommateRoot:
 
 
 func _sort_by_area_apply_order(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
-	var a_index := _blocks_area_apply_order.find(a.get_script())
-	var b_index := _blocks_area_apply_order.find(b.get_script())
-	return b_index > a_index
+	return a.apply_order < b.apply_order
 
 
 func _sort_by_style(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
