@@ -15,6 +15,8 @@ extends Node3D
 ## This node doesn't create blocks on it's own, but it still can be used to 
 ## apply style on certain area.
 
+const SNAP_STEP := Vector3.ONE * 0.5
+
 @export var size := Vector3.ONE:
 	set(value):
 		size = value
@@ -68,9 +70,8 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 		var corner := root_transform.affine_inverse() * global_transform * box.get_endpoint(i)
 		start = Vector3(minf(start.x, corner.x), minf(start.y, corner.y), minf(start.z, corner.z))
 		end = Vector3(maxf(end.x, corner.x), maxf(end.y, corner.y), maxf(end.z, corner.z))
-	# no floor or ceil because of rounding error
-	var start_block_position := (start / block_size).round()
-	var end_block_position := (end / block_size).round()
+	var start_block_position := (start / block_size).snapped(SNAP_STEP).floor()
+	var end_block_position := (end / block_size).snapped(SNAP_STEP).ceil()
 	var range := AABB(start_block_position, Vector3.ZERO).expand(end_block_position)
 	range.size.x = 1 if range.size.x == 0 and size.x != 0 else range.size.x
 	range.size.y = 1 if range.size.y == 0 and size.y != 0 else range.size.y

@@ -26,10 +26,13 @@ var _original_area_size: Variant = null
 
 
 func _init() -> void:
+	var version := Engine.get_version_info()
+	if version["major"] == 4 and version["minor"] == 0:
+		handles_3d_size = 0.1
 	_handle_infos.make_read_only()
 	create_material("area", Color.AQUA)
 	create_material("blocks", Color.GREEN)
-	create_material("handles_3d", Color.YELLOW)
+	create_material("handles_3d", Color.YELLOW, false, true)
 	create_handle_material("handles")
 
 
@@ -70,7 +73,9 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 			var mesh := SphereMesh.new()
 			mesh.height = handles_3d_size
 			mesh.radius = handles_3d_size / 2
-			gizmo.add_mesh(mesh, get_material("handles_3d", gizmo), Transform3D.IDENTITY.translated(handle_position))
+			var material := get_material("handles_3d", gizmo)
+			material.no_depth_test = true
+			gizmo.add_mesh(mesh, material, Transform3D.IDENTITY.translated(handle_position))
 	gizmo.add_handles(handles_positions, get_material("handles", gizmo), [])
 
 
