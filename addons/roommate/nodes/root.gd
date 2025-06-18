@@ -52,8 +52,7 @@ enum CollisionShape
 
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
-	RoommateBlock.OUT_OF_BOUNDS_TYPE: _process_skip_part,
-	RoommateBlock.NONE_TYPE: _process_skip_part,
+	RoommateBlock.NONE_TYPE: _process_none_block_part,
 }
 
 var _tools := {}
@@ -86,7 +85,12 @@ func generate() -> void:
 	var all_blocks := {}
 	for area in areas:
 		var area_blocks := area.create_blocks(global_transform, block_size)
-		all_blocks.merge(area_blocks, true)
+		for new_block_position in area_blocks:
+			var new_block := area_blocks[new_block_position] as RoommateBlock
+			if new_block:
+				all_blocks[new_block_position] = new_block
+				continue
+			all_blocks.erase(new_block_position)
 	
 	# Applying internal style
 	var internal_style := preload("../resources/internal_style.gd").new()
@@ -278,14 +282,14 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
-	var adjacent_block := all_blocks.get(block.position + (part.flow as Vector3i)) as RoommateBlock
-	if not RoommateBlock.in_bounds(adjacent_block) or part.flow == Vector3.ZERO:
+	if not all_blocks.has(block.position + (part.flow as Vector3i)) or part.flow == Vector3.ZERO:
 		return part
 	return null
 
 
-func _process_skip_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+func _process_none_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
+	push_warning("Attempting to generate part of block with type btid_none. Skipping.")
 	return null
 
 

@@ -12,7 +12,6 @@ extends RefCounted
 
 const NONE_TYPE := &"btid_none"
 const SPACE_TYPE := &"btid_space"
-const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
 const CEIL := &"sid_up"
 const FLOOR := &"sid_down"
@@ -27,33 +26,10 @@ var position: Vector3i
 var slots := {}
 
 
-static func in_bounds(block: RoommateBlock) -> bool:
-	return block != null and block.type_id != OUT_OF_BOUNDS_TYPE
-
-
-static func position_in_bounds(position: Vector3i, source_blocks: Dictionary) -> bool:
-	return in_bounds(source_blocks.get(position) as RoommateBlock)
-
-
-static func raycast(start: Vector3i, position_change: Vector3i, 
-		source_blocks: Dictionary, predicate: Callable) -> int:
+static func raycast(start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:
 	var result := 0
 	var block := source_blocks.get(start + position_change) as RoommateBlock
-	while block != null and predicate.call(block):
+	while block:
 		result += 1
 		block = source_blocks.get(block.position + position_change) as RoommateBlock
 	return result
-
-
-static func raycast_until(start: Vector3i, position_change: Vector3i, 
-		source_blocks: Dictionary, stop_type := OUT_OF_BOUNDS_TYPE) -> int:
-	var predicate := func (block: RoommateBlock) -> bool:
-		return block.type_id != stop_type
-	return raycast(start, position_change, source_blocks, predicate)
-
-
-static func raycast_while(start: Vector3i, position_change: Vector3i, 
-		source_blocks: Dictionary, continue_type: StringName) -> int:
-	var predicate := func (block: RoommateBlock) -> bool:
-		return block.type_id == continue_type
-	return raycast(start, position_change, source_blocks, predicate)

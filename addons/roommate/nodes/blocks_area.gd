@@ -27,7 +27,6 @@ const SNAP_STEP := Vector3.ONE * 0.5
 var box: AABB:
 	get:
 		return AABB(-size / 2, size)
-var _default_apply_order := 0
 
 
 static func get_class_name() -> StringName:
@@ -35,24 +34,12 @@ static func get_class_name() -> StringName:
 
 
 func _ready():
-	if not owner:
-		apply_order = _default_apply_order
 	set_notify_transform(true)
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED:
 		update_gizmos()
-
-
-func _property_can_revert(property: StringName) -> bool:
-	return true
-
-
-func _property_get_revert(property: StringName) -> Variant:
-	if property == &"apply_order":
-		return _default_apply_order
-	return (RoommateBlocksArea as Script).get_property_default_value(property)
 
 
 func get_block_positions(root_transform: Transform3D, block_size: float) -> Array[Vector3i]:
@@ -71,9 +58,7 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 		var new_block := RoommateBlock.new()
 		new_block.type_id = RoommateBlock.NONE_TYPE
 		new_block.position = block_position
-		var processed_block := _process_block(new_block)
-		if processed_block:
-			result[block_position] = new_block
+		result[block_position] = _process_block(new_block)
 	return result
 
 
@@ -94,4 +79,4 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 
 
 func _process_block(new_block: RoommateBlock) -> RoommateBlock: # virtual method
-	return null
+	return new_block

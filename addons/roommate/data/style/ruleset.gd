@@ -50,12 +50,12 @@ func select_all_blocks() -> BLOCKS_SELECTOR:
 
 func select_edge_blocks(position_changes: Array[Vector3i], max_counts: Array[int]) -> BLOCKS_SELECTOR:
 	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
-		if not RoommateBlock.position_in_bounds(offset_position, source_blocks):
+		if not source_blocks.has(offset_position):
 			return false
 		for i in position_changes.size():
 			if max_counts.is_empty() or i != clampi(i, 0, max_counts.size() - 1) or max_counts[i] < 0:
 				continue
-			var count := RoommateBlock.raycast_until(offset_position, position_changes[i], source_blocks)
+			var count := RoommateBlock.raycast(offset_position, position_changes[i], source_blocks)
 			if count > max_counts[i]:
 				return false
 		return true
@@ -85,13 +85,13 @@ func select_interval_blocks(interval: Vector3i) -> BLOCKS_SELECTOR:
 
 func select_inner_blocks(position_changes: Array[Vector3i], tolerances: Array[int]) -> BLOCKS_SELECTOR:
 	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
-		if not RoommateBlock.position_in_bounds(offset_position, source_blocks):
+		if not source_blocks.has(offset_position):
 			return false
 		for i in position_changes.size():
 			if tolerances.is_empty() or i != clampi(i, 0, tolerances.size() - 1) or tolerances[i] < 0:
 				continue
-			var forward_count := RoommateBlock.raycast_until(offset_position, position_changes[i], source_blocks)
-			var back_count := RoommateBlock.raycast_until(offset_position, -position_changes[i], source_blocks)
+			var forward_count := RoommateBlock.raycast(offset_position, position_changes[i], source_blocks)
+			var back_count := RoommateBlock.raycast(offset_position, -position_changes[i], source_blocks)
 			if absi(forward_count - back_count) > tolerances[i]:
 				return false
 		return true
