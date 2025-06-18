@@ -35,6 +35,8 @@ static func get_class_name() -> StringName:
 
 
 func _ready():
+	if not owner:
+		apply_order = _default_apply_order
 	set_notify_transform(true)
 
 
