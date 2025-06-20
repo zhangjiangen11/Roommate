@@ -54,11 +54,12 @@ func get_block_positions(root_transform: Transform3D, block_size: float) -> Arra
 
 func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary:
 	var result := {}
+	var blocks_range := get_blocks_range(root_transform, block_size)
 	for block_position in get_block_positions(root_transform, block_size):
 		var new_block := RoommateBlock.new()
 		new_block.type_id = RoommateBlock.NONE_TYPE
 		new_block.position = block_position
-		result[block_position] = _process_block(new_block)
+		result[block_position] = _process_block(new_block, blocks_range)
 	return result
 
 
@@ -78,5 +79,41 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 	return range
 
 
-func _process_block(new_block: RoommateBlock) -> RoommateBlock: # virtual method
+func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock: # virtual method
 	return new_block
+
+
+func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transform3D) -> RoommatePart:
+	var result := RoommatePart.new()
+	result.anchor = anchor
+	result.flow = flow
+	result.mesh_transform = part_transform
+	result.collision_transform = part_transform
+	result.scene_transform = part_transform
+	var default_mesh := QuadMesh.new()
+	default_mesh.material = preload("../defaults/default_material.tres")
+	result.mesh = default_mesh
+	result.collision_mesh = default_mesh
+	return result
+
+
+func _create_space_parts() -> Dictionary:
+	var center_part := _create_default_part(Vector3(0.5, 0.5, 0.5), Vector3i.ZERO, 
+			Transform3D.IDENTITY)
+	center_part.mesh = null
+	center_part.collision_mesh = null
+	return {
+		RoommateBlock.CENTER_SLOT: center_part,
+		RoommateBlock.CEIL_SLOT: _create_default_part(Vector3(0.5, 1, 0.5), Vector3i.UP, 
+				Transform3D.IDENTITY.rotated(Vector3.RIGHT, PI / 2)),
+		RoommateBlock.FLOOR_SLOT: _create_default_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, 
+				Transform3D.IDENTITY.rotated(Vector3.LEFT, PI / 2)),
+		RoommateBlock.WALL_LEFT_SLOT: _create_default_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, 
+				Transform3D.IDENTITY.rotated(Vector3.UP, PI / 2)),
+		RoommateBlock.WALL_RIGHT_SLOT: _create_default_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, 
+				Transform3D.IDENTITY.rotated(Vector3.DOWN, PI / 2)),
+		RoommateBlock.WALL_FORWARD_SLOT: _create_default_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, 
+				Transform3D.IDENTITY),
+		RoommateBlock.WALL_BACK_SLOT: _create_default_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, 
+				Transform3D.IDENTITY.rotated(Vector3.UP, PI)),
+	}

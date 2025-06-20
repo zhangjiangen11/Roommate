@@ -15,5 +15,6 @@ extends RoommateBlocksArea
 ## of block will be threated as it doesn't exists. No parts created by a default.
 
 
-func _process_block(new_block: RoommateBlock) -> RoommateBlock:
-	return null
+func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
+	new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
+	return new_block

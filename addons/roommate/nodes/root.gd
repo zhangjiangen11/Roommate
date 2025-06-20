@@ -52,6 +52,7 @@ enum CollisionShape
 
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
+	RoommateBlock.BEVEL_TYPE: _process_bevel_block_part,
 	RoommateBlock.NONE_TYPE: _process_none_block_part,
 }
 
@@ -87,10 +88,12 @@ func generate() -> void:
 		var area_blocks := area.create_blocks(global_transform, block_size)
 		for new_block_position in area_blocks:
 			var new_block := area_blocks[new_block_position] as RoommateBlock
-			if new_block:
-				all_blocks[new_block_position] = new_block
+			if not new_block:
 				continue
-			all_blocks.erase(new_block_position)
+			if new_block.type_id == RoommateBlock.OUT_OF_BOUNDS_TYPE:
+				all_blocks.erase(new_block_position)
+				continue
+			all_blocks[new_block_position] = new_block
 	
 	# Applying internal style
 	var internal_style := preload("../resources/internal_style.gd").new()
@@ -287,8 +290,17 @@ func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: R
 	return null
 
 
-func _process_none_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+func _process_bevel_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
+	if slot_id == RoommateBlock.BEVEL_SLOT:
+		return part
+	
+	if not all_blocks.has(block.position + (part.flow as Vector3i)) or part.flow == Vector3.ZERO:
+		return part
+	return null
+
+
+func _process_none_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, all_blocks: Dictionary) -> RoommatePart:
 	push_warning("Attempting to generate part of block with type btid_none. Skipping.")
 	return null
 

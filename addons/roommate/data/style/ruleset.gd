@@ -134,36 +134,36 @@ func select_all_parts() -> PARTS_SETTER:
 
 func select_all_walls() -> PARTS_SETTER:
 	return select_parts([
-		RoommateBlock.WALL_LEFT,
-		RoommateBlock.WALL_RIGHT,
-		RoommateBlock.WALL_FORWARD,
-		RoommateBlock.WALL_BACK,
+		RoommateBlock.WALL_LEFT_SLOT,
+		RoommateBlock.WALL_RIGHT_SLOT,
+		RoommateBlock.WALL_FORWARD_SLOT,
+		RoommateBlock.WALL_BACK_SLOT,
 	])
 
 
 func select_ceil() -> PARTS_SETTER:
-	return select_parts([RoommateBlock.CEIL])
+	return select_parts([RoommateBlock.CEIL_SLOT])
 
 
 func select_floor() -> PARTS_SETTER:
-	return select_parts([RoommateBlock.FLOOR])
+	return select_parts([RoommateBlock.FLOOR_SLOT])
 
 
 func select_wall_left() -> PARTS_SETTER:
-	return select_parts([RoommateBlock.WALL_LEFT])
+	return select_parts([RoommateBlock.WALL_LEFT_SLOT])
 
 
 func select_wall_right() -> PARTS_SETTER:
-	return select_parts([RoommateBlock.WALL_RIGHT])
+	return select_parts([RoommateBlock.WALL_RIGHT_SLOT])
 
 
 func select_wall_forward() -> PARTS_SETTER:
-	return select_parts([RoommateBlock.WALL_FORWARD])
+	return select_parts([RoommateBlock.WALL_FORWARD_SLOT])
 
 
 func select_wall_back() -> PARTS_SETTER:
-	return select_parts([RoommateBlock.WALL_BACK])
+	return select_parts([RoommateBlock.WALL_BACK_SLOT])
 
 
 func select_center() -> PARTS_SETTER:
-	return select_parts([RoommateBlock.CENTER])
+	return select_parts([RoommateBlock.CENTER_SLOT])

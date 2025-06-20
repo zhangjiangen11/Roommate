@@ -12,14 +12,18 @@ extends RefCounted
 
 const NONE_TYPE := &"btid_none"
 const SPACE_TYPE := &"btid_space"
+const BEVEL_TYPE := &"btid_bevel"
+const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
-const CEIL := &"sid_up"
-const FLOOR := &"sid_down"
-const WALL_LEFT := &"sid_left"
-const WALL_RIGHT := &"sid_right"
-const WALL_FORWARD := &"sid_forward"
-const WALL_BACK := &"sid_back"
-const CENTER := &"sid_center"
+const CEIL_SLOT := &"sid_up"
+const FLOOR_SLOT := &"sid_down"
+const WALL_LEFT_SLOT := &"sid_left"
+const WALL_RIGHT_SLOT := &"sid_right"
+const WALL_FORWARD_SLOT := &"sid_forward"
+const WALL_BACK_SLOT := &"sid_back"
+const CENTER_SLOT := &"sid_center"
+
+const BEVEL_SLOT := &"sid_bevel"
 
 var type_id: StringName
 var position: Vector3i
