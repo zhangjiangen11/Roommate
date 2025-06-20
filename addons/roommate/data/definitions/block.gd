@@ -12,7 +12,7 @@ extends RefCounted
 
 const NONE_TYPE := &"btid_none"
 const SPACE_TYPE := &"btid_space"
-const BEVEL_TYPE := &"btid_bevel"
+const OBLIQUE_TYPE := &"btid_oblique"
 const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
 const CEIL_SLOT := &"sid_up"
@@ -23,7 +23,7 @@ const WALL_FORWARD_SLOT := &"sid_forward"
 const WALL_BACK_SLOT := &"sid_back"
 const CENTER_SLOT := &"sid_center"
 
-const BEVEL_SLOT := &"sid_bevel"
+const OBLIQUE_SLOT := &"sid_oblique"
 
 var type_id: StringName
 var position: Vector3i

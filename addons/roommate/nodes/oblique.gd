@@ -7,7 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-class_name RoommateBevel
+class_name RoommateOblique
 extends RoommateBlocksArea
 ## Area that represents sloped surface
 
@@ -16,7 +16,7 @@ enum ExtendAxis {
 	Y = 1,
 	Z = 2,
 }
-enum BevelRotation {
+enum ObliqueRotation {
 	A,
 	B,
 	C,
@@ -24,27 +24,27 @@ enum BevelRotation {
 }
 
 @export var extend_axis := ExtendAxis.X
-@export var bevel_rotation := BevelRotation.A
+@export var oblique_rotation := ObliqueRotation.A
 @export var add_out_of_bounds := true
 
-var _bevel_infos := {
+var _oblique_infos := {
 	ExtendAxis.X: {
-		BevelRotation.A: BevelInfo.new(4, 0, Vector3.ZERO),
-		BevelRotation.B: BevelInfo.new(6, 2, Vector3.ZERO),
-		BevelRotation.C: BevelInfo.new(7, 3, Vector3.ZERO),
-		BevelRotation.D: BevelInfo.new(5, 1, Vector3.ZERO),
+		ObliqueRotation.A: ObliqueInfo.new(4, 0, Vector3.ZERO),
+		ObliqueRotation.B: ObliqueInfo.new(6, 2, Vector3.ZERO),
+		ObliqueRotation.C: ObliqueInfo.new(7, 3, Vector3.ZERO),
+		ObliqueRotation.D: ObliqueInfo.new(5, 1, Vector3.ZERO),
 	},
 	ExtendAxis.Y: {
-		BevelRotation.A: BevelInfo.new(6, 4, Vector3.ZERO),
-		BevelRotation.B: BevelInfo.new(2, 0, Vector3.ZERO),
-		BevelRotation.C: BevelInfo.new(3, 1, Vector3.ZERO),
-		BevelRotation.D: BevelInfo.new(7, 5, Vector3.ZERO),
+		ObliqueRotation.A: ObliqueInfo.new(6, 4, Vector3.ZERO),
+		ObliqueRotation.B: ObliqueInfo.new(2, 0, Vector3.ZERO),
+		ObliqueRotation.C: ObliqueInfo.new(3, 1, Vector3.ZERO),
+		ObliqueRotation.D: ObliqueInfo.new(7, 5, Vector3.ZERO),
 	},
 	ExtendAxis.Z: {
-		BevelRotation.A: BevelInfo.new(5, 4, Vector3.ZERO),
-		BevelRotation.B: BevelInfo.new(7, 6, Vector3.ZERO),
-		BevelRotation.C: BevelInfo.new(3, 2, Vector3.ZERO),
-		BevelRotation.D: BevelInfo.new(1, 0, Vector3.ZERO),
+		ObliqueRotation.A: ObliqueInfo.new(5, 4, Vector3.ZERO),
+		ObliqueRotation.B: ObliqueInfo.new(7, 6, Vector3.ZERO),
+		ObliqueRotation.C: ObliqueInfo.new(3, 2, Vector3.ZERO),
+		ObliqueRotation.D: ObliqueInfo.new(1, 0, Vector3.ZERO),
 	},
 }
 
@@ -68,7 +68,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var next := Vector3.ZERO
 	next[extend_axis] = 1
 	
-	var info := _bevel_infos[extend_axis][bevel_rotation] as BevelInfo
+	var info := _oblique_infos[extend_axis][oblique_rotation] as ObliqueInfo
 	var plane := Plane(blocks_range.get_endpoint(info.first_endpoint) - HALF, 
 			blocks_range.get_center() - HALF, 
 			blocks_range.get_endpoint(info.second_endpoint) - HALF)
@@ -88,16 +88,16 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	
 	var part_scale_delta := (used_size.length() - max_side_size) / max_side_size
 	var part_transform := Transform3D.IDENTITY.looking_at(plane.normal, Vector3.FORWARD).scaled_local(Vector3.ONE + part_scale_delta * scale_axis)
-	var bevel_part := _create_default_part(anchor, Vector3.ZERO, part_transform)
+	var oblique_part := _create_default_part(anchor, Vector3.ZERO, part_transform)
 	
-	new_block.type_id = RoommateBlock.BEVEL_TYPE;
+	new_block.type_id = RoommateBlock.OBLIQUE_TYPE;
 	var slots := {}#_create_space_parts()
-	slots[RoommateBlock.BEVEL_SLOT] = bevel_part
+	slots[RoommateBlock.OBLIQUE_SLOT] = oblique_part
 	new_block.slots = slots
 	return new_block
 
 
-class BevelInfo:
+class ObliqueInfo:
 	extends RefCounted
 	
 	var first_endpoint := 0

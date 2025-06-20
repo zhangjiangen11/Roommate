@@ -52,7 +52,7 @@ enum CollisionShape
 
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
-	RoommateBlock.BEVEL_TYPE: _process_bevel_block_part,
+	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
 	RoommateBlock.NONE_TYPE: _process_none_block_part,
 }
 
@@ -290,11 +290,10 @@ func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: R
 	return null
 
 
-func _process_bevel_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
-	if slot_id == RoommateBlock.BEVEL_SLOT:
+	if slot_id == RoommateBlock.OBLIQUE_SLOT:
 		return part
-	
 	if not all_blocks.has(block.position + (part.flow as Vector3i)) or part.flow == Vector3.ZERO:
 		return part
 	return null
