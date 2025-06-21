@@ -7,8 +7,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-extends EditorNode3DGizmoPlugin
+extends EditorNode3DGizmo
 
+const GIZMO_PLUGIN := preload("./gizmo_plugin.gd")
 const MIN_AREA_SIZE := 0.002
 
 var handles_3d_size: float = 0.0
@@ -29,62 +30,14 @@ func _init() -> void:
 	var version := Engine.get_version_info()
 	if version["major"] == 4 and version["minor"] == 0:
 		handles_3d_size = 0.1
-	_handle_infos.make_read_only()
-	create_material("area", Color.AQUA)
-	create_material("blocks", Color.GREEN)
-	create_material("handles_3d", Color.YELLOW, false, true)
-	create_handle_material("handles")
 
 
-func _has_gizmo(for_node_3d: Node3D) -> bool:
-	return for_node_3d is RoommateBlocksArea
-
-
-func _get_gizmo_name() -> String:
-	return "Roommate"
-
-
-func _redraw(gizmo: EditorNode3DGizmo) -> void:
-	gizmo.clear()
-	var area := gizmo.get_node_3d() as RoommateBlocksArea
-	var root := _get_root(area)
-	var area_selected := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes().has(area)
-	
-	# area
-	gizmo.add_lines(_get_aabb_lines(area.box), get_material("area", gizmo))
-	
-	# blocks range
-	if root:
-		var blocks_box := area.get_blocks_range(root.global_transform, root.block_size)
-		blocks_box.size *= root.block_size
-		blocks_box.position *= root.block_size
-		var blocks_box_lines := area.global_transform.affine_inverse() * (root.global_transform * _get_aabb_lines(blocks_box))
-		gizmo.add_lines(blocks_box_lines, get_material("blocks", gizmo))
-	
-	if not area_selected:
-		return
-	
-	# handles
-	var info_to_point := func (handle: HandleInfo) -> Vector3: 
-		return handle.get_position(area.box)
-	var handles_positions := _handle_infos.map(info_to_point)
-	if handles_3d_size > 0:
-		for handle_position in handles_positions:
-			var mesh := SphereMesh.new()
-			mesh.height = handles_3d_size
-			mesh.radius = handles_3d_size / 2
-			var material := get_material("handles_3d", gizmo)
-			material.no_depth_test = true
-			gizmo.add_mesh(mesh, material, Transform3D.IDENTITY.translated(handle_position))
-	gizmo.add_handles(handles_positions, get_material("handles", gizmo), [])
-
-
-func _get_handle_name(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool) -> String:
+func _get_handle_name(handle_id: int, secondary: bool) -> String:
 	return _handle_infos[handle_id].name
 
 
-func _get_handle_value(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool) -> Variant:
-	var area := gizmo.get_node_3d() as RoommateBlocksArea
+func _get_handle_value(handle_id: int, secondary: bool) -> Variant:
+	var area := get_node_3d() as RoommateBlocksArea
 	if _original_area_transform == null:
 		_original_area_transform = area.transform
 	if _original_area_global_transform == null:
@@ -94,9 +47,8 @@ func _get_handle_value(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool
 	return area.size
 
 
-func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, 
-		camera: Camera3D, screen_pos: Vector2) -> void:
-	var area := gizmo.get_node_3d() as RoommateBlocksArea
+func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: Vector2) -> void:
+	var area := get_node_3d() as RoommateBlocksArea
 	var original_area_transform := _original_area_transform as Transform3D
 	var original_area_global_transform := _original_area_global_transform as Transform3D
 	var original_area_size := _original_area_size as Vector3
@@ -139,11 +91,38 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool,
 	area.size[handle.axis_index] = new_area_size
 
 
-func _commit_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, 
-		restore, cancel: bool) -> void:
+func _commit_handle(handle_id: int, secondary: bool, restore, cancel: bool) -> void:
 	_original_area_transform = null
 	_original_area_global_transform = null
 	_original_area_size = null
+
+
+func _draw_area_edit() -> void:
+	var area := get_node_3d() as RoommateBlocksArea
+	var area_selected := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes().has(area)
+	
+	if not area_selected:
+		return
+	
+	# area
+	var area_material := get_plugin().get_material("area", self)
+	add_lines(_get_aabb_lines(area.box), area_material)
+	
+	# handles
+	var info_to_point := func (handle: HandleInfo) -> Vector3: 
+		return handle.get_position(area.box)
+	var handles_positions := _handle_infos.map(info_to_point)
+	if handles_3d_size > 0:
+		var handle_3d_material := get_plugin().get_material("handles_3d", self)
+		handle_3d_material.no_depth_test = true
+		for handle_position in handles_positions:
+			var mesh := SphereMesh.new()
+			mesh.height = handles_3d_size
+			mesh.radius = handles_3d_size / 2
+			add_mesh(mesh, handle_3d_material, Transform3D.IDENTITY.translated(handle_position))
+	
+	var handle_material := get_plugin().get_material("handles", self)
+	add_handles(handles_positions, handle_material, [])
 
 
 func _get_aabb_lines(aabb: AABB) -> PackedVector3Array:
@@ -162,15 +141,6 @@ func _get_aabb_lines(aabb: AABB) -> PackedVector3Array:
 			result.push_back(aabb.get_endpoint(TOP[i][j]))
 			result.push_back(aabb.get_endpoint(BOTTOM[i][j]))
 	return result
-
-
-func _get_root(node: Node) -> RoommateRoot:
-	var parent := node.get_parent()
-	while not parent is RoommateRoot:
-		parent = parent.get_parent()
-		if not parent:
-			return null
-	return parent as RoommateRoot
 
 
 class HandleInfo:

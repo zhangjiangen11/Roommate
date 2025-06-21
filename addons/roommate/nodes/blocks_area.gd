@@ -79,6 +79,15 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 	return range
 
 
+func find_root() -> RoommateRoot:
+	var parent := get_parent()
+	while not parent is RoommateRoot:
+		parent = parent.get_parent()
+		if not parent:
+			return null
+	return parent as RoommateRoot
+
+
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock: # virtual method
 	return new_block
 
