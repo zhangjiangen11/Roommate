@@ -16,35 +16,35 @@ enum ExtendAxis {
 	Y = 1,
 	Z = 2,
 }
-enum ObliqueRotation {
-	A,
-	B,
-	C,
-	D,
+enum ObliqueAxisDirection {
+	AllPositive,
+	AllNegative,
+	Mixed,
+	InverseMixed,
 }
 
 @export var extend_axis := ExtendAxis.X
-@export var oblique_rotation := ObliqueRotation.A
-@export var add_out_of_bounds := true
+@export var oblique_axis_direction := ObliqueAxisDirection.AllPositive
+@export var fill_out_of_bounds := true
 
 var _oblique_infos := {
 	ExtendAxis.X: {
-		ObliqueRotation.A: ObliqueInfo.new(4, 0, Vector3.ZERO),
-		ObliqueRotation.B: ObliqueInfo.new(6, 2, Vector3.ZERO),
-		ObliqueRotation.C: ObliqueInfo.new(7, 3, Vector3.ZERO),
-		ObliqueRotation.D: ObliqueInfo.new(5, 1, Vector3.ZERO),
+		ObliqueAxisDirection.AllPositive: ObliqueInfo.new(6, 2, Vector3.ZERO),
+		ObliqueAxisDirection.AllNegative: ObliqueInfo.new(5, 1, Vector3.ZERO),
+		ObliqueAxisDirection.Mixed: ObliqueInfo.new(4, 0, Vector3.ZERO),
+		ObliqueAxisDirection.InverseMixed: ObliqueInfo.new(7, 3, Vector3.ZERO),
 	},
 	ExtendAxis.Y: {
-		ObliqueRotation.A: ObliqueInfo.new(6, 4, Vector3.ZERO),
-		ObliqueRotation.B: ObliqueInfo.new(2, 0, Vector3.ZERO),
-		ObliqueRotation.C: ObliqueInfo.new(3, 1, Vector3.ZERO),
-		ObliqueRotation.D: ObliqueInfo.new(7, 5, Vector3.ZERO),
+		ObliqueAxisDirection.AllPositive: ObliqueInfo.new(3, 1, Vector3.ZERO),
+		ObliqueAxisDirection.AllNegative: ObliqueInfo.new(6, 4, Vector3.ZERO),
+		ObliqueAxisDirection.Mixed: ObliqueInfo.new(7, 5, Vector3.ZERO),
+		ObliqueAxisDirection.InverseMixed: ObliqueInfo.new(2, 0, Vector3.ZERO),
 	},
 	ExtendAxis.Z: {
-		ObliqueRotation.A: ObliqueInfo.new(5, 4, Vector3.ZERO),
-		ObliqueRotation.B: ObliqueInfo.new(7, 6, Vector3.ZERO),
-		ObliqueRotation.C: ObliqueInfo.new(3, 2, Vector3.ZERO),
-		ObliqueRotation.D: ObliqueInfo.new(1, 0, Vector3.ZERO),
+		ObliqueAxisDirection.AllPositive: ObliqueInfo.new(5, 4, Vector3.ZERO),
+		ObliqueAxisDirection.AllNegative: ObliqueInfo.new(3, 2, Vector3.ZERO),
+		ObliqueAxisDirection.Mixed: ObliqueInfo.new(1, 0, Vector3.ZERO),
+		ObliqueAxisDirection.InverseMixed: ObliqueInfo.new(7, 6, Vector3.ZERO),
 	},
 }
 
@@ -68,26 +68,25 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var next := Vector3.ZERO
 	next[extend_axis] = 1
 	
-	var info := _oblique_infos[extend_axis][oblique_rotation] as ObliqueInfo
-	var plane := Plane(blocks_range.get_endpoint(info.first_endpoint) - HALF, 
+	var plane := Plane(get_first_endpoint(blocks_range) - HALF, 
 			blocks_range.get_center() - HALF, 
-			blocks_range.get_endpoint(info.second_endpoint) - HALF)
-	
-	var is_on_plane := plane.has_point(new_block.position, 0.5)
-	var next_is_on_plane := plane.has_point((new_block.position as Vector3) + next_direction, 0.5)
-	if not is_on_plane or next_is_on_plane:
-		if add_out_of_bounds and plane.is_point_over(new_block.position):
-			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
-			return new_block
-		return null
+			get_second_endpoint(blocks_range) - HALF)
 	
 	var ray_front := plane.intersects_ray(new_block.position, next_direction)
 	var ray_back := plane.intersects_ray(new_block.position, -next_direction)
 	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
 	var anchor := intersection - (new_block.position as Vector3) + HALF
 	
+	var anchor_over_max := anchor.x > 1 or anchor.y > 1 or anchor.z > 1
+	var anchor_below_min := anchor.x < 0 or anchor.y < 0 or anchor.z < 0
+	if anchor_over_max or anchor_below_min:
+		if fill_out_of_bounds and not plane.is_point_over(new_block.position):
+			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
+			return new_block
+		return null
+	
 	var part_scale_delta := (used_size.length() - max_side_size) / max_side_size
-	var part_transform := Transform3D.IDENTITY.looking_at(plane.normal, Vector3.FORWARD).scaled_local(Vector3.ONE + part_scale_delta * scale_axis)
+	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, Vector3.FORWARD).scaled_local(Vector3.ONE + part_scale_delta * scale_axis)
 	var oblique_part := _create_default_part(anchor, Vector3.ZERO, part_transform)
 	
 	new_block.type_id = RoommateBlock.OBLIQUE_TYPE;
@@ -95,6 +94,16 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	slots[RoommateBlock.OBLIQUE_SLOT] = oblique_part
 	new_block.slots = slots
 	return new_block
+
+
+func get_first_endpoint(box: AABB) -> Vector3:
+	var info := _oblique_infos[extend_axis][oblique_axis_direction] as ObliqueInfo
+	return box.get_endpoint(info.first_endpoint)
+
+
+func get_second_endpoint(box: AABB) -> Vector3:
+	var info := _oblique_infos[extend_axis][oblique_axis_direction] as ObliqueInfo
+	return box.get_endpoint(info.second_endpoint)
 
 
 class ObliqueInfo:
