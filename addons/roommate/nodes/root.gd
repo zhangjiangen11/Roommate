@@ -56,21 +56,15 @@ var _part_processors := {
 	RoommateBlock.NONE_TYPE: _process_none_block_part,
 }
 
-var _tools := {}
-var _collision_faces := PackedVector3Array()
-var _scene_infos: Array[SceneInfo] = []
-
 
 static func get_class_name() -> StringName:
 	return &"RoommateRoot"
 
 
 func generate() -> void:
-	var this_node := _resolve_self()
-	
 	# Searching for areas which are not children of other root nodes
-	var child_areas := this_node.find_children("*", RoommateBlocksArea.get_class_name())
-	var child_roots := this_node.find_children("*", get_class_name())
+	var child_areas := find_children("*", RoommateBlocksArea.get_class_name())
+	var child_roots := find_children("*", get_class_name())
 
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(child_areas.filter(_filter_by_parents.bind(child_roots)))
@@ -117,11 +111,10 @@ func generate() -> void:
 				area_blocks[area_block_position] = area_block
 		area.style.apply(area_blocks)
 	
-	# clearing
-	_tools.clear()
-	_collision_faces.clear()
-	_scene_infos.clear()
-	clear_scenes()
+	# creating collections
+	var surface_tools := {}
+	var collision_faces := PackedVector3Array()
+	var scene_infos: Array[SceneInfo] = []
 	
 	# generating everything
 	for block_position in all_blocks:
@@ -134,12 +127,13 @@ func generate() -> void:
 			var part := block.slots[slot_id] as RoommatePart
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
-				_generate_part(processed_part, block)
+				_generate_part(processed_part, block, surface_tools, 
+						collision_faces, scene_infos)
 	
 	# applying mesh
 	var result_mesh := ArrayMesh.new()
-	for surface_material in _tools:
-		var tool := _tools[surface_material] as SurfaceTool
+	for surface_material in surface_tools:
+		var tool := surface_tools[surface_material] as SurfaceTool
 		if index_mesh:
 			tool.index()
 		if generate_normals:
@@ -151,25 +145,26 @@ func generate() -> void:
 	mesh = result_mesh
 	
 	# applying collision
-	var collision_shape_node := this_node.get_node_or_null(linked_collision_shape) as CollisionShape3D
+	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
 	if collision_shape_node:
 		var shape: Shape3D
 		match collision_shape:
 			CollisionShape.CONCAVE:
 				var concave := ConcavePolygonShape3D.new()
-				concave.set_faces(_collision_faces)
+				concave.set_faces(collision_faces)
 				collision_shape_node.shape = concave
 			CollisionShape.CONVEX:
 				var convex := ConvexPolygonShape3D.new()
-				convex.points = _collision_faces.duplicate()
+				convex.points = collision_faces.duplicate()
 				collision_shape_node.shape = convex
 			_:
 				push_error("Unknown collision shape %s." % collision_shape)
 	
 	#applying scenes
-	for info in _scene_infos:
-		var scene_parent := this_node.get_node_or_null(info.parent_path)
-		var valid_parent := scene_parent and (this_node.is_ancestor_of(scene_parent) or this_node == scene_parent)
+	clear_scenes()
+	for info in scene_infos:
+		var scene_parent := get_node_or_null(info.parent_path)
+		var valid_parent := scene_parent and (is_ancestor_of(scene_parent) or self == scene_parent)
 		if info.parent_path.is_empty():
 			push_warning("Scene creation. Path is empty")
 		elif not valid_parent:
@@ -178,30 +173,30 @@ func generate() -> void:
 		if info.parent_path.is_empty() or not valid_parent:
 			if not use_scenes_fallback_parent:
 				continue
-			var fallback := this_node.get_node_or_null(NodePath(scenes_fallback_parent_name))
+			var fallback := get_node_or_null(NodePath(scenes_fallback_parent_name))
 			if not fallback:
 				fallback = Node3D.new()
 				fallback.name = scenes_fallback_parent_name
-				this_node.add_child(fallback)
-				fallback.owner = this_node.owner
+				add_child(fallback)
+				fallback.owner = owner
 				fallback.add_to_group(scenes_group, true)
 			scene_parent = fallback
 		
 		var new_scene := info.scene.instantiate()
 		scene_parent.add_child(new_scene, force_readable_scene_names)
-		new_scene.owner = this_node.owner
+		new_scene.owner = owner
 		new_scene.add_to_group(scenes_group, true)
 		
 		var node3d_scene := new_scene as Node3D
 		if not node3d_scene:
 			continue
 		if transform_scene_relative_to_part:
-			node3d_scene.global_transform = this_node.global_transform * info.scene_transform
+			node3d_scene.global_transform = global_transform * info.scene_transform
 		else:
 			node3d_scene.transform = info.scene_transform
 	
 	# applying navigation
-	var navigation_region := this_node.get_node_or_null(linked_navigation_region) as NavigationRegion3D
+	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
 	if navigation_region:
 		navigation_region.bake_navigation_mesh()
 
@@ -214,32 +209,33 @@ func register_block_type_id(block_type_id: StringName, part_processor: Callable)
 
 
 func clear_scenes() -> void:
-	var this_node := _resolve_self()
-	var all_scenes := this_node.get_tree().get_nodes_in_group(scenes_group)
-	var child_roots := this_node.find_children("*", get_class_name())
+	var all_scenes := get_tree().get_nodes_in_group(scenes_group)
+	var child_roots := find_children("*", get_class_name())
 	var filter_by_self := func (target: Node) -> bool:
-		return this_node.is_ancestor_of(target)
+		return is_ancestor_of(target)
 	var scenes := all_scenes.filter(filter_by_self).filter(_filter_by_parents.bind(child_roots)) as Array[Node]
 	for scene in scenes:
 		scene.get_parent().remove_child(scene)
 		scene.queue_free()
 
 
-func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
+func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
+		surface_tools: Dictionary, collision_faces: PackedVector3Array,
+		scene_infos: Array[SceneInfo]) -> void:
 	if not part:
 		return
 	var part_origin := parent_block.position * block_size + block_size * part.anchor
 	
 	if part.collision_mesh:
 		var part_collision_faces := part.collision_transform.translated(part_origin) * part.collision_mesh.get_faces()
-		_collision_faces.append_array(part_collision_faces)
+		collision_faces.append_array(part_collision_faces)
 	
 	if part.scene:
 		var info := SceneInfo.new()
 		info.scene = part.scene
 		info.scene_transform = part.scene_transform.translated(part_origin)
 		info.parent_path = part.scene_parent_path
-		_scene_infos.append(info)
+		scene_infos.append(info)
 	
 	if not part.mesh:
 		return
@@ -274,12 +270,12 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock) -> void:
 		if part_surface_override.material:
 			part_material = part_surface_override.material
 			
-		if not _tools.has(part_material):
+		if not surface_tools.has(part_material):
 			var new_surface_tool := SurfaceTool.new()
 			new_surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 			new_surface_tool.set_material(part_material)
-			_tools[part_material] = new_surface_tool
-		var surface_tool := _tools[part_material] as SurfaceTool
+			surface_tools[part_material] = new_surface_tool
+		var surface_tool := surface_tools[part_material] as SurfaceTool
 		surface_tool.append_from(part_mesh, 0, part.mesh_transform.translated(part_origin))
 
 
@@ -302,15 +298,6 @@ func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block:
 func _process_none_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, all_blocks: Dictionary) -> RoommatePart:
 	push_warning("Attempting to generate part of block with type btid_none. Skipping.")
 	return null
-
-
-func _resolve_self() -> RoommateRoot:
-	if Engine.is_editor_hint():
-		# Workaround for error
-		# Parser Error: Native class "EditorPlugin" cannot be constructed as it is abstract.
-		var editor_plugin := (EditorPlugin as Variant).new() as EditorPlugin
-		return editor_plugin.get_editor_interface().get_edited_scene_root().get_node(get_path()) as RoommateRoot
-	return self
 
 
 func _sort_by_area_apply_order(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
