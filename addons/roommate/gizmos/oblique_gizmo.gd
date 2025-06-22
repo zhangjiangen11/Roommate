@@ -13,5 +13,17 @@ extends "./area_edit_gizmo.gd"
 func _redraw() -> void:
 	clear()
 	_draw_area_edit()
+	
+	var area := get_node_3d() as RoommateBlocksArea
+	var root := area.find_root()
+	
+	# blocks range
+	if not root:
+		return
+	
+	var blocks_box := area.get_blocks_range(root.global_transform, root.block_size)
+	blocks_box.size *= root.block_size
+	blocks_box.position *= root.block_size
+	var blocks_box_lines := area.global_transform.affine_inverse() * (root.global_transform * _get_aabb_lines(blocks_box))
 	var blocks_material := get_plugin().get_material("blocks", self)
-	add_lines([Vector3(0, 0, 0), Vector3(0, 0, -1)], blocks_material)
+	add_lines(blocks_box_lines, blocks_material)

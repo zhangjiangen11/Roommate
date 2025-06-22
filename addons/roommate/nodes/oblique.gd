@@ -25,7 +25,6 @@ enum ObliqueAxisDirection {
 
 @export var extend_axis := ExtendAxis.X
 @export var oblique_axis_direction := ObliqueAxisDirection.AllPositive
-@export var fill_out_of_bounds := true
 
 var _oblique_infos := {
 	ExtendAxis.X: {
@@ -65,9 +64,6 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	next_direction[extend_axis] = 0
 	next_direction[used_size.max_axis_index()] = 0
 	
-	var next := Vector3.ZERO
-	next[extend_axis] = 1
-	
 	var plane := Plane(get_first_endpoint(blocks_range) - HALF, 
 			blocks_range.get_center() - HALF, 
 			get_second_endpoint(blocks_range) - HALF)
@@ -80,17 +76,16 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var anchor_over_max := anchor.x > 1 or anchor.y > 1 or anchor.z > 1
 	var anchor_below_min := anchor.x < 0 or anchor.y < 0 or anchor.z < 0
 	if anchor_over_max or anchor_below_min:
-		if fill_out_of_bounds and not plane.is_point_over(new_block.position):
-			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
-			return new_block
-		return null
+		new_block.type_id = RoommateBlock.SPACE_TYPE
+		new_block.slots = _create_space_parts()
+		return new_block
 	
 	var part_scale_delta := (used_size.length() - max_side_size) / max_side_size
 	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, Vector3.FORWARD).scaled_local(Vector3.ONE + part_scale_delta * scale_axis)
 	var oblique_part := _create_default_part(anchor, Vector3.ZERO, part_transform)
 	
 	new_block.type_id = RoommateBlock.OBLIQUE_TYPE;
-	var slots := {}#_create_space_parts()
+	var slots := _create_space_parts()
 	slots[RoommateBlock.OBLIQUE_SLOT] = oblique_part
 	new_block.slots = slots
 	return new_block
