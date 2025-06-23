@@ -53,7 +53,7 @@ enum CollisionShape
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
 	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
-	RoommateBlock.NONE_TYPE: _process_none_block_part,
+	RoommateBlock.NODRAW_TYPE: _process_nodraw_block_part,
 }
 
 
@@ -295,8 +295,8 @@ func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block:
 	return null
 
 
-func _process_none_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, all_blocks: Dictionary) -> RoommatePart:
-	push_warning("Attempting to generate part of block with type btid_none. Skipping.")
+func _process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
+		all_blocks: Dictionary) -> RoommatePart:
 	return null
 
 

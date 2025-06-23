@@ -10,7 +10,7 @@
 class_name RoommateBlock
 extends RefCounted
 
-const NONE_TYPE := &"btid_none"
+const NODRAW_TYPE := &"btid_nodraw"
 const SPACE_TYPE := &"btid_space"
 const OBLIQUE_TYPE := &"btid_oblique"
 const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
@@ -28,6 +28,8 @@ const OBLIQUE_SLOT := &"sid_oblique"
 var type_id: StringName
 var position: Vector3i
 var slots := {}
+var center: Vector3:
+	get: return (position as Vector3) + Vector3.ONE / 2
 
 
 static func raycast(start: Vector3i, position_change: Vector3i, source_blocks: Dictionary) -> int:

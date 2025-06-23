@@ -29,6 +29,7 @@ enum ExtendAxis {
 	set(value):
 		oblique_part_flipped = value
 		update_gizmos()
+@export var nodraw_start := -1.0
 
 
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
@@ -43,26 +44,20 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	next_direction[extend_axis] = 0
 	next_direction[used_size.max_axis_index()] = 0
 	
-	var plane := Plane(get_oblique_plane(blocks_range).normal, blocks_range.get_center() - Vector3.ONE / 2) 
-	var ray_front := plane.intersects_ray(new_block.position, next_direction)
-	var ray_back := plane.intersects_ray(new_block.position, -next_direction)
+	var plane := get_oblique_plane(blocks_range)
+	var ray_front := plane.intersects_ray(new_block.center, next_direction)
+	var ray_back := plane.intersects_ray(new_block.center, -next_direction)
 	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
-	var anchor := intersection - (new_block.position as Vector3) + Vector3.ONE / 2
+	var anchor := intersection - new_block.center + Vector3.ONE / 2
 	
-	var anchor_over_max := (
-			(anchor.x > 1 and not is_equal_approx(anchor.x, 1))
-			or (anchor.y > 1 and not is_equal_approx(anchor.y, 1))
-			or (anchor.z > 1 and not is_equal_approx(anchor.z, 1))
-	)
-	var anchor_below_min := (
-			(anchor.x < 0 and not is_equal_approx(anchor.x, 0))
-			or (anchor.y < 0 and not is_equal_approx(anchor.x, 0))
-			or (anchor.z < 0 and not is_equal_approx(anchor.x, 0))
-	)
-	if anchor_over_max or anchor_below_min:
+	if not anchor.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor):
+		var plane_distance := plane.distance_to(new_block.center)
+		if plane_distance < 0 and absf(plane_distance) > nodraw_start and nodraw_start >= 0:
+			new_block.type_id = RoommateBlock.NODRAW_TYPE
+			return new_block
 		new_block.type_id = RoommateBlock.SPACE_TYPE
 		new_block.slots = _create_space_parts()
-		return new_block
+		return null
 	
 	var part_scale_delta := (used_size.length() - max_side_size) / max_side_size
 	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, next_direction).scaled_local(Vector3(1, 1 + part_scale_delta, 1))

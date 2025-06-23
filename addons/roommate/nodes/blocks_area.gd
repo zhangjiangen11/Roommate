@@ -57,7 +57,7 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 	var blocks_range := get_blocks_range(root_transform, block_size)
 	for block_position in get_block_positions(root_transform, block_size):
 		var new_block := RoommateBlock.new()
-		new_block.type_id = RoommateBlock.NONE_TYPE
+		new_block.type_id = RoommateBlock.NODRAW_TYPE
 		new_block.position = block_position
 		var processed_block := _process_block(new_block, blocks_range)
 		if processed_block:
@@ -92,7 +92,7 @@ func find_root() -> RoommateRoot:
 
 
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock: # virtual method
-	return new_block
+	return null
 
 
 func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transform3D) -> RoommatePart:

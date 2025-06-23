@@ -48,6 +48,12 @@ func select_all_blocks() -> BLOCKS_SELECTOR:
 	return select_blocks(check_selection)
 
 
+func select_blocks_by_type(type_id: StringName) -> BLOCKS_SELECTOR:
+	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		return block.type_id == type_id
+	return select_blocks(check_selection)
+
+
 func select_edge_blocks(position_changes: Array[Vector3i], max_counts: Array[int]) -> BLOCKS_SELECTOR:
 	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		if not source_blocks.has(offset_position):
