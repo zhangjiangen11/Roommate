@@ -173,3 +173,7 @@ func select_wall_back() -> PARTS_SETTER:
 
 func select_center() -> PARTS_SETTER:
 	return select_parts([RoommateBlock.CENTER_SLOT])
+
+
+func select_oblique() -> PARTS_SETTER:
+	return select_parts([RoommateBlock.OBLIQUE_SLOT])
