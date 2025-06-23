@@ -59,7 +59,10 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 		var new_block := RoommateBlock.new()
 		new_block.type_id = RoommateBlock.NONE_TYPE
 		new_block.position = block_position
-		result[block_position] = _process_block(new_block, blocks_range)
+		var processed_block := _process_block(new_block, blocks_range)
+		if processed_block:
+			processed_block.position = block_position
+		result[block_position] = processed_block
 	return result
 
 
