@@ -57,7 +57,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 			return new_block
 		new_block.type_id = RoommateBlock.SPACE_TYPE
 		new_block.slots = _create_space_parts()
-		return null
+		return new_block
 	
 	var part_scale_delta := (used_size.length() - max_side_size) / max_side_size
 	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, next_direction).scaled_local(Vector3(1, 1 + part_scale_delta, 1))
