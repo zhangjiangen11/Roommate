@@ -17,13 +17,22 @@ enum ExtendAxis {
 	Z = 2,
 }
 
-@export var extend_axis := ExtendAxis.X
-@export var oblique_part_rotated := false
-@export var oblique_part_flipped := false
+@export var extend_axis := ExtendAxis.X:
+	set(value):
+		extend_axis = value
+		update_gizmos()
+@export var oblique_part_rotated := false:
+	set(value):
+		oblique_part_rotated = value
+		update_gizmos()
+@export var oblique_part_flipped := false:
+	set(value):
+		oblique_part_flipped = value
+		update_gizmos()
 
 
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
-	new_block.type_id = RoommateBlock.OBLIQUE_TYPE;
+	new_block.type_id = RoommateBlock.OBLIQUE_TYPE
 	
 	var used_size := blocks_range.size
 	used_size[extend_axis] = 0
@@ -34,21 +43,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	next_direction[extend_axis] = 0
 	next_direction[used_size.max_axis_index()] = 0
 	
-	var extend_axis_vector := Vector3.ZERO
-	extend_axis_vector[extend_axis] = 1
-	var plane_normal := used_size.normalized().rotated(extend_axis_vector, PI / 2)
-	if extend_axis != ExtendAxis.Z:
-		# top of oblique should be visible by default
-		plane_normal = -plane_normal
-	if oblique_part_rotated:
-		var part_rotation_axis := Vector3.ZERO
-		part_rotation_axis[extend_axis_vector.min_axis_index()] = 1
-		plane_normal = plane_normal.rotated(part_rotation_axis, PI)
-	if oblique_part_flipped:
-		plane_normal = -plane_normal
-	var plane := Plane(plane_normal, 
-			blocks_range.get_center() - Vector3.ONE / 2)
-	
+	var plane := Plane(get_oblique_plane(blocks_range).normal, blocks_range.get_center() - Vector3.ONE / 2) 
 	var ray_front := plane.intersects_ray(new_block.position, next_direction)
 	var ray_back := plane.intersects_ray(new_block.position, -next_direction)
 	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
@@ -77,3 +72,22 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	slots[RoommateBlock.OBLIQUE_SLOT] = oblique_part
 	new_block.slots = slots
 	return new_block
+
+
+func get_oblique_plane(blocks_range: AABB) -> Plane:
+	var used_size := blocks_range.size
+	used_size[extend_axis] = 0
+	
+	var extend_axis_vector := Vector3.ZERO
+	extend_axis_vector[extend_axis] = 1
+	var plane_normal := used_size.normalized().rotated(extend_axis_vector, PI / 2)
+	if extend_axis != ExtendAxis.Z:
+		# top of oblique should be visible by default
+		plane_normal = -plane_normal
+	if oblique_part_rotated:
+		var part_rotation_axis := Vector3.ZERO
+		part_rotation_axis[extend_axis_vector.min_axis_index()] = 1
+		plane_normal = plane_normal.rotated(part_rotation_axis, PI)
+	if oblique_part_flipped:
+		plane_normal = -plane_normal
+	return Plane(plane_normal, blocks_range.get_center())
