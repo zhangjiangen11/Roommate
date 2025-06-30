@@ -13,7 +13,7 @@ extends EditorNode3DGizmoPlugin
 func _init() -> void:
 	create_material("blocks", Color.GREEN)
 	create_material("area", Color.AQUA)
-	create_material("handles_3d", Color.YELLOW, false, true)
+	create_material("handles_3d", Color.YELLOW)
 	create_handle_material("handles")
 
 

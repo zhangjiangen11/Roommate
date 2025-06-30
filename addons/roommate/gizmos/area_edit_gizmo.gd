@@ -117,7 +117,6 @@ func _draw_area_edit() -> void:
 	var handles_positions := range(HANDLE_DIRECTIONS.size()).map(direction_to_point)
 	if handles_3d_size > 0:
 		var handle_3d_material := get_plugin().get_material("handles_3d", self)
-		handle_3d_material.no_depth_test = true
 		for handle_position in handles_positions:
 			var mesh := SphereMesh.new()
 			mesh.height = handles_3d_size

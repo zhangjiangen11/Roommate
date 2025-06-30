@@ -24,7 +24,8 @@ extends RoommateBlocksArea
 		oblique_part_flipped = value
 		update_gizmos()
 
-@export var fill_start_distance := -1.0
+@export var fill := false
+@export var fill_start_distance := 0.0
 @export_enum("Nodraw", "Out Of Bounds") var fill_block_type := "Nodraw":
 	set(value):
 		const BLOCK_MAP := {
@@ -57,10 +58,11 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var ray_back := plane.intersects_ray(new_block.center, -up_axis)
 	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
 	var anchor := intersection - new_block.center + Vector3.ONE / 2
+	var plane_distance := plane.distance_to(new_block.center)
+	var has_fill := plane_distance <= minf(-fill_start_distance, 0) and fill
 	
 	if not anchor.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor):
-		var plane_distance := plane.distance_to(new_block.center)
-		if plane_distance < 0 and absf(plane_distance) > fill_start_distance and fill_start_distance >= 0:
+		if has_fill:
 			new_block.type_id = _fill_block_type_id
 			return new_block
 		new_block.type_id = RoommateBlock.SPACE_TYPE
@@ -69,11 +71,10 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	
 	var part_scale := (used_size.length() - max_side_size) / max_side_size + 1
 	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, up_axis).scaled_local(Vector3(1, part_scale, 1))
-	var oblique_part := _create_default_part(anchor, Vector3.ZERO, part_transform)
+	var oblique_part := _create_default_part(anchor, plane.normal, part_transform)
 	
 	var slots := _create_space_parts()
 	slots[RoommateBlock.Slot.OBLIQUE] = oblique_part
-	
 	new_block.slots = slots
 	return new_block
 

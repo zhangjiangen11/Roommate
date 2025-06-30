@@ -126,7 +126,7 @@ func generate() -> void:
 			continue
 		var processor := _part_processors[block.type_id] as Callable
 		for slot_id in block.slots:
-			var part := block.slots[slot_id] as RoommatePart
+			var part := block.slots.get(slot_id) as RoommatePart
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
 				_generate_part(processed_part, block, surface_tools, 
@@ -284,14 +284,22 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
+	if not part:
+		return null
 	var next_position := block.position + (part.flow as Vector3i)
-	if not all_blocks.has(next_position) or part.flow == Vector3.ZERO:
+	var next_block := all_blocks.get(next_position) as RoommateBlock
+	if not next_block or part.flow == Vector3.ZERO:
 		return part
-	return null
+	if next_block.type_id != RoommateBlock.OBLIQUE_TYPE:
+		return null
+	var oblique_part := next_block.slots.get(RoommateBlock.Slot.OBLIQUE) as RoommatePart
+	return null # TODO
 
 
 func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
+	if not part:
+		return null
 	var next_position := block.position + (part.flow as Vector3i)
 	var next_block := all_blocks.get(next_position) as RoommateBlock
 	
