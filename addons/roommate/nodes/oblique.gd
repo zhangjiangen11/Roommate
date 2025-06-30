@@ -11,13 +11,7 @@ class_name RoommateOblique
 extends RoommateBlocksArea
 ## Area that represents sloped surface
 
-enum ExtendAxis {
-	X = 0,
-	Y = 1,
-	Z = 2,
-}
-
-@export var extend_axis := ExtendAxis.X:
+@export_enum("X:0", "Y:1", "Z:2") var extend_axis := 0:
 	set(value):
 		extend_axis = value
 		update_gizmos()
@@ -29,7 +23,18 @@ enum ExtendAxis {
 	set(value):
 		oblique_part_flipped = value
 		update_gizmos()
-@export var nodraw_start := -1.0
+
+@export var fill_start_distance := -1.0
+@export_enum("Nodraw", "Out Of Bounds") var fill_block_type := "Nodraw":
+	set(value):
+		const BLOCK_MAP := {
+			"Nodraw": RoommateBlock.NODRAW_TYPE,
+			"Out Of Bounds": RoommateBlock.OUT_OF_BOUNDS_TYPE,
+		}
+		fill_block_type = value
+		_fill_block_type_id = BLOCK_MAP[value]
+
+var _fill_block_type_id := RoommateBlock.NODRAW_TYPE
 
 
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
@@ -40,31 +45,35 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	
 	var max_side_size := used_size[used_size.max_axis_index()]
 	
-	var next_direction := Vector3.ONE
-	next_direction[extend_axis] = 0
-	next_direction[used_size.max_axis_index()] = 0
+	var up_axis := Vector3.ONE
+	up_axis[extend_axis] = 0
+	up_axis[used_size.max_axis_index()] = 0
+	var forward_axis := Vector3.ONE
+	forward_axis[extend_axis] = 0
+	forward_axis[up_axis.max_axis_index()] = 0
 	
 	var plane := get_oblique_plane(blocks_range)
-	var ray_front := plane.intersects_ray(new_block.center, next_direction)
-	var ray_back := plane.intersects_ray(new_block.center, -next_direction)
+	var ray_front := plane.intersects_ray(new_block.center, up_axis)
+	var ray_back := plane.intersects_ray(new_block.center, -up_axis)
 	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
 	var anchor := intersection - new_block.center + Vector3.ONE / 2
 	
 	if not anchor.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor):
 		var plane_distance := plane.distance_to(new_block.center)
-		if plane_distance < 0 and absf(plane_distance) > nodraw_start and nodraw_start >= 0:
-			new_block.type_id = RoommateBlock.NODRAW_TYPE
+		if plane_distance < 0 and absf(plane_distance) > fill_start_distance and fill_start_distance >= 0:
+			new_block.type_id = _fill_block_type_id
 			return new_block
 		new_block.type_id = RoommateBlock.SPACE_TYPE
 		new_block.slots = _create_space_parts()
 		return new_block
 	
-	var part_scale_delta := (used_size.length() - max_side_size) / max_side_size
-	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, next_direction).scaled_local(Vector3(1, 1 + part_scale_delta, 1))
+	var part_scale := (used_size.length() - max_side_size) / max_side_size + 1
+	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, up_axis).scaled_local(Vector3(1, part_scale, 1))
 	var oblique_part := _create_default_part(anchor, Vector3.ZERO, part_transform)
 	
 	var slots := _create_space_parts()
 	slots[RoommateBlock.OBLIQUE_SLOT] = oblique_part
+	
 	new_block.slots = slots
 	return new_block
 
@@ -76,7 +85,7 @@ func get_oblique_plane(blocks_range: AABB) -> Plane:
 	var extend_axis_vector := Vector3.ZERO
 	extend_axis_vector[extend_axis] = 1
 	var plane_normal := used_size.normalized().rotated(extend_axis_vector, PI / 2)
-	if extend_axis != ExtendAxis.Z:
+	if extend_axis != Vector3.AXIS_Z:
 		# top of oblique should be visible by default
 		plane_normal = -plane_normal
 	if oblique_part_rotated:
@@ -86,3 +95,12 @@ func get_oblique_plane(blocks_range: AABB) -> Plane:
 	if oblique_part_flipped:
 		plane_normal = -plane_normal
 	return Plane(plane_normal, blocks_range.get_center())
+
+
+func _create_oblique_side(anchor: Vector3, flow: Vector3, part_transform: Transform3D) -> RoommatePart:
+	var result := _create_default_part(anchor, flow, part_transform)
+	var default_mesh := preload("../defaults/oblique_side_model.tres")
+	default_mesh.surface_set_material(0, preload("../defaults/default_material.tres"))
+	result.mesh = default_mesh
+	result.collision_mesh = default_mesh
+	return result

@@ -15,15 +15,17 @@ const SPACE_TYPE := &"btid_space"
 const OBLIQUE_TYPE := &"btid_oblique"
 const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
-const CEIL_SLOT := &"sid_up"
-const FLOOR_SLOT := &"sid_down"
-const WALL_LEFT_SLOT := &"sid_left"
-const WALL_RIGHT_SLOT := &"sid_right"
-const WALL_FORWARD_SLOT := &"sid_forward"
-const WALL_BACK_SLOT := &"sid_back"
+const CEIL_SLOT := &"sid_ceil"
+const FLOOR_SLOT := &"sid_floor"
+const WALL_LEFT_SLOT := &"sid_wall_left"
+const WALL_RIGHT_SLOT := &"sid_wall_right"
+const WALL_FORWARD_SLOT := &"sid_wall_forward"
+const WALL_BACK_SLOT := &"sid_wall_back"
 const CENTER_SLOT := &"sid_center"
 
 const OBLIQUE_SLOT := &"sid_oblique"
+const OBLIQUE_SIDE_RIGHT_SLOT := &"sid_oblique_side_right"
+const OBLIQUE_SIDE_LEFT_SLOT := &"sid_oblique_side_left"
 
 var type_id: StringName
 var position: Vector3i

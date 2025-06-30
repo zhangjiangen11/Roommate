@@ -9,14 +9,7 @@
 @tool
 extends RefCounted
 
-enum Mode {
-	INCLUDE,
-	EXCLUDE,
-	INVERT,
-	INTERSECT,
-}
-
-var mode := Mode.INCLUDE
+var mode := &"omid_include"
 var offset := Vector3i.ZERO
 var check_selection: Callable
 
@@ -32,37 +25,38 @@ func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_includ
 		is_selected = false
 	
 	if not is_selected:
-		if mode == Mode.INTERSECT:
+		if mode == &"omid_intersect":
 			return false
 		return is_included
 	
 	match mode:
-		Mode.INCLUDE:
+		&"omid_include":
 			return true
-		Mode.EXCLUDE:
+		&"omid_exclude":
 			return false
-		Mode.INVERT:
+		&"omid_invert":
 			return not is_included
-		Mode.INTERSECT:
+		&"omid_intersect":
 			return is_included
 	
+	push_warning("Unexpected mode id %s." % mode)
 	return is_included
 
 
 func include() -> void:
-	mode = Mode.INCLUDE
+	mode = &"omid_include"
 
 
 func exclude() -> void:
-	mode = Mode.EXCLUDE
+	mode = &"omid_exclude"
 
 
 func invert() -> void:
-	mode = Mode.INVERT
+	mode = &"omid_invert"
 
 
 func intersect() -> void:
-	mode = Mode.INTERSECT
+	mode = &"omid_intersect"
 
 
 func set_offset(new_offset: Vector3i) -> void:

@@ -14,12 +14,6 @@ extends MeshInstance3D
 ## 
 ## Set [RoommateBlocksArea] or it's derived nodes as a child to affect generation.
 
-enum CollisionShape 
-{ 
-	CONCAVE, 
-	CONVEX, 
-}
-
 @export var block_size := 1.0:
 	set(value):
 		block_size = value
@@ -37,7 +31,14 @@ enum CollisionShape
 @export var generate_tangents := true
 
 @export_group("Collision")
-@export var collision_shape := CollisionShape.CONCAVE
+@export_enum("Concave", "Convex") var collision_shape := "Concave":
+	set(value):
+		const SHAPE_MAP := {
+			"Concave": &"csid_concave",
+			"Convex": &"csid_convex",
+		}
+		collision_shape = value
+		_collision_shape_id = SHAPE_MAP[value]
 @export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
 
 @export_group("Scenes")
@@ -50,6 +51,7 @@ enum CollisionShape
 @export_group("Navigation")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 
+var _collision_shape_id := &"csid_concave"
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
 	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
@@ -114,7 +116,7 @@ func generate() -> void:
 	# creating collections
 	var surface_tools := {}
 	var collision_faces := PackedVector3Array()
-	var scene_infos: Array[SceneInfo] = []
+	var scene_infos: Array[Dictionary] = []
 	
 	# generating everything
 	for block_position in all_blocks:
@@ -145,32 +147,33 @@ func generate() -> void:
 	mesh = result_mesh
 	
 	# applying collision
+	print(_collision_shape_id)
 	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
 	if collision_shape_node:
 		var shape: Shape3D
-		match collision_shape:
-			CollisionShape.CONCAVE:
+		match _collision_shape_id:
+			&"csid_concave":
 				var concave := ConcavePolygonShape3D.new()
 				concave.set_faces(collision_faces)
 				collision_shape_node.shape = concave
-			CollisionShape.CONVEX:
+			&"csid_convex":
 				var convex := ConvexPolygonShape3D.new()
 				convex.points = collision_faces.duplicate()
 				collision_shape_node.shape = convex
 			_:
-				push_error("Unknown collision shape %s." % collision_shape)
+				push_error("Unknown collision shape id %s." % _collision_shape_id)
 	
 	#applying scenes
 	clear_scenes()
 	for info in scene_infos:
-		var scene_parent := get_node_or_null(info.parent_path)
+		var scene_parent := get_node_or_null(info[&"parent_path"])
 		var valid_parent := scene_parent and (is_ancestor_of(scene_parent) or self == scene_parent)
-		if info.parent_path.is_empty():
+		if info[&"parent_path"].is_empty():
 			push_warning("Scene creation. Path is empty")
 		elif not valid_parent:
-			push_warning("Scene creation. There is no valid node on path %s" % info.parent_path)
+			push_warning("Scene creation. There is no valid node on path %s" % info[&"parent_path"])
 		
-		if info.parent_path.is_empty() or not valid_parent:
+		if info[&"parent_path"].is_empty() or not valid_parent:
 			if not use_scenes_fallback_parent:
 				continue
 			var fallback := get_node_or_null(NodePath(scenes_fallback_parent_name))
@@ -182,7 +185,7 @@ func generate() -> void:
 				fallback.add_to_group(scenes_group, true)
 			scene_parent = fallback
 		
-		var new_scene := info.scene.instantiate()
+		var new_scene := info[&"scene"].instantiate() as Node
 		scene_parent.add_child(new_scene, force_readable_scene_names)
 		new_scene.owner = owner
 		new_scene.add_to_group(scenes_group, true)
@@ -191,9 +194,9 @@ func generate() -> void:
 		if not node3d_scene:
 			continue
 		if transform_scene_relative_to_part:
-			node3d_scene.global_transform = global_transform * info.scene_transform
+			node3d_scene.global_transform = global_transform * info[&"scene_transform"]
 		else:
-			node3d_scene.transform = info.scene_transform
+			node3d_scene.transform = info[&"scene_transform"]
 	
 	# applying navigation
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
@@ -221,7 +224,7 @@ func clear_scenes() -> void:
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
 		surface_tools: Dictionary, collision_faces: PackedVector3Array,
-		scene_infos: Array[SceneInfo]) -> void:
+		scene_infos: Array[Dictionary]) -> void:
 	if not part:
 		return
 	var part_origin := parent_block.position * block_size + block_size * part.anchor
@@ -231,10 +234,11 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 		collision_faces.append_array(part_collision_faces)
 	
 	if part.scene:
-		var info := SceneInfo.new()
-		info.scene = part.scene
-		info.scene_transform = part.scene_transform.translated(part_origin)
-		info.parent_path = part.scene_parent_path
+		var info := {}
+		info[&"scene"] = part.scene
+		info[&"scene_transform"] = part.scene_transform.translated(part_origin)
+		info[&"parent_path"] = part.scene_parent_path
+		info.make_read_only()
 		scene_infos.append(info)
 	
 	if not part.mesh:
@@ -281,17 +285,26 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
-	if not all_blocks.has(block.position + (part.flow as Vector3i)) or part.flow == Vector3.ZERO:
+	var next_position := block.position + (part.flow as Vector3i)
+	if not all_blocks.has(next_position) or part.flow == Vector3.ZERO:
 		return part
 	return null
 
 
 func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
-	if slot_id == RoommateBlock.OBLIQUE_SLOT:
-		return part
-	if not all_blocks.has(block.position + (part.flow as Vector3i)) or part.flow == Vector3.ZERO:
-		return part
+	var next_position := block.position + (part.flow as Vector3i)
+	var next_block := all_blocks.get(next_position) as RoommateBlock
+	
+	match slot_id:
+		RoommateBlock.OBLIQUE_SLOT:
+			return part
+		RoommateBlock.OBLIQUE_SIDE_LEFT_SLOT, RoommateBlock.OBLIQUE_SIDE_RIGHT_SLOT:
+			return part if next_block and next_block.type_id != RoommateBlock.OBLIQUE_TYPE else null
+		_:
+			return part if not next_block or part.flow == Vector3.ZERO else null
+	
+	push_error("Unexpected slot_id while processing oblique part.")
 	return null
 
 
@@ -317,12 +330,3 @@ func _filter_by_parents(target: Node, parents: Array[Node]) -> bool:
 		if parent.is_ancestor_of(target):
 			return false
 	return true
-
-
-## Internal class used by [RoommateRoot].
-class SceneInfo:
-	extends RefCounted
-	
-	var scene: PackedScene
-	var parent_path: NodePath
-	var scene_transform: Transform3D

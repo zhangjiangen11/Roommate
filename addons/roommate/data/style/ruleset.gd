@@ -132,6 +132,10 @@ func select_parts(slot_ids: Array[StringName]) -> PARTS_SETTER:
 	return new_setter
 
 
+func select_part(slot_id: StringName) -> PARTS_SETTER:
+	return select_parts([slot_id])
+
+
 func select_all_parts() -> PARTS_SETTER:
 	var setter := select_parts([])
 	setter.inverse_selection = true
