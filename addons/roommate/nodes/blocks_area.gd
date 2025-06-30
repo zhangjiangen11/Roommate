@@ -115,17 +115,17 @@ func _create_space_parts() -> Dictionary:
 	center_part.mesh = null
 	center_part.collision_mesh = null
 	return {
-		RoommateBlock.CENTER_SLOT: center_part,
-		RoommateBlock.CEIL_SLOT: _create_default_part(Vector3(0.5, 1, 0.5), Vector3i.UP, 
+		RoommateBlock.Slot.CENTER: center_part,
+		RoommateBlock.Slot.CEIL: _create_default_part(Vector3(0.5, 1, 0.5), Vector3i.UP, 
 				Transform3D.IDENTITY.rotated(Vector3.RIGHT, PI / 2)),
-		RoommateBlock.FLOOR_SLOT: _create_default_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, 
+		RoommateBlock.Slot.FLOOR: _create_default_part(Vector3(0.5, 0, 0.5), Vector3i.DOWN, 
 				Transform3D.IDENTITY.rotated(Vector3.LEFT, PI / 2)),
-		RoommateBlock.WALL_LEFT_SLOT: _create_default_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, 
+		RoommateBlock.Slot.WALL_LEFT: _create_default_part(Vector3(0, 0.5, 0.5), Vector3i.LEFT, 
 				Transform3D.IDENTITY.rotated(Vector3.UP, PI / 2)),
-		RoommateBlock.WALL_RIGHT_SLOT: _create_default_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, 
+		RoommateBlock.Slot.WALL_RIGHT: _create_default_part(Vector3(1, 0.5, 0.5), Vector3i.RIGHT, 
 				Transform3D.IDENTITY.rotated(Vector3.DOWN, PI / 2)),
-		RoommateBlock.WALL_FORWARD_SLOT: _create_default_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, 
+		RoommateBlock.Slot.WALL_FORWARD: _create_default_part(Vector3(0.5, 0.5, 0), Vector3i.FORWARD, 
 				Transform3D.IDENTITY),
-		RoommateBlock.WALL_BACK_SLOT: _create_default_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, 
+		RoommateBlock.Slot.WALL_BACK: _create_default_part(Vector3(0.5, 0.5, 1), Vector3i.BACK, 
 				Transform3D.IDENTITY.rotated(Vector3.UP, PI)),
 	}

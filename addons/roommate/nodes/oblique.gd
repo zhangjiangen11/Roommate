@@ -72,7 +72,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var oblique_part := _create_default_part(anchor, Vector3.ZERO, part_transform)
 	
 	var slots := _create_space_parts()
-	slots[RoommateBlock.OBLIQUE_SLOT] = oblique_part
+	slots[RoommateBlock.Slot.OBLIQUE] = oblique_part
 	
 	new_block.slots = slots
 	return new_block

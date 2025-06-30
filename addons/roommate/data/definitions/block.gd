@@ -15,18 +15,6 @@ const SPACE_TYPE := &"btid_space"
 const OBLIQUE_TYPE := &"btid_oblique"
 const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
-const CEIL_SLOT := &"sid_ceil"
-const FLOOR_SLOT := &"sid_floor"
-const WALL_LEFT_SLOT := &"sid_wall_left"
-const WALL_RIGHT_SLOT := &"sid_wall_right"
-const WALL_FORWARD_SLOT := &"sid_wall_forward"
-const WALL_BACK_SLOT := &"sid_wall_back"
-const CENTER_SLOT := &"sid_center"
-
-const OBLIQUE_SLOT := &"sid_oblique"
-const OBLIQUE_SIDE_RIGHT_SLOT := &"sid_oblique_side_right"
-const OBLIQUE_SIDE_LEFT_SLOT := &"sid_oblique_side_left"
-
 var type_id: StringName
 var position: Vector3i
 var slots := {}
@@ -41,3 +29,17 @@ static func raycast(start: Vector3i, position_change: Vector3i, source_blocks: D
 		result += 1
 		block = source_blocks.get(block.position + position_change) as RoommateBlock
 	return result
+
+
+class Slot:
+	const CEIL := &"slid_ceil"
+	const FLOOR := &"slid_floor"
+	const WALL_LEFT := &"slid_wall_left"
+	const WALL_RIGHT := &"slid_wall_right"
+	const WALL_FORWARD := &"slid_wall_forward"
+	const WALL_BACK := &"slid_wall_back"
+	const CENTER := &"slid_center"
+
+	const OBLIQUE := &"slid_oblique"
+	const OBLIQUE_SIDE_RIGHT := &"slid_oblique_side_right"
+	const OBLIQUE_SIDE_LEFT := &"slid_oblique_side_left"

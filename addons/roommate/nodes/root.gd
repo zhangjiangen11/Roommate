@@ -147,7 +147,6 @@ func generate() -> void:
 	mesh = result_mesh
 	
 	# applying collision
-	print(_collision_shape_id)
 	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
 	if collision_shape_node:
 		var shape: Shape3D
@@ -297,9 +296,9 @@ func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block:
 	var next_block := all_blocks.get(next_position) as RoommateBlock
 	
 	match slot_id:
-		RoommateBlock.OBLIQUE_SLOT:
+		RoommateBlock.Slot.OBLIQUE:
 			return part
-		RoommateBlock.OBLIQUE_SIDE_LEFT_SLOT, RoommateBlock.OBLIQUE_SIDE_RIGHT_SLOT:
+		RoommateBlock.Slot.OBLIQUE_SIDE_LEFT, RoommateBlock.Slot.OBLIQUE_SIDE_RIGHT:
 			return part if next_block and next_block.type_id != RoommateBlock.OBLIQUE_TYPE else null
 		_:
 			return part if not next_block or part.flow == Vector3.ZERO else null
