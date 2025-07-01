@@ -95,7 +95,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	return null
 
 
-func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transform3D) -> RoommatePart:
+func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transform3D, set_mesh := true) -> RoommatePart:
 	var result := RoommatePart.new()
 	result.anchor = anchor
 	result.flow = flow
@@ -104,16 +104,14 @@ func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transf
 	result.scene_transform = part_transform
 	var default_mesh := QuadMesh.new()
 	default_mesh.material = preload("../defaults/default_material.tres")
-	result.mesh = default_mesh
-	result.collision_mesh = default_mesh
+	result.mesh = default_mesh if set_mesh else null
+	result.collision_mesh = default_mesh if set_mesh else null
 	return result
 
 
 func _create_space_parts() -> Dictionary:
 	var center_part := _create_default_part(Vector3(0.5, 0.5, 0.5), Vector3i.ZERO, 
-			Transform3D.IDENTITY)
-	center_part.mesh = null
-	center_part.collision_mesh = null
+			Transform3D.IDENTITY, false)
 	return {
 		RoommateBlock.Slot.CENTER: center_part,
 		RoommateBlock.Slot.CEIL: _create_default_part(Vector3(0.5, 1, 0.5), Vector3i.UP, 

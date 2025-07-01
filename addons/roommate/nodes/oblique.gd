@@ -65,15 +65,25 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 		if has_fill:
 			new_block.type_id = _fill_block_type_id
 			return new_block
-		new_block.type_id = RoommateBlock.SPACE_TYPE
-		new_block.slots = _create_space_parts()
+		if plane.is_point_over(new_block.center):
+			return null
+		var space_hide_predicate := func(part: RoommatePart) -> bool:
+			var extend_axis_vector := Vector3.ZERO
+			extend_axis_vector[extend_axis] = 1
+			return not plane.is_point_over(new_block.center) and part.flow * extend_axis_vector == Vector3.ZERO
+		new_block.slots = _create_visible_space_parts(space_hide_predicate)
+		new_block.slots[RoommateBlock.Slot.OBLIQUE] = _create_default_part(Vector3.ONE / 2, 
+				plane.normal if fill else Vector3.ZERO, Transform3D.IDENTITY, false)
 		return new_block
 	
 	var part_scale := (used_size.length() - max_side_size) / max_side_size + 1
 	var part_transform := Transform3D.IDENTITY.looking_at(-plane.normal, up_axis).scaled_local(Vector3(1, part_scale, 1))
-	var oblique_part := _create_default_part(anchor, plane.normal, part_transform)
+	var oblique_part := _create_default_part(anchor, plane.normal if fill else Vector3.ZERO, part_transform)
 	
-	var slots := _create_space_parts()
+	var oblique_hide_predicate := func(part: RoommatePart) -> bool:
+		var flow_dot := plane.normal.dot(part.flow)
+		return flow_dot < 0 and not is_zero_approx(flow_dot)
+	var slots := _create_visible_space_parts(oblique_hide_predicate)
 	slots[RoommateBlock.Slot.OBLIQUE] = oblique_part
 	new_block.slots = slots
 	return new_block
@@ -105,3 +115,14 @@ func _create_oblique_side(anchor: Vector3, flow: Vector3, part_transform: Transf
 	result.mesh = default_mesh
 	result.collision_mesh = default_mesh
 	return result
+
+
+func _create_visible_space_parts(hide_predicate: Callable) -> Dictionary:
+	var slots := _create_space_parts()
+	if not fill:
+		return slots	
+	for slot_id in slots:
+		var part := slots[slot_id] as RoommatePart
+		if part and hide_predicate.call(part):
+			slots[slot_id] = null
+	return slots
