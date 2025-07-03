@@ -181,11 +181,3 @@ func select_center() -> PARTS_SETTER:
 
 func select_oblique() -> PARTS_SETTER:
 	return select_part(RoommateBlock.Slot.OBLIQUE)
-
-
-func select_oblique_side_right() -> PARTS_SETTER:
-	return select_part(RoommateBlock.Slot.OBLIQUE_SIDE_RIGHT)
-
-
-func select_oblique_side_left() -> PARTS_SETTER:
-	return select_part(RoommateBlock.Slot.OBLIQUE_SIDE_LEFT)

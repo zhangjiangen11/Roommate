@@ -48,6 +48,11 @@ func set_uv_tile(tile_coord: Vector2i, tile_count: Vector2i, tile_rotation := 0.
 	uv_transform = get_uv_tile_transform(tile_coord, tile_count, tile_rotation)
 
 
+func set_color(new_color: Color) -> void:
+	color = new_color
+	color_weight = 1
+
+
 func get_copy_with_fallback(fallback: RoommateSurfaceOverride) -> RoommateSurfaceOverride:
 	var result := RoommateSurfaceOverride.new()
 	for property in (RoommateSurfaceOverride as Script).get_script_property_list():

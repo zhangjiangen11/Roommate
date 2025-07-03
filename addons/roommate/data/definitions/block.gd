@@ -41,5 +41,3 @@ class Slot:
 	const CENTER := &"slid_center"
 
 	const OBLIQUE := &"slid_oblique"
-	const OBLIQUE_SIDE_RIGHT := &"slid_oblique_side_right"
-	const OBLIQUE_SIDE_LEFT := &"slid_oblique_side_left"

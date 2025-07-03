@@ -25,17 +25,7 @@ extends RoommateBlocksArea
 		update_gizmos()
 
 @export var fill := false
-@export var fill_start_distance := 0.0
-@export_enum("Nodraw", "Out Of Bounds") var fill_block_type := "Nodraw":
-	set(value):
-		const BLOCK_MAP := {
-			"Nodraw": RoommateBlock.NODRAW_TYPE,
-			"Out Of Bounds": RoommateBlock.OUT_OF_BOUNDS_TYPE,
-		}
-		fill_block_type = value
-		_fill_block_type_id = BLOCK_MAP[value]
-
-var _fill_block_type_id := RoommateBlock.NODRAW_TYPE
+@export var fill_start_distance := 0.7
 
 
 func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlock:
@@ -63,9 +53,9 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	
 	if not anchor.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor):
 		if has_fill:
-			new_block.type_id = _fill_block_type_id
+			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
 			return new_block
-		if plane.is_point_over(new_block.center):
+		if plane.is_point_over(new_block.center) or not fill:
 			return null
 		var space_hide_predicate := func(part: RoommatePart) -> bool:
 			var extend_axis_vector := Vector3.ZERO
@@ -90,37 +80,22 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 
 
 func get_oblique_plane(blocks_range: AABB) -> Plane:
+	var extend_axis_vector := Vector3.ZERO
+	extend_axis_vector[extend_axis] = -1 if extend_axis == Vector3.AXIS_X else 1
 	var used_size := blocks_range.size
 	used_size[extend_axis] = 0
-	
-	var extend_axis_vector := Vector3.ZERO
-	extend_axis_vector[extend_axis] = 1
 	var plane_normal := used_size.normalized().rotated(extend_axis_vector, PI / 2)
-	if extend_axis != Vector3.AXIS_Z:
-		# top of oblique should be visible by default
-		plane_normal = -plane_normal
-	if oblique_part_rotated:
-		var part_rotation_axis := Vector3.ZERO
-		part_rotation_axis[extend_axis_vector.min_axis_index()] = 1
-		plane_normal = plane_normal.rotated(part_rotation_axis, PI)
+	if not oblique_part_rotated:
+		plane_normal *= plane_normal.sign()
 	if oblique_part_flipped:
-		plane_normal = -plane_normal
+		plane_normal *= -1
 	return Plane(plane_normal, blocks_range.get_center())
-
-
-func _create_oblique_side(anchor: Vector3, flow: Vector3, part_transform: Transform3D) -> RoommatePart:
-	var result := _create_default_part(anchor, flow, part_transform)
-	var default_mesh := preload("../defaults/oblique_side_model.tres")
-	default_mesh.surface_set_material(0, preload("../defaults/default_material.tres"))
-	result.mesh = default_mesh
-	result.collision_mesh = default_mesh
-	return result
 
 
 func _create_visible_space_parts(hide_predicate: Callable) -> Dictionary:
 	var slots := _create_space_parts()
 	if not fill:
-		return slots	
+		return slots
 	for slot_id in slots:
 		var part := slots[slot_id] as RoommatePart
 		if part and hide_predicate.call(part):

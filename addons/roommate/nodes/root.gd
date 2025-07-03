@@ -288,16 +288,7 @@ func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: R
 		return null
 	var next_position := block.position + (part.flow as Vector3i)
 	var next_block := all_blocks.get(next_position) as RoommateBlock
-	if not next_block or part.flow == Vector3.ZERO:
-		return part
-	
-	if next_block.type_id != RoommateBlock.OBLIQUE_TYPE:
-		return null
-	var oblique_part := next_block.slots.get(RoommateBlock.Slot.OBLIQUE) as RoommatePart
-	if not oblique_part or oblique_part.flow == Vector3.ZERO:
-		return null
-	var flow_dot := oblique_part.flow.dot(part.flow)
-	return part if flow_dot > 0 and not is_zero_approx(flow_dot) else null
+	return part if not next_block or part.flow == Vector3.ZERO else null
 
 
 func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
@@ -306,29 +297,9 @@ func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block:
 		return null
 	var next_position := block.position + (part.flow as Vector3i)
 	var next_block := all_blocks.get(next_position) as RoommateBlock
-	
-	match slot_id:
-		RoommateBlock.Slot.OBLIQUE:
-			return part
-		RoommateBlock.Slot.OBLIQUE_SIDE_LEFT, RoommateBlock.Slot.OBLIQUE_SIDE_RIGHT:
-			return part if next_block and next_block.type_id != RoommateBlock.OBLIQUE_TYPE else null
-		_:
-			if not next_block or part.flow == Vector3.ZERO:
-				return part
-			if next_block.type_id == RoommateBlock.OBLIQUE_TYPE:
-				var next_oblique_part := next_block.slots.get(RoommateBlock.Slot.OBLIQUE) as RoommatePart
-				var current_oblique_part := block.slots.get(RoommateBlock.Slot.OBLIQUE) as RoommatePart
-				if not next_oblique_part or not current_oblique_part or current_oblique_part.flow == next_oblique_part.flow:
-					return null
-				for i in 3:
-					if is_zero_approx(next_oblique_part.flow[i]) and is_zero_approx(current_oblique_part.flow[i]):
-						return null
-				var flow_dot := current_oblique_part.flow.dot(next_oblique_part.flow)
-				return part if flow_dot > 0 and not is_zero_approx(flow_dot) else null
-			return null
-	
-	push_error("Unexpected slot_id while processing oblique part.")
-	return null
+	if slot_id == RoommateBlock.Slot.OBLIQUE:
+		return part
+	return part if not next_block or part.flow == Vector3.ZERO else null
 
 
 func _process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
