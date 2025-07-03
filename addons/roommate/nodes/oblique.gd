@@ -24,6 +24,7 @@ extends RoommateBlocksArea
 		oblique_part_flipped = value
 		update_gizmos()
 
+@export var clear_blocks := true
 @export var fill := false
 @export var fill_start_distance := 0.7
 
@@ -55,8 +56,9 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 		if has_fill:
 			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
 			return new_block
-		if plane.is_point_over(new_block.center) or not fill:
+		if not clear_blocks:
 			return null
+		new_block.type_id = RoommateBlock.SPACE_TYPE
 		var space_hide_predicate := func(part: RoommatePart) -> bool:
 			var extend_axis_vector := Vector3.ZERO
 			extend_axis_vector[extend_axis] = 1
