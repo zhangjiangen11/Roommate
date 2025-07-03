@@ -9,6 +9,10 @@
 @tool
 extends EditorPlugin
 
+const SETTINGS_PATH := "plugins/roommate/%s"
+const GENERATE_SHORTCUT_SETTING := SETTINGS_PATH % "generate_root_nodes_shortcut"
+
+const GENERATE_SHORTCUT_RESOURCE := preload("./defaults/default_generate_shortcut.tres")
 const ROOT_ACTIONS_SCENE := preload("./controls/roommate_root_actions/roommate_root_actions.tscn")
 
 var _root_actions: Control
@@ -31,6 +35,19 @@ func _exit_tree() -> void:
 	remove_node_3d_gizmo_plugin(_gizmo_plugin)
 
 
+func _shortcut_input(event: InputEvent) -> void:
+	if not event.is_pressed() or event.is_echo(): 
+		return
+	var settings := get_editor_interface().get_editor_settings()
+	var shortcut := settings.get_setting(GENERATE_SHORTCUT_SETTING) as Shortcut
+	if not shortcut:
+		shortcut = GENERATE_SHORTCUT_RESOURCE.duplicate(true)
+		settings.set_setting(GENERATE_SHORTCUT_SETTING, shortcut)
+		settings.emit_changed()
+	if shortcut.matches_event(event):
+		_generate_root_nodes()
+
+
 func _update_controls_visibility() -> void:
 	if not _root_actions:
 		return
@@ -38,3 +55,18 @@ func _update_controls_visibility() -> void:
 	var is_extends := func(node: Node) -> bool:
 		return node is RoommateRoot
 	_root_actions.visible = nodes.any(is_extends)
+
+
+func _generate_root_nodes() -> void:
+	var selected_nodes := get_editor_interface().get_selection().get_selected_nodes()
+	var scene_root := get_editor_interface().get_edited_scene_root()
+	var roots: Array[RoommateRoot] = []
+	roots.assign(scene_root.find_children("*", RoommateRoot.get_class_name()))
+	var filter_by_child := func(root: RoommateRoot) -> bool:
+		for node in selected_nodes:
+			if root == node or root.is_ancestor_of(node):
+				return true
+		return false
+	for node in roots.filter(filter_by_child):
+		var root := node as RoommateRoot
+		root.generate()
