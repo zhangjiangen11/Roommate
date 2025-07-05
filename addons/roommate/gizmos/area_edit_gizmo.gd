@@ -70,7 +70,6 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 	var projected_hit := (hit_position - handle_position).project(handle_normal) + handle_position
 	
 	var local_hit := original_area_global_transform.affine_inverse() * projected_hit
-	var local_handle_normal := (area.transform.basis * handle_direction).normalized()
 	
 	var distance_sign := signf((projected_hit - original_area_global_transform.origin).dot(handle_normal))
 	var delta_to_center := local_hit.length() * distance_sign
@@ -89,8 +88,8 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 	if Input.is_physical_key_pressed(KEY_CTRL):
 		new_area_size = snappedf(new_area_size, 1)
 	new_area_size = maxf(new_area_size, MIN_AREA_SIZE)
-	var grow_start := original_area_transform.origin - local_handle_normal * area.scale * original_area_size[handle_axis_index] / 2
-	area.position = grow_start + local_handle_normal * area.scale * new_area_size / 2
+	var grow_start := original_area_transform.origin - area.global_transform.basis * handle_direction * original_area_size[handle_axis_index] / 2
+	area.position = grow_start + area.global_transform.basis * handle_direction * new_area_size / 2
 	area.size[handle_axis_index] = new_area_size
 
 
