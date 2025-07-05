@@ -54,6 +54,30 @@ func select_blocks_by_type(type_id: StringName) -> BLOCKS_SELECTOR:
 	return select_blocks(check_selection)
 
 
+func select_blocks_by_extreme(axis: Vector3) -> BLOCKS_SELECTOR:
+	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
+		var max_position := -Vector3.INF
+		var min_position := Vector3.INF
+		for key in source_blocks.keys():
+			var position := key as Vector3i
+			for i in 3:
+				max_position[i] = maxf(max_position[i], position[i])
+				min_position[i] = minf(min_position[i], position[i])
+		if not AABB(min_position, Vector3.ZERO).expand(max_position).has_point(offset_position):
+			return false
+		for i in 3:
+			if axis[i] == 0:
+				continue
+			var max_delta := axis[i] if axis[i] > 0 else 0 
+			var min_delta := axis[i] if axis[i] < 0 else 0 
+			var over_min: bool = offset_position[i] >= min_position[i] - min_delta
+			var below_max: bool = offset_position[i] <= max_position[i] - max_delta
+			if over_min and below_max:
+				return false
+		return true
+	return select_blocks(check_selection)
+
+
 func select_edge_blocks(position_changes: Array[Vector3i], max_counts: Array[int]) -> BLOCKS_SELECTOR:
 	var check_selection := func (offset_position: Vector3i, block: RoommateBlock, source_blocks: Dictionary) -> bool:
 		if not source_blocks.has(offset_position):
