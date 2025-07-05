@@ -9,6 +9,7 @@
 @tool
 extends RefCounted
 
+# omid - operation mode id
 var mode := &"omid_include"
 var offset := Vector3i.ZERO
 var check_selection: Callable
