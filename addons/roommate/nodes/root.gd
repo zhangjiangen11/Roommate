@@ -327,7 +327,7 @@ func _resolve_mesh_container() -> Node3D:
 		container.name = mesh_container_name
 		add_child(container)
 		container.owner = owner
-		linked_mesh_container = container.get_path()
+		linked_mesh_container = get_path_to(container)
 	return container
 
 

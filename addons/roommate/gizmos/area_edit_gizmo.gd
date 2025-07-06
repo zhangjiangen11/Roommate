@@ -22,7 +22,6 @@ const HANDLE_DIRECTIONS: Array[Vector3] = [
 ]
 
 var handles_3d_size: float = 0.0
-var _original_area_transform: Variant = null
 var _original_area_global_transform: Variant = null
 var _original_area_size: Variant = null
 
@@ -39,8 +38,6 @@ func _get_handle_name(handle_id: int, secondary: bool) -> String:
 
 func _get_handle_value(handle_id: int, secondary: bool) -> Variant:
 	var area := get_node_3d() as RoommateBlocksArea
-	if _original_area_transform == null:
-		_original_area_transform = area.transform
 	if _original_area_global_transform == null:
 		_original_area_global_transform = area.global_transform
 	if _original_area_size == null:
@@ -50,7 +47,6 @@ func _get_handle_value(handle_id: int, secondary: bool) -> Variant:
 
 func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: Vector2) -> void:
 	var area := get_node_3d() as RoommateBlocksArea
-	var original_area_transform := _original_area_transform as Transform3D
 	var original_area_global_transform := _original_area_global_transform as Transform3D
 	var original_area_size := _original_area_size as Vector3
 	
@@ -70,7 +66,6 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 	var projected_hit := (hit_position - handle_position).project(handle_normal) + handle_position
 	
 	var local_hit := original_area_global_transform.affine_inverse() * projected_hit
-	
 	var distance_sign := signf((projected_hit - original_area_global_transform.origin).dot(handle_normal))
 	var delta_to_center := local_hit.length() * distance_sign
 	
@@ -88,13 +83,13 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 	if Input.is_physical_key_pressed(KEY_CTRL):
 		new_area_size = snappedf(new_area_size, 1)
 	new_area_size = maxf(new_area_size, MIN_AREA_SIZE)
-	var grow_start := original_area_transform.origin - area.global_transform.basis * handle_direction * original_area_size[handle_axis_index] / 2
-	area.position = grow_start + area.global_transform.basis * handle_direction * new_area_size / 2
+	var grow_direction := area.global_transform.basis * handle_direction
+	var grow_start := original_area_global_transform.origin - grow_direction * original_area_size[handle_axis_index] / 2
+	area.global_position = grow_start + grow_direction * new_area_size / 2
 	area.size[handle_axis_index] = new_area_size
 
 
 func _commit_handle(handle_id: int, secondary: bool, restore, cancel: bool) -> void:
-	_original_area_transform = null
 	_original_area_global_transform = null
 	_original_area_size = null
 
