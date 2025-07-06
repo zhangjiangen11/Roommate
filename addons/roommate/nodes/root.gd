@@ -9,10 +9,15 @@
 @tool
 @icon("../icons/root_icon.svg")
 class_name RoommateRoot
-extends MeshInstance3D
+extends Node3D
 ## Node that creates mesh, collision and scenes. 
 ## 
 ## Set [RoommateBlocksArea] or it's derived nodes as a child to affect generation.
+
+const MESH_SINGLE := &"mtid_single"
+
+const COLLISION_CONCAVE := &"csid_concave"
+const COLLISION_CONVEX := &"csid_convex"
 
 @export var block_size := 1.0:
 	set(value):
@@ -26,16 +31,29 @@ extends MeshInstance3D
 @export var global_style: RoommateStyle = null
 
 @export_group("Mesh")
+@export_enum("Single Mesh") var mesh_type := "Single Mesh":
+	set(value):
+		const MESH_MAP := {
+			"Single Mesh": MESH_SINGLE
+		}
+		mesh_type = value
+		_mesh_type_id = MESH_MAP[value]
+@export_node_path("Node3D") var linked_mesh_container: NodePath
 @export var index_mesh := true
 @export var generate_normals := true
 @export var generate_tangents := true
+
+@export_group("Mesh Container")
+@export var mesh_container_name := &"RoommateMeshContainer"
+@export var create_mesh_container_if_missing := true
+@export var reset_mesh_position := true
 
 @export_group("Collision")
 @export_enum("Concave", "Convex") var collision_shape := "Concave":
 	set(value):
 		const SHAPE_MAP := {
-			"Concave": &"csid_concave",
-			"Convex": &"csid_convex",
+			"Concave": COLLISION_CONCAVE,
+			"Convex": COLLISION_CONVEX,
 		}
 		collision_shape = value
 		_collision_shape_id = SHAPE_MAP[value]
@@ -45,13 +63,15 @@ extends MeshInstance3D
 @export var scenes_group := &"roommate_generated_scenes"
 @export var transform_scene_relative_to_part := true
 @export var use_scenes_fallback_parent := true
-@export var scenes_fallback_parent_name := &"RoommateFallbackContainer"
+@export var scenes_fallback_parent_name := &"RoommateSceneFallbackContainer"
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
+@export var bake_nav_on_thread := true
 
-var _collision_shape_id := &"csid_concave"
+var _mesh_type_id := MESH_SINGLE
+var _collision_shape_id := COLLISION_CONCAVE
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
 	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
@@ -133,29 +153,22 @@ func generate() -> void:
 						collision_faces, scene_infos)
 	
 	# applying mesh
-	var result_mesh := ArrayMesh.new()
-	for surface_material in surface_tools:
-		var tool := surface_tools[surface_material] as SurfaceTool
-		if index_mesh:
-			tool.index()
-		if generate_normals:
-			tool.generate_normals()
-		if generate_tangents:
-			tool.generate_tangents()
-		tool.commit(result_mesh)
-		result_mesh.surface_set_material(result_mesh.get_surface_count() - 1, surface_material)
-	mesh = result_mesh
+	match _mesh_type_id:
+		MESH_SINGLE:
+			_generate_single_mesh(surface_tools)
+		_:
+			push_error("Unknown mesh type id %s." % _mesh_type_id)
 	
 	# applying collision
 	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
 	if collision_shape_node:
 		var shape: Shape3D
 		match _collision_shape_id:
-			&"csid_concave":
+			COLLISION_CONCAVE:
 				var concave := ConcavePolygonShape3D.new()
 				concave.set_faces(collision_faces)
 				collision_shape_node.shape = concave
-			&"csid_convex":
+			COLLISION_CONVEX:
 				var convex := ConvexPolygonShape3D.new()
 				convex.points = collision_faces.duplicate()
 				collision_shape_node.shape = convex
@@ -200,7 +213,7 @@ func generate() -> void:
 	# applying navigation
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
 	if navigation_region:
-		navigation_region.bake_navigation_mesh()
+		navigation_region.bake_navigation_mesh(bake_nav_on_thread)
 
 
 func register_block_type_id(block_type_id: StringName, part_processor: Callable) -> void:
@@ -280,6 +293,42 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 			surface_tools[part_material] = new_surface_tool
 		var surface_tool := surface_tools[part_material] as SurfaceTool
 		surface_tool.append_from(part_mesh, 0, part.mesh_transform.translated(part_origin))
+
+
+func _generate_single_mesh(surface_tools: Dictionary) -> void:
+	var container := _resolve_mesh_container() as MeshInstance3D
+	if not container:
+		return
+	var result_mesh := ArrayMesh.new()
+	for surface_material in surface_tools:
+		var tool := surface_tools[surface_material] as SurfaceTool
+		if index_mesh:
+			tool.index()
+		if generate_normals:
+			tool.generate_normals()
+		if generate_tangents:
+			tool.generate_tangents()
+		tool.commit(result_mesh)
+		result_mesh.surface_set_material(result_mesh.get_surface_count() - 1, surface_material)
+	container.mesh = result_mesh
+
+
+func _resolve_mesh_container() -> Node3D:
+	var container := get_node_or_null(linked_mesh_container) as Node3D
+	if container:
+		if _mesh_type_id == MESH_SINGLE and not container is MeshInstance3D:
+			push_error("Wrong type of mesh container. MeshInstance3D expected.")
+			return null
+		if reset_mesh_position:
+			container.transform = Transform3D.IDENTITY
+		return container
+	if create_mesh_container_if_missing:
+		container = MeshInstance3D.new() if _mesh_type_id == MESH_SINGLE else Node3D.new()
+		container.name = mesh_container_name
+		add_child(container)
+		container.owner = owner
+		linked_mesh_container = container.get_path()
+	return container
 
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
