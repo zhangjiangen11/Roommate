@@ -19,6 +19,9 @@ const MESH_SINGLE := &"mtid_single"
 const COLLISION_CONCAVE := &"csid_concave"
 const COLLISION_CONVEX := &"csid_convex"
 
+const NAV_BAKED := &"nmtid_baked"
+const NAV_ASSEMBLED := &"nmtid_assembled"
+
 @export var block_size := 1.0:
 	set(value):
 		block_size = value
@@ -39,14 +42,11 @@ const COLLISION_CONVEX := &"csid_convex"
 		mesh_type = value
 		_mesh_type_id = MESH_MAP[value]
 @export_node_path("Node3D") var linked_mesh_container: NodePath
+@export var create_mesh_container_if_missing := true
+@export var mesh_container_name := &"RoommateMeshContainer"
 @export var index_mesh := true
 @export var generate_normals := true
 @export var generate_tangents := true
-
-@export_group("Mesh Container")
-@export var mesh_container_name := &"RoommateMeshContainer"
-@export var create_mesh_container_if_missing := true
-@export var reset_mesh_position := true
 
 @export_group("Collision")
 @export_enum("Concave", "Convex") var collision_shape := "Concave":
@@ -67,11 +67,20 @@ const COLLISION_CONVEX := &"csid_convex"
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
+@export_enum("Baked", "Assembled") var nav_mesh_type := "Baked":
+	set(value):
+		const NAV_MAP := {
+			"Baked": NAV_BAKED,
+			"Assembled": NAV_ASSEMBLED,
+		}
+		nav_mesh_type = value
+		_nav_mesh_type_id = NAV_MAP[value]
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 @export var bake_nav_on_thread := true
 
 var _mesh_type_id := MESH_SINGLE
 var _collision_shape_id := COLLISION_CONCAVE
+var _nav_mesh_type_id := NAV_BAKED
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
 	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
@@ -137,6 +146,7 @@ func generate() -> void:
 	var surface_tools := {}
 	var collision_faces := PackedVector3Array()
 	var scene_infos: Array[Dictionary] = []
+	var nav_tool := SurfaceTool.new()
 	
 	# generating everything
 	for block_position in all_blocks:
@@ -150,7 +160,7 @@ func generate() -> void:
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
 				_generate_part(processed_part, block, surface_tools, 
-						collision_faces, scene_infos)
+						collision_faces, scene_infos, nav_tool)
 	
 	# applying mesh
 	match _mesh_type_id:
@@ -213,7 +223,19 @@ func generate() -> void:
 	# applying navigation
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
 	if navigation_region:
-		navigation_region.bake_navigation_mesh(bake_nav_on_thread)
+		var nav_mesh := navigation_region.navigation_mesh
+		if not nav_mesh:
+			nav_mesh = NavigationMesh.new()
+			navigation_region.navigation_mesh = nav_mesh
+		match _nav_mesh_type_id:
+			NAV_BAKED:
+				navigation_region.bake_navigation_mesh(bake_nav_on_thread)
+			NAV_ASSEMBLED:
+				nav_tool.index()
+				nav_mesh.create_from_mesh(nav_tool.commit())
+				navigation_region.update_gizmos()
+			_:
+				push_error("Unknown nav mesh type id %s." % _nav_mesh_type_id)
 
 
 func register_block_type_id(block_type_id: StringName, part_processor: Callable) -> void:
@@ -236,7 +258,7 @@ func clear_scenes() -> void:
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
 		surface_tools: Dictionary, collision_faces: PackedVector3Array,
-		scene_infos: Array[Dictionary]) -> void:
+		scene_infos: Array[Dictionary], nav_tool: SurfaceTool) -> void:
 	if not part:
 		return
 	var part_origin := parent_block.position * block_size + block_size * part.anchor
@@ -252,6 +274,10 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 		info[&"parent_path"] = part.scene_parent_path
 		info.make_read_only()
 		scene_infos.append(info)
+	
+	if part.nav_mesh:
+		for surface_id in part.nav_mesh.get_surface_count():
+			nav_tool.append_from(part.nav_mesh, surface_id, part.nav_transform.translated(part_origin))
 	
 	if not part.mesh:
 		return
@@ -319,8 +345,6 @@ func _resolve_mesh_container() -> Node3D:
 		if _mesh_type_id == MESH_SINGLE and not container is MeshInstance3D:
 			push_error("Wrong type of mesh container. MeshInstance3D expected.")
 			return null
-		if reset_mesh_position:
-			container.transform = Transform3D.IDENTITY
 		return container
 	if create_mesh_container_if_missing:
 		container = MeshInstance3D.new() if _mesh_type_id == MESH_SINGLE else Node3D.new()

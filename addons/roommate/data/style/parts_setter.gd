@@ -26,6 +26,8 @@ var collision_transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"collision_transform", TRANSFORM3D_SETTER)
 var scene_transform: TRANSFORM3D_SETTER:
 	get: return resolve_value_setter(&"scene_transform", TRANSFORM3D_SETTER)
+var nav_transform: TRANSFORM3D_SETTER:
+	get: return resolve_value_setter(&"nav_transform", TRANSFORM3D_SETTER)
 
 var mesh: MESH_SETTER:
 	get: return resolve_value_setter(&"mesh", MESH_SETTER)
@@ -33,6 +35,8 @@ var collision_mesh: MESH_SETTER:
 	get: return resolve_value_setter(&"collision_mesh", MESH_SETTER)
 var scene: PACKED_SCENE_SETTER:
 	get: return resolve_value_setter(&"scene", PACKED_SCENE_SETTER)
+var nav_mesh: MESH_SETTER:
+	get: return resolve_value_setter(&"nav_mesh", MESH_SETTER)
 
 var scene_parent_path: NODE_PATH_SETTER:
 	get: return resolve_value_setter(&"scene_parent_path", NODE_PATH_SETTER)
