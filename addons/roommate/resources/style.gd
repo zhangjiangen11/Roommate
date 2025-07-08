@@ -7,6 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
+@icon("../icons/style.svg")
 class_name RoommateStyle
 extends Resource
 ## Base class for generating rulesets and changing [RoommatePart]

@@ -7,7 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
-@icon("../icons/root_icon.svg")
+@icon("../icons/root.svg")
 class_name RoommateRoot
 extends Node3D
 ## Node that creates mesh, collision and scenes. 

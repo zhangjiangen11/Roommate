@@ -7,6 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
+@icon("../icons/space.svg")
 class_name RoommateSpace
 extends RoommateBlocksArea
 ## Area that represents empty space of a room.

@@ -7,6 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
+@icon("../icons/oblique.svg")
 class_name RoommateOblique
 extends RoommateBlocksArea
 ## Area that represents sloped surface

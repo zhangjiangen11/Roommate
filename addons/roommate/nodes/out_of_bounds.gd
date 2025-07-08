@@ -7,6 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
+@icon("../icons/out_of_bounds.svg")
 class_name RoommateOutOfBounds
 extends RoommateBlocksArea
 ## Area that represents filled space of a room.

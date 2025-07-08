@@ -7,6 +7,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 @tool
+@icon("../icons/blocks_area.svg")
 class_name RoommateBlocksArea
 extends Node3D
 ## Base class for creating multiple [RoommateBlock] and applying styles over 
