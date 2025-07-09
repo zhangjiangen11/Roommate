@@ -4,6 +4,10 @@
 
 Roommate is hassle-free and easy to use 3D level builder plugin for Godot 4. Originally it's intended for creating an indoors environment, but can be repurposed for different use cases like creating cityscape background, adding objects in batch (props, lights, NPCs) and so on.
 
+## Learn
+
+[Repository with examples](https://github.com/Hoork/roommate_examples/)
+
 ## Features
 
 - Generate level's mesh, collision, scenes and navigation in one click.
