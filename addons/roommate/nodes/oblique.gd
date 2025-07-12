@@ -25,7 +25,8 @@ extends RoommateBlocksArea
 		oblique_part_flipped = value
 		update_gizmos()
 
-@export var clear_blocks := true
+@export var clear_over := true
+@export var clear_under := true
 @export var fill := false
 @export var fill_start_distance := 0.7
 
@@ -52,21 +53,20 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	var anchor := intersection - new_block.center + Vector3.ONE / 2
 	var plane_distance := plane.distance_to(new_block.center)
 	var has_fill := plane_distance <= minf(-fill_start_distance, 0) and fill
+	var is_over_plane := plane.is_point_over(new_block.center)
 	
 	if not anchor.clamp(Vector3.ZERO, Vector3.ONE).is_equal_approx(anchor):
 		if has_fill:
 			new_block.type_id = RoommateBlock.OUT_OF_BOUNDS_TYPE
 			return new_block
-		if not clear_blocks:
+		if (not clear_over and is_over_plane) or (not clear_under and not is_over_plane):
 			return null
 		new_block.type_id = RoommateBlock.SPACE_TYPE
 		var space_hide_predicate := func(part: RoommatePart) -> bool:
 			var extend_axis_vector := Vector3.ZERO
 			extend_axis_vector[extend_axis] = 1
-			return not plane.is_point_over(new_block.center) and part.flow * extend_axis_vector == Vector3.ZERO
+			return not is_over_plane and part.flow * extend_axis_vector == Vector3.ZERO
 		new_block.slots = _create_visible_space_parts(space_hide_predicate)
-		new_block.slots[RoommateBlock.Slot.OBLIQUE] = _create_default_part(Vector3.ONE / 2, 
-				plane.normal if fill else Vector3.ZERO, Transform3D.IDENTITY, false)
 		return new_block
 	
 	var part_scale := (used_size.length() - max_side_size) / max_side_size + 1
