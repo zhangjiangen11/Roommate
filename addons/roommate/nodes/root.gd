@@ -28,10 +28,11 @@ const NAV_ASSEMBLED := &"nmtid_assembled"
 		for node in find_children("*", RoommateBlocksArea.get_class_name()):
 			var area := node as RoommateBlocksArea
 			area.update_gizmos()
+@export var global_style: RoommateStyle = null
+
 @export var scale_with_block_size := true
 @export var force_white_vertex_color := true
-
-@export var global_style: RoommateStyle = null
+@export var generate_on_ready := false
 
 @export_group("Mesh")
 @export_enum("Single Mesh") var mesh_type := "Single Mesh":
@@ -90,6 +91,11 @@ var _part_processors := {
 
 static func get_class_name() -> StringName:
 	return &"RoommateRoot"
+
+
+func _ready() -> void:
+	if not Engine.is_editor_hint() and generate_on_ready:
+		generate()
 
 
 func generate() -> void:
