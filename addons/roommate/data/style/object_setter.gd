@@ -28,7 +28,7 @@ func resolve_value_setter(property_name: StringName, setter_script: Script) -> B
 	if _value_setters.has(property_name):
 		var existing_setter := _value_setters[property_name] as BASE_VALUE_SETTER
 		if not setter_script.instance_has(existing_setter):
-			push_error("setter %s doesnt have exprected type" % property_name)
+			push_error("ROOMMATE: Setter %s doesn't have expected type." % property_name)
 		return existing_setter
 	var new_setter := setter_script.new() as BASE_VALUE_SETTER
 	new_setter.property_name = property_name

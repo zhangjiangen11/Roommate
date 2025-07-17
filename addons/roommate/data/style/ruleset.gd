@@ -18,9 +18,9 @@ var _parts_setters: Array[PARTS_SETTER] = []
 
 func apply(source_blocks: Dictionary) -> void:
 	if _blocks_selectors.size() == 0:
-		push_warning("Ruleset doesnt have blocks selectors.")
+		push_warning("ROOMMATE: Ruleset doesn't have blocks selectors.")
 	if _parts_setters.size() == 0:
-		push_warning("Ruleset doesnt have parts setters.")
+		push_warning("ROOMMATE: Ruleset doesn't have parts setters.")
 	for block_position in source_blocks:
 		var include := false
 		var block := source_blocks[block_position] as RoommateBlock
@@ -30,7 +30,7 @@ func apply(source_blocks: Dictionary) -> void:
 			continue
 		for setter in _parts_setters:
 			if not setter:
-				push_warning("Parts setter is null.")
+				push_warning("ROOMMATE: Parts setter is null.")
 				continue
 			setter.apply(block)
 

@@ -62,7 +62,7 @@ func apply(block: RoommateBlock) -> void:
 		for surface_id in surface_overrides:
 			var override_setter := surface_overrides[surface_id] as SURFACE_OVERRIDE_SETTER
 			if not override_setter:
-				push_warning("Surface override setter is null.")
+				push_warning("ROOMMATE: Surface override setter is null.")
 				continue
 			var current_override := current_part.resolve_surface_override(surface_id)
 			override_setter.apply(current_override)

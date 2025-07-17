@@ -47,11 +47,11 @@ static func init_settings(editor_settings: EditorSettings) -> void:
 static func get_shortcut(setting_id: String, editor_settings: EditorSettings) -> InputEventKey:
 	var path := _get_path(setting_id)
 	if not editor_settings.has_setting(path):
-		push_error("Editor setting %s doesnt exist." % path)
+		push_error("ROOMMATE: Editor setting %s doesn't exist." % path)
 		return null
 	var shortcut := editor_settings.get_setting(path) as InputEventKey
 	if not shortcut:
-		push_error("Wrong type of editor setting %s. InputEventKey expected." % path)
+		push_error("ROOMMATE: Wrong type of editor setting %s. InputEventKey expected." % path)
 		return null
 	return shortcut
 
@@ -72,16 +72,16 @@ static func get_or_default(setting_id: String) -> Variant:
 	var path := _get_path(setting_id)
 	var default_value: Variant = SETTING_DEFAULTS[setting_id]
 	if not ProjectSettings.has_setting(path):
-		push_error("Project setting %s doesnt exists." % path)
+		push_error("ROOMMATE: Project setting %s doesn't exists." % path)
 		return default_value
 	var value := ProjectSettings.get_setting_with_override(path)
 	if typeof(value) != typeof(default_value):
-		push_error("Wrong type of project setting %s. Type %d expected." % [path, typeof(default_value)])
+		push_error("ROOMMATE: Wrong type of project setting %s. Type %d expected." % [path, typeof(default_value)])
 		return default_value
 	return ProjectSettings.get_setting_with_override(path)
 
 
 static func _get_path(settind_id: StringName) -> String:
 	if not settind_id.begins_with("stid_"):
-		push_error("Setting Id must start with stid_ prefix. Received '%s'." % settind_id)
+		push_error("ROOMMATE: Setting Id must start with stid_ prefix. Received '%s'." % settind_id)
 	return SETTINGS_PATH_TEMPLATE % settind_id.trim_prefix("stid_")

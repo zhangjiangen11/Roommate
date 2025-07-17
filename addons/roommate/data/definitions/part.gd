@@ -39,7 +39,7 @@ func resolve_surface_override(surface_id: int) -> RoommateSurfaceOverride:
 
 func resolve_surface_override_with_fallback(surface_id: int) -> RoommateSurfaceOverride:
 	if not fallback_surface_override:
-		push_warning("fallback_surface_override is null. Creating new one.")
+		push_warning("ROOMMATE: fallback_surface_override is null. Creating new one.")
 		fallback_surface_override = RoommateSurfaceOverride.new()
 	if surface_overrides.has(surface_id):
 		var override := surface_overrides[surface_id] as RoommateSurfaceOverride

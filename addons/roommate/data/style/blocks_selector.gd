@@ -17,12 +17,12 @@ var check_selection: Callable
 
 func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_included: bool) -> bool:
 	if not check_selection.is_valid():
-		push_error("check_selection is not valid")
+		push_error("ROOMMATE: check_selection is not valid.")
 		return is_included
 	var offset_position := block.position - offset
 	var is_selected := check_selection.call(offset_position, block, source_blocks)
 	if not is_selected is bool:
-		push_error("check_selection returned value of type %s. Bool expected" % typeof(is_selected))
+		push_error("ROOMMATE: check_selection returned value of type %s. Bool expected." % typeof(is_selected))
 		is_selected = false
 	
 	if not is_selected:
@@ -40,7 +40,7 @@ func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_includ
 		&"omid_intersect":
 			return is_included
 	
-	push_warning("Unexpected mode id %s." % mode)
+	push_warning("ROOMMATE: Unexpected mode id %s." % mode)
 	return is_included
 
 

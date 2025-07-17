@@ -105,10 +105,10 @@ func generate() -> void:
 	areas.assign(child_areas.filter(_filter_by_parents.bind(child_roots)))
 	areas.sort_custom(_sort_by_area_apply_order)
 	if child_roots.size() > 0:
-		push_warning("RoommateRoot has other RoommateRoots as a children. " + 
+		push_warning("ROOMMATE: RoommateRoot has other RoommateRoots as a children. " + 
 				"Their BlocksAreas are ignored.")
 	if areas.size() == 0:
-		push_warning("RoommateRoot doesnt own any blocks areas.")
+		push_warning("ROOMMATE: RoommateRoot doesn't own any blocks areas.")
 		return
 	
 	# Creating all the blocks that defined by areas and applying styles
@@ -156,7 +156,7 @@ func generate() -> void:
 	for block_position in all_blocks:
 		var block := all_blocks[block_position] as RoommateBlock
 		if not _part_processors.has(block.type_id):
-			push_error("Unknown block type: %s." % block.type_id)
+			push_error("ROOMMATE: Unknown block type: %s." % block.type_id)
 			continue
 		var processor := _part_processors[block.type_id] as Callable
 		for slot_id in block.slots:
@@ -171,7 +171,7 @@ func generate() -> void:
 		MESH_SINGLE:
 			_generate_single_mesh(surface_tools)
 		_:
-			push_error("Unknown mesh type id %s." % _mesh_type_id)
+			push_error("ROOMMATE: Unknown mesh type id %s." % _mesh_type_id)
 	
 	# applying collision
 	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
@@ -187,7 +187,7 @@ func generate() -> void:
 				convex.points = collision_faces.duplicate()
 				collision_shape_node.shape = convex
 			_:
-				push_error("Unknown collision shape id %s." % _collision_shape_id)
+				push_error("ROOMMATE: Unknown collision shape id %s." % _collision_shape_id)
 	
 	#applying scenes
 	clear_scenes()
@@ -195,9 +195,9 @@ func generate() -> void:
 		var scene_parent := get_node_or_null(info[&"parent_path"])
 		var valid_parent := scene_parent and (is_ancestor_of(scene_parent) or self == scene_parent)
 		if info[&"parent_path"].is_empty():
-			push_warning("Scene creation. Path is empty")
+			push_warning("ROOMMATE: Scene creation. Path is empty")
 		elif not valid_parent:
-			push_warning("Scene creation. There is no valid node on path %s" % info[&"parent_path"])
+			push_warning("ROOMMATE: Scene creation. There is no valid node on path %s" % info[&"parent_path"])
 		
 		if info[&"parent_path"].is_empty() or not valid_parent:
 			if not use_scenes_fallback_parent:
@@ -239,12 +239,12 @@ func generate() -> void:
 				nav_mesh.create_from_mesh(nav_tool.commit())
 				navigation_region.update_gizmos()
 			_:
-				push_error("Unknown nav mesh type id %s." % _nav_mesh_type_id)
+				push_error("ROOMMATE: Unknown nav mesh type id %s." % _nav_mesh_type_id)
 
 
 func register_block_type_id(block_type_id: StringName, part_processor: Callable) -> void:
 	if _part_processors.has(block_type_id):
-		push_error("Block type %s already registered." % block_type_id)
+		push_error("ROOMMATE: Block type %s already registered." % block_type_id)
 		return
 	_part_processors[block_type_id] = part_processor
 
@@ -295,7 +295,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 			if mesh_arrays[Mesh.ARRAY_INDEX] and mesh_arrays[Mesh.ARRAY_INDEX].size() > 0:
 				mesh_arrays[Mesh.ARRAY_INDEX].reverse()
 			else:
-				push_warning("Cant flip faces. Mesh array doesnt have indexes.")
+				push_warning("ROOMMATE: Can't flip faces. Mesh array doesn't have indexes.")
 		part_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
 		var mesh_data_tool := MeshDataTool.new()
 		var create_error := mesh_data_tool.create_from_surface(part_mesh, 0)
@@ -347,7 +347,7 @@ func _resolve_mesh_container() -> Node3D:
 	var container := get_node_or_null(linked_mesh_container) as Node3D
 	if container:
 		if _mesh_type_id == MESH_SINGLE and not container is MeshInstance3D:
-			push_error("Wrong type of mesh container. MeshInstance3D expected.")
+			push_error("ROOMMATE: Wrong type of mesh container. MeshInstance3D expected.")
 			return null
 		return container
 	if create_mesh_container_if_missing:
