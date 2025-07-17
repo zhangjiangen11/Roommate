@@ -9,10 +9,8 @@
 @tool
 extends EditorPlugin
 
-const SETTINGS_PATH := "plugins/roommate/%s"
-const GENERATE_SHORTCUT_SETTING := SETTINGS_PATH % "generate_root_nodes_shortcut"
+const SETTINGS := preload("./plugin_settings.gd")
 
-const GENERATE_SHORTCUT_RESOURCE := preload("./defaults/default_generate_shortcut.tres")
 const ROOT_ACTIONS_SCENE := preload("./controls/roommate_root_actions/roommate_root_actions.tscn")
 
 var _root_actions: Control
@@ -25,6 +23,7 @@ func _enter_tree() -> void:
 	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as Control
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, _root_actions)
 	_update_controls_visibility()
+	SETTINGS.init_settings(get_editor_interface().get_editor_settings())
 
 
 func _exit_tree() -> void:
@@ -38,13 +37,8 @@ func _exit_tree() -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if not event.is_pressed() or event.is_echo(): 
 		return
-	var settings := get_editor_interface().get_editor_settings()
-	var shortcut := settings.get_setting(GENERATE_SHORTCUT_SETTING) as Shortcut
-	if not shortcut:
-		shortcut = GENERATE_SHORTCUT_RESOURCE.duplicate(true)
-		settings.set_setting(GENERATE_SHORTCUT_SETTING, shortcut)
-		settings.emit_changed()
-	if shortcut.matches_event(event):
+	var shortcut := SETTINGS.get_generate_shortcut(get_editor_interface().get_editor_settings())
+	if shortcut and shortcut.is_match(event):
 		_generate_root_nodes()
 
 
