@@ -30,7 +30,6 @@ const NAV_ASSEMBLED := &"nmtid_assembled"
 		for node in find_children("*", RoommateBlocksArea.get_class_name()):
 			var area := node as RoommateBlocksArea
 			area.update_gizmos()
-@export var global_style: RoommateStyle = null
 
 @export var scale_with_block_size := true
 @export var force_white_vertex_color := true
@@ -203,6 +202,10 @@ func create_blocks() -> Dictionary:
 		push_warning("ROOMMATE: RoommateRoot doesn't own any blocks areas.")
 		return {}
 	
+	var sort_areas := func (a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
+		return a.blocks_apply_order < b.blocks_apply_order
+	areas.sort_custom(sort_areas)
+	
 	# Creating all the blocks that defined by areas and applying styles
 	var all_blocks := {}
 	for area in areas:
@@ -223,20 +226,13 @@ func create_blocks() -> Dictionary:
 	internal_style.force_white_vertex_color = force_white_vertex_color
 	internal_style.apply(all_blocks)
 	
-	# Applying global style
-	if global_style:
-		global_style.apply(all_blocks)
-	
-	# Applying area styles
-	var areas_with_style := areas.filter(_filter_by_style) as Array[RoommateBlocksArea]
-	areas_with_style.sort_custom(_sort_by_style)
-	for area in areas_with_style:
-		var area_blocks := {}
-		for area_block_position in area.get_block_positions(global_transform, block_size):
-			var area_block := all_blocks.get(area_block_position) as RoommateBlock
-			if area_block:
-				area_blocks[area_block_position] = area_block
-		area.style.apply(area_blocks)
+	# Applying stylers
+	var stylers := get_owned_stylers()
+	var sort_stylers := func (a: RoommateStyler, b: RoommateStyler) -> bool:
+		return a.style_apply_order < b.style_apply_order
+	stylers.sort_custom(sort_stylers)
+	for styler in stylers:
+		styler.apply_style(all_blocks, global_transform, block_size)
 	return all_blocks
 
 
@@ -268,7 +264,6 @@ func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
 	var child_roots := find_children("*", get_class_name())
 	var nodes: Array[Node] = []
 	nodes.assign(child_nodes.filter(_filter_by_parents.bind(child_roots)))
-	nodes.sort_custom(_sort_by_area_apply_order)
 	return nodes
 
 
@@ -276,6 +271,12 @@ func get_owned_areas() -> Array[RoommateBlocksArea]:
 	var areas: Array[RoommateBlocksArea] = []
 	areas.assign(get_owned_nodes(RoommateBlocksArea.get_class_name()))
 	return areas
+
+
+func get_owned_stylers() -> Array[RoommateStyler]:
+	var stylers: Array[RoommateStyler] = []
+	stylers.assign(get_owned_nodes(RoommateStyler.get_class_name()))
+	return stylers
 
 
 func get_owned_scenes() -> Array[Node]:
@@ -408,18 +409,6 @@ func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block:
 func _process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
 	return null
-
-
-func _sort_by_area_apply_order(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
-	return a.apply_order < b.apply_order
-
-
-func _sort_by_style(a: RoommateBlocksArea, b: RoommateBlocksArea) -> bool:
-	return a.style.apply_order < b.style.apply_order
-
-
-func _filter_by_style(target: RoommateBlocksArea) -> bool:
-	return target.style != null
 
 
 func _filter_by_parents(target: Node, parents: Array[Node]) -> bool:

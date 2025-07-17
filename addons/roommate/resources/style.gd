@@ -20,8 +20,6 @@ extends Resource
 
 const RULESET := preload("../data/style/ruleset.gd")
 
-@export var apply_order := 0
-
 var _current_rulesets: Array[RULESET] = []
 
 

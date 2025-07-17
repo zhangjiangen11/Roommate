@@ -9,7 +9,7 @@
 @tool
 @icon("../icons/blocks_area.svg")
 class_name RoommateBlocksArea
-extends Node3D
+extends RoommateStyler
 ## Base class for creating multiple [RoommateBlock] and applying styles over 
 ## occupied area.
 ##
@@ -22,8 +22,7 @@ const SNAP_STEP := Vector3.ONE * 0.5
 	set(value):
 		size = value
 		update_gizmos()
-@export var style: RoommateStyle
-@export var apply_order := 0
+@export var blocks_apply_order := 0
 
 var box: AABB:
 	get:
@@ -41,6 +40,12 @@ func _ready():
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED:
 		update_gizmos()
+
+
+func _check_block_for_style(block: RoommateBlock, all_blocks: Dictionary, 
+		root_transform: Transform3D, block_size: float) -> bool:
+	var blocks_range := get_blocks_range(root_transform, block_size)
+	return blocks_range.has_point((block.position as Vector3) + Vector3.ONE / 2)
 
 
 func get_block_positions(root_transform: Transform3D, block_size: float) -> Array[Vector3i]:
