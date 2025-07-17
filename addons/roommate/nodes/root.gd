@@ -93,58 +93,12 @@ static func get_class_name() -> StringName:
 
 func _ready() -> void:
 	if not Engine.is_editor_hint() and generate_on_ready:
-		generate()
+		generate(create_blocks())
 
 
-func generate() -> void:
-	# Searching for areas which are not children of other root nodes
-	var child_areas := find_children("*", RoommateBlocksArea.get_class_name())
-	var child_roots := find_children("*", get_class_name())
-
-	var areas: Array[RoommateBlocksArea] = []
-	areas.assign(child_areas.filter(_filter_by_parents.bind(child_roots)))
-	areas.sort_custom(_sort_by_area_apply_order)
-	if child_roots.size() > 0:
-		push_warning("ROOMMATE: RoommateRoot has other RoommateRoots as a children. " + 
-				"Their BlocksAreas are ignored.")
-	if areas.size() == 0:
-		push_warning("ROOMMATE: RoommateRoot doesn't own any blocks areas.")
+func generate(all_blocks: Dictionary) -> void:
+	if all_blocks.is_empty():
 		return
-	
-	# Creating all the blocks that defined by areas and applying styles
-	var all_blocks := {}
-	for area in areas:
-		var area_blocks := area.create_blocks(global_transform, block_size)
-		for new_block_position in area_blocks:
-			var new_block := area_blocks[new_block_position] as RoommateBlock
-			if not new_block:
-				continue
-			if new_block.type_id == RoommateBlock.OUT_OF_BOUNDS_TYPE:
-				all_blocks.erase(new_block_position)
-				continue
-			all_blocks[new_block_position] = new_block
-	
-	# Applying internal style
-	var internal_style := preload("../resources/internal_style.gd").new()
-	if scale_with_block_size:
-		internal_style.scale = Vector3.ONE * block_size
-	internal_style.force_white_vertex_color = force_white_vertex_color
-	internal_style.apply(all_blocks)
-	
-	# Applying global style
-	if global_style:
-		global_style.apply(all_blocks)
-	
-	# Applying area styles
-	var areas_with_style := areas.filter(_filter_by_style) as Array[RoommateBlocksArea]
-	areas_with_style.sort_custom(_sort_by_style)
-	for area in areas_with_style:
-		var area_blocks := {}
-		for area_block_position in area.get_block_positions(global_transform, block_size):
-			var area_block := all_blocks.get(area_block_position) as RoommateBlock
-			if area_block:
-				area_blocks[area_block_position] = area_block
-		area.style.apply(area_blocks)
 	
 	# creating collections
 	var surface_tools := {}
@@ -202,19 +156,19 @@ func generate() -> void:
 		if info[&"parent_path"].is_empty() or not valid_parent:
 			if not use_scenes_fallback_parent:
 				continue
-			var fallback := get_node_or_null(NodePath(SETTINGS.get_string("stid_scenes_fallback_parent_name")))
+			var fallback := get_node_or_null(NodePath(SETTINGS.get_string(&"stid_scenes_fallback_parent_name")))
 			if not fallback:
 				fallback = Node3D.new()
-				fallback.name = SETTINGS.get_string("stid_scenes_fallback_parent_name")
+				fallback.name = SETTINGS.get_string(&"stid_scenes_fallback_parent_name")
 				add_child(fallback)
 				fallback.owner = owner
-				fallback.add_to_group(SETTINGS.get_string("stid_scenes_group"), true)
+				fallback.add_to_group(SETTINGS.get_string(&"stid_scenes_group"), true)
 			scene_parent = fallback
 		
 		var new_scene := info[&"scene"].instantiate() as Node
 		scene_parent.add_child(new_scene, force_readable_scene_names)
 		new_scene.owner = owner
-		new_scene.add_to_group(SETTINGS.get_string("stid_scenes_group"), true)
+		new_scene.add_to_group(SETTINGS.get_string(&"stid_scenes_group"), true)
 		
 		var node3d_scene := new_scene as Node3D
 		if not node3d_scene:
@@ -233,13 +187,57 @@ func generate() -> void:
 			navigation_region.navigation_mesh = nav_mesh
 		match _nav_mesh_type_id:
 			NAV_BAKED:
-				navigation_region.bake_navigation_mesh(SETTINGS.get_bool("stid_bake_nav_on_thread"))
+				navigation_region.bake_navigation_mesh(SETTINGS.get_bool(&"stid_bake_nav_on_thread"))
 			NAV_ASSEMBLED:
 				nav_tool.index()
 				nav_mesh.create_from_mesh(nav_tool.commit())
 				navigation_region.update_gizmos()
 			_:
 				push_error("ROOMMATE: Unknown nav mesh type id %s." % _nav_mesh_type_id)
+
+
+func create_blocks() -> Dictionary:
+	# Searching for areas which are not children of other root nodes
+	var areas := get_owned_areas()
+	if areas.size() == 0:
+		push_warning("ROOMMATE: RoommateRoot doesn't own any blocks areas.")
+		return {}
+	
+	# Creating all the blocks that defined by areas and applying styles
+	var all_blocks := {}
+	for area in areas:
+		var area_blocks := area.create_blocks(global_transform, block_size)
+		for new_block_position in area_blocks:
+			var new_block := area_blocks[new_block_position] as RoommateBlock
+			if not new_block:
+				continue
+			if new_block.type_id == RoommateBlock.OUT_OF_BOUNDS_TYPE:
+				all_blocks.erase(new_block_position)
+				continue
+			all_blocks[new_block_position] = new_block
+	
+	# Applying internal style
+	var internal_style := preload("../resources/internal_style.gd").new()
+	if scale_with_block_size:
+		internal_style.scale = Vector3.ONE * block_size
+	internal_style.force_white_vertex_color = force_white_vertex_color
+	internal_style.apply(all_blocks)
+	
+	# Applying global style
+	if global_style:
+		global_style.apply(all_blocks)
+	
+	# Applying area styles
+	var areas_with_style := areas.filter(_filter_by_style) as Array[RoommateBlocksArea]
+	areas_with_style.sort_custom(_sort_by_style)
+	for area in areas_with_style:
+		var area_blocks := {}
+		for area_block_position in area.get_block_positions(global_transform, block_size):
+			var area_block := all_blocks.get(area_block_position) as RoommateBlock
+			if area_block:
+				area_blocks[area_block_position] = area_block
+		area.style.apply(area_blocks)
+	return all_blocks
 
 
 func register_block_type_id(block_type_id: StringName, part_processor: Callable) -> void:
@@ -250,14 +248,42 @@ func register_block_type_id(block_type_id: StringName, part_processor: Callable)
 
 
 func clear_scenes() -> void:
-	var all_scenes := get_tree().get_nodes_in_group(SETTINGS.get_string("stid_scenes_group"))
-	var child_roots := find_children("*", get_class_name())
-	var filter_by_self := func (target: Node) -> bool:
-		return is_ancestor_of(target)
-	var scenes := all_scenes.filter(filter_by_self).filter(_filter_by_parents.bind(child_roots)) as Array[Node]
+	var scenes := get_owned_scenes()
 	for scene in scenes:
 		scene.get_parent().remove_child(scene)
 		scene.queue_free()
+
+
+func snap_areas() -> void:
+	var areas := get_owned_areas()
+	for area in areas:
+		var margin := -absf(SETTINGS.get_float(&"stid_area_snap_margin"))
+		var blocks_range := area.get_blocks_range(global_transform, block_size).grow(margin)
+		area.global_position = blocks_range.get_center()
+		area.size = blocks_range.size
+
+
+func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
+	var child_nodes := find_children("*", node_class_name)
+	var child_roots := find_children("*", get_class_name())
+	var nodes: Array[Node] = []
+	nodes.assign(child_nodes.filter(_filter_by_parents.bind(child_roots)))
+	nodes.sort_custom(_sort_by_area_apply_order)
+	return nodes
+
+
+func get_owned_areas() -> Array[RoommateBlocksArea]:
+	var areas: Array[RoommateBlocksArea] = []
+	areas.assign(get_owned_nodes(RoommateBlocksArea.get_class_name()))
+	return areas
+
+
+func get_owned_scenes() -> Array[Node]:
+	var all_scenes := get_tree().get_nodes_in_group(SETTINGS.get_string(&"stid_scenes_group"))
+	var child_roots := find_children("*", get_class_name())
+	var filter_by_self := func (target: Node) -> bool:
+		return is_ancestor_of(target)
+	return all_scenes.filter(filter_by_self).filter(_filter_by_parents.bind(child_roots)) as Array[Node]
 
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
@@ -352,7 +378,7 @@ func _resolve_mesh_container() -> Node3D:
 		return container
 	if create_mesh_container_if_missing:
 		container = MeshInstance3D.new() if _mesh_type_id == MESH_SINGLE else Node3D.new()
-		container.name = SETTINGS.get_string("stid_mesh_container_name")
+		container.name = SETTINGS.get_string(&"stid_mesh_container_name")
 		add_child(container)
 		container.owner = owner
 		linked_mesh_container = get_path_to(container)

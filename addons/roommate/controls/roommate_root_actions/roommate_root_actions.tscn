@@ -15,5 +15,5 @@ popup/item_0/id = 0
 popup/item_1/text = "Clear Scenes"
 popup/item_1/id = 0
 popup/item_2/text = "Snap Areas"
-popup/item_2/id = 2
+popup/item_2/id = 0
 script = ExtResource("2_ybwyx")

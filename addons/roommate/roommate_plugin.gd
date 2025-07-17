@@ -38,9 +38,30 @@ func _exit_tree() -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if not event.is_pressed() or event.is_echo(): 
 		return
-	var shortcut := SETTINGS.get_shortcut("stid_generate_root_nodes_shortcut", get_editor_interface().get_editor_settings())
-	if shortcut and shortcut.is_match(event):
-		_generate_root_nodes()
+	if _match_shortcut(&"stid_generate_root_nodes_shortcut", event):
+		generate_roots(_get_root_nodes_by_selected_children())
+
+
+func generate_roots(roots: Array[RoommateRoot]) -> void:
+	if roots.is_empty():
+		return
+	for root in roots:
+		var blocks := root.create_blocks()
+		root.generate(blocks)
+
+
+func clear_roots_scenes(roots: Array[RoommateRoot]) -> void:
+	if roots.is_empty():
+		return
+	for root in roots:
+		root.clear_scenes()
+
+
+func snap_roots_areas(roots: Array[RoommateRoot]) -> void:
+	if roots.is_empty():
+		return
+	for root in roots:
+		root.snap_areas()
 
 
 func _update_controls_visibility() -> void:
@@ -52,7 +73,13 @@ func _update_controls_visibility() -> void:
 	_root_actions.visible = nodes.any(is_extends)
 
 
-func _generate_root_nodes() -> void:
+func _match_shortcut(setting_id: StringName, event: InputEvent) -> bool:
+	var editor_settings := get_editor_interface().get_editor_settings()
+	var generate_shortcut := SETTINGS.get_shortcut(setting_id, editor_settings)
+	return generate_shortcut and generate_shortcut.is_match(event)
+
+
+func _get_root_nodes_by_selected_children() -> Array[RoommateRoot]:
 	var selected_nodes := get_editor_interface().get_selection().get_selected_nodes()
 	var scene_root := get_editor_interface().get_edited_scene_root()
 	var roots: Array[RoommateRoot] = []
@@ -62,6 +89,4 @@ func _generate_root_nodes() -> void:
 			if root == node or root.is_ancestor_of(node):
 				return true
 		return false
-	for node in roots.filter(filter_by_child):
-		var root := node as RoommateRoot
-		root.generate()
+	return roots.filter(filter_by_child)

@@ -77,14 +77,14 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 		area.global_position = original_area_global_transform.origin
 		var new_area_size := delta_to_center * 2
 		if Input.is_physical_key_pressed(KEY_CTRL):
-			new_area_size = snappedf(new_area_size, SETTINGS.get_float("stid_area_resize_snap"))
+			new_area_size = snappedf(new_area_size, SETTINGS.get_float(&"stid_area_resize_snap"))
 		area.size[handle_axis_index] = maxf(new_area_size, MIN_AREA_SIZE)
 		return
 #
 #	# growing in one side
 	var new_area_size := delta_to_center + original_area_size[handle_axis_index] / 2
 	if Input.is_physical_key_pressed(KEY_CTRL):
-		new_area_size = snappedf(new_area_size, SETTINGS.get_float("stid_area_resize_snap"))
+		new_area_size = snappedf(new_area_size, SETTINGS.get_float(&"stid_area_resize_snap"))
 	new_area_size = maxf(new_area_size, MIN_AREA_SIZE)
 	var grow_direction := area.global_transform.basis * handle_direction
 	var grow_start := original_area_global_transform.origin - grow_direction * original_area_size[handle_axis_index] / 2

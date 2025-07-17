@@ -9,7 +9,9 @@
 @tool
 extends MenuButton
 
-var plugin: EditorPlugin
+const ROOMMATE := preload("../../roommate_plugin.gd")
+
+var plugin: ROOMMATE
 
 
 func _ready() -> void:
@@ -20,15 +22,14 @@ func _on_popup_menu_index_pressed(index: int) -> void:
 	var nodes := plugin.get_editor_interface().get_selection().get_selected_nodes()
 	var is_extends := func (node: Node) -> bool:
 		return node is RoommateRoot
-	var filtered := nodes.filter(is_extends)
-	if filtered.size() == 0:
+	var roots: Array[RoommateRoot] = []
+	roots.assign(nodes.filter(is_extends))
+	if roots.size() == 0:
 		return
-	for node in filtered:
-		var root := node as RoommateRoot
-		match index:
-			0:
-				root.generate()
-			1:
-				root.clear_scenes()
-			2:
-				pass # TODO: snap areas
+	match index:
+		0:
+			plugin.generate_roots(roots)
+		1:
+			plugin.clear_roots_scenes(roots)
+		2:
+			plugin.snap_roots_areas(roots)

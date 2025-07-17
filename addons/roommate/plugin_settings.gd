@@ -12,13 +12,12 @@ extends RefCounted
 const SETTINGS_PATH_TEMPLATE := "plugins/roommate/%s"
 
 const SETTING_DEFAULTS := {
-	"stid_mesh_container_name": &"RoommateMeshContainer",
-	"stid_scenes_group": &"roommate_generated_scenes",
-	"stid_scenes_fallback_parent_name": &"RoommateSceneFallbackContainer",
-	"stid_bake_nav_on_thread": true,
-	"stid_area_resize_snap": 1.0,
-	"stid_area_snap_margin": 0.0,
-	"stid_area_snap_on_generate": false,
+	&"stid_mesh_container_name": &"RoommateMeshContainer",
+	&"stid_scenes_group": &"roommate_generated_scenes",
+	&"stid_scenes_fallback_parent_name": &"RoommateSceneFallbackContainer",
+	&"stid_bake_nav_on_thread": true,
+	&"stid_area_resize_snap": 1.0,
+	&"stid_area_snap_margin": 0.0,
 }
 
 const SHORTCUT_DEFAULTS := {
@@ -44,7 +43,8 @@ static func init_settings(editor_settings: EditorSettings) -> void:
 		ProjectSettings.set_initial_value(setting_path, default_value)
 
 
-static func get_shortcut(setting_id: String, editor_settings: EditorSettings) -> InputEventKey:
+static func get_shortcut(setting_id: StringName, 
+		editor_settings: EditorSettings) -> InputEventKey:
 	var path := _get_path(setting_id)
 	if not editor_settings.has_setting(path):
 		push_error("ROOMMATE: Editor setting %s doesn't exist." % path)
@@ -56,19 +56,19 @@ static func get_shortcut(setting_id: String, editor_settings: EditorSettings) ->
 	return shortcut
 
 
-static func get_bool(setting_id: String) -> bool:
+static func get_bool(setting_id: StringName) -> bool:
 	return get_or_default(setting_id) as bool
 
 
-static func get_float(setting_id: String) -> float:
+static func get_float(setting_id: StringName) -> float:
 	return get_or_default(setting_id) as float
 
 
-static func get_string(setting_id: String) -> StringName:
+static func get_string(setting_id: StringName) -> StringName:
 	return get_or_default(setting_id) as StringName
 
 
-static func get_or_default(setting_id: String) -> Variant:
+static func get_or_default(setting_id: StringName) -> Variant:
 	var path := _get_path(setting_id)
 	var default_value: Variant = SETTING_DEFAULTS[setting_id]
 	if not ProjectSettings.has_setting(path):
