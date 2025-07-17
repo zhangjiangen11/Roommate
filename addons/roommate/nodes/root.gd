@@ -202,19 +202,19 @@ func generate() -> void:
 		if info[&"parent_path"].is_empty() or not valid_parent:
 			if not use_scenes_fallback_parent:
 				continue
-			var fallback := get_node_or_null(NodePath(SETTINGS.get_scenes_fallback_parent_name()))
+			var fallback := get_node_or_null(NodePath(SETTINGS.get_string("stid_scenes_fallback_parent_name")))
 			if not fallback:
 				fallback = Node3D.new()
-				fallback.name = SETTINGS.get_scenes_fallback_parent_name()
+				fallback.name = SETTINGS.get_string("stid_scenes_fallback_parent_name")
 				add_child(fallback)
 				fallback.owner = owner
-				fallback.add_to_group(SETTINGS.get_scenes_group(), true)
+				fallback.add_to_group(SETTINGS.get_string("stid_scenes_group"), true)
 			scene_parent = fallback
 		
 		var new_scene := info[&"scene"].instantiate() as Node
 		scene_parent.add_child(new_scene, force_readable_scene_names)
 		new_scene.owner = owner
-		new_scene.add_to_group(SETTINGS.get_scenes_group(), true)
+		new_scene.add_to_group(SETTINGS.get_string("stid_scenes_group"), true)
 		
 		var node3d_scene := new_scene as Node3D
 		if not node3d_scene:
@@ -233,7 +233,7 @@ func generate() -> void:
 			navigation_region.navigation_mesh = nav_mesh
 		match _nav_mesh_type_id:
 			NAV_BAKED:
-				navigation_region.bake_navigation_mesh(SETTINGS.get_bake_nav_on_thread())
+				navigation_region.bake_navigation_mesh(SETTINGS.get_bool("stid_bake_nav_on_thread"))
 			NAV_ASSEMBLED:
 				nav_tool.index()
 				nav_mesh.create_from_mesh(nav_tool.commit())
@@ -250,7 +250,7 @@ func register_block_type_id(block_type_id: StringName, part_processor: Callable)
 
 
 func clear_scenes() -> void:
-	var all_scenes := get_tree().get_nodes_in_group(SETTINGS.get_scenes_group())
+	var all_scenes := get_tree().get_nodes_in_group(SETTINGS.get_string("stid_scenes_group"))
 	var child_roots := find_children("*", get_class_name())
 	var filter_by_self := func (target: Node) -> bool:
 		return is_ancestor_of(target)
@@ -352,7 +352,7 @@ func _resolve_mesh_container() -> Node3D:
 		return container
 	if create_mesh_container_if_missing:
 		container = MeshInstance3D.new() if _mesh_type_id == MESH_SINGLE else Node3D.new()
-		container.name = SETTINGS.get_mesh_container_name()
+		container.name = SETTINGS.get_string("stid_mesh_container_name")
 		add_child(container)
 		container.owner = owner
 		linked_mesh_container = get_path_to(container)

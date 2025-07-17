@@ -38,7 +38,7 @@ func _exit_tree() -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if not event.is_pressed() or event.is_echo(): 
 		return
-	var shortcut := SETTINGS.get_generate_shortcut(get_editor_interface().get_editor_settings())
+	var shortcut := SETTINGS.get_shortcut("stid_generate_root_nodes_shortcut", get_editor_interface().get_editor_settings())
 	if shortcut and shortcut.is_match(event):
 		_generate_root_nodes()
 

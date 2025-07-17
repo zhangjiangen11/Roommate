@@ -30,3 +30,5 @@ func _on_popup_menu_index_pressed(index: int) -> void:
 				root.generate()
 			1:
 				root.clear_scenes()
+			2:
+				pass # TODO: snap areas
