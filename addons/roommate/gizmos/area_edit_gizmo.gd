@@ -24,9 +24,11 @@ const HANDLE_DIRECTIONS: Array[Vector3] = [
 var handles_3d_size: float = 0.0
 var _original_area_global_transform: Variant = null
 var _original_area_size: Variant = null
+var _plugin: EditorPlugin
 
 
-func _init() -> void:
+func _init(plugin: EditorPlugin) -> void:
+	_plugin = plugin
 	var version := Engine.get_version_info()
 	if version["major"] == 4 and version["minor"] == 0:
 		handles_3d_size = 0.1
@@ -89,14 +91,28 @@ func _set_handle(handle_id: int, secondary: bool, camera: Camera3D, screen_pos: 
 	area.size[handle_axis_index] = new_area_size
 
 
-func _commit_handle(handle_id: int, secondary: bool, restore, cancel: bool) -> void:
+func _commit_handle(handle_id: int, secondary: bool, restore: Variant, cancel: bool) -> void:
+	var original_transform := _original_area_global_transform as Transform3D
+	var original_size := _original_area_size as Vector3
 	_original_area_global_transform = null
 	_original_area_size = null
+	var area := get_node_3d() as RoommateBlocksArea
+	if cancel:
+		area.size = original_size
+		area.global_position = original_transform.origin
+		return
+	var undo_redo := _plugin.get_undo_redo()
+	undo_redo.create_action("Change Roommate Blocks Area Size")
+	undo_redo.add_undo_property(area, &"global_position", original_transform.origin)
+	undo_redo.add_do_property(area, &"global_position", area.global_position)
+	undo_redo.add_undo_property(area, &"size", original_size)
+	undo_redo.add_do_property(area, &"size", area.size)
+	undo_redo.commit_action()
 
 
 func _draw_area_edit() -> void:
 	var area := get_node_3d() as RoommateBlocksArea
-	var area_selected := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes().has(area)
+	var area_selected := _plugin.get_editor_interface().get_selection().get_selected_nodes().has(area)
 	
 	if not area_selected:
 		return

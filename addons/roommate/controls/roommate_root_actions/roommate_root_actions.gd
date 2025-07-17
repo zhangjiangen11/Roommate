@@ -9,13 +9,15 @@
 @tool
 extends MenuButton
 
+var plugin: EditorPlugin
+
 
 func _ready() -> void:
 	get_popup().index_pressed.connect(_on_popup_menu_index_pressed)
 
 
 func _on_popup_menu_index_pressed(index: int) -> void:
-	var nodes := EditorPlugin.new().get_editor_interface().get_selection().get_selected_nodes()
+	var nodes := plugin.get_editor_interface().get_selection().get_selected_nodes()
 	var is_extends := func (node: Node) -> bool:
 		return node is RoommateRoot
 	var filtered := nodes.filter(is_extends)

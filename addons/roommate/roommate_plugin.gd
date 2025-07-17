@@ -10,17 +10,18 @@
 extends EditorPlugin
 
 const SETTINGS := preload("./plugin_settings.gd")
-
 const ROOT_ACTIONS_SCENE := preload("./controls/roommate_root_actions/roommate_root_actions.tscn")
+const ROOT_ACTIONS_SCRIPT := preload("./controls/roommate_root_actions/roommate_root_actions.gd")
 
 var _root_actions: Control
-var _gizmo_plugin := preload("./gizmos/gizmo_plugin.gd").new()
+var _gizmo_plugin := preload("./gizmos/gizmo_plugin.gd").new(self)
 
 
 func _enter_tree() -> void:
 	get_editor_interface().get_selection().selection_changed.connect(_update_controls_visibility)
 	add_node_3d_gizmo_plugin(_gizmo_plugin)
-	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as Control
+	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as ROOT_ACTIONS_SCRIPT
+	_root_actions.plugin = self
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, _root_actions)
 	_update_controls_visibility()
 	SETTINGS.init_settings(get_editor_interface().get_editor_settings())
