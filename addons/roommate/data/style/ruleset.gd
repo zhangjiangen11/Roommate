@@ -9,8 +9,8 @@
 @tool
 extends RefCounted
 
-const BLOCKS_SELECTOR := preload("./blocks_selector.gd")
-const PARTS_SETTER := preload("./parts_setter.gd")
+const BLOCKS_SELECTOR := preload("./blocks_selectors/blocks_selector.gd")
+const PARTS_SETTER := preload("./object_setters/parts_setter.gd")
 
 var _blocks_selectors: Array[BLOCKS_SELECTOR] = []
 var _parts_setters: Array[PARTS_SETTER] = []
