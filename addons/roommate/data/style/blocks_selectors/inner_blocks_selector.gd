@@ -16,7 +16,7 @@ func _init(init_segments: Array[RoommateSegment]) -> void:
 	segments = init_segments
 
 
-func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
 	if not source_blocks.has(offset_position):
 		return false

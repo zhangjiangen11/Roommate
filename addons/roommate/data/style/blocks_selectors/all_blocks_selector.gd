@@ -10,6 +10,6 @@
 extends "./blocks_selector.gd"
 
 
-func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
 	return true

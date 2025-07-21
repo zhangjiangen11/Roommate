@@ -16,6 +16,6 @@ func _init(init_interval: Vector3i) -> void:
 	interval = init_interval
 
 
-func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
 	return offset_position.snapped(interval) == offset_position

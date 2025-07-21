@@ -32,7 +32,7 @@ func prepare(source_blocks: Dictionary) -> void:
 			push_error("ROOMMATE: prepare_vars returned value of type %s. Dictionary expected." % typeof(new_vars))
 
 
-func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
 	if not _check_selection_valid:
 		return false

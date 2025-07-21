@@ -28,7 +28,7 @@ func prepare(source_blocks: Dictionary) -> void:
 			_min_position[i] = minf(_min_position[i], position[i])
 
 
-func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
 	if not AABB(_min_position, Vector3.ZERO).expand(_max_position).has_point(offset_position):
 		return false

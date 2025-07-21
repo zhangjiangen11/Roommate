@@ -18,7 +18,7 @@ func _init(init_density: float, init_rng: RandomNumberGenerator) -> void:
 	rng = init_rng
 
 
-func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
 	var random_number := rng.randf() if rng else randf()
 	return density >= random_number

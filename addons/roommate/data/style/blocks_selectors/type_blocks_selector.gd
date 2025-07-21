@@ -16,6 +16,6 @@ func _init(init_target_type_id: StringName) -> void:
 	target_type_id = init_target_type_id
 
 
-func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
 	return block.type_id == target_type_id
