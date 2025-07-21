@@ -12,20 +12,11 @@ extends RefCounted
 # omid - operation mode id
 var mode := &"omid_include"
 var offset := Vector3i.ZERO
-var check_selection: Callable
 
 
-func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_included: bool) -> bool:
-	if not check_selection.is_valid():
-		push_error("ROOMMATE: check_selection is not valid.")
-		return is_included
-	var offset_position := block.position - offset
-	var is_selected := check_selection.call(offset_position, block, source_blocks)
-	if not is_selected is bool:
-		push_error("ROOMMATE: check_selection returned value of type %s. Bool expected." % typeof(is_selected))
-		is_selected = false
-	
-	if not is_selected:
+func update_inclusion(block: RoommateBlock, source_blocks: Dictionary,
+		is_included: bool) -> bool:
+	if not _check_selection(block.position - offset, block, source_blocks):
 		if mode == &"omid_intersect":
 			return false
 		return is_included
@@ -40,7 +31,7 @@ func update_inclusion(block: RoommateBlock, source_blocks: Dictionary, is_includ
 		&"omid_intersect":
 			return is_included
 	
-	push_warning("ROOMMATE: Unexpected mode id %s." % mode)
+	push_warning("ROOMMATE: Unexpected operation mode id %s." % mode)
 	return is_included
 
 
@@ -62,3 +53,12 @@ func intersect() -> void:
 
 func set_offset(new_offset: Vector3i) -> void:
 	offset = new_offset
+
+
+func prepare(source_blocks: Dictionary) -> void: # virtual method
+	pass
+
+
+func _check_selection(offset_position: Vector3i, block: RoommateBlock, 
+		source_blocks: Dictionary) -> bool: # virtual method
+	return false
