@@ -27,6 +27,7 @@ const SNAP_STEP := Vector3.ONE * 0.5
 var box: AABB:
 	get:
 		return AABB(-size / 2, size)
+var _styler_range: AABB
 
 
 static func get_class_name() -> StringName:
@@ -42,10 +43,13 @@ func _notification(what: int) -> void:
 		update_gizmos()
 
 
-func _check_block_for_style(block: RoommateBlock, all_blocks: Dictionary, 
-		root_transform: Transform3D, block_size: float) -> bool:
-	var blocks_range := get_blocks_range(root_transform, block_size)
-	return blocks_range.has_point((block.position as Vector3) + Vector3.ONE / 2)
+func _prepare_for_style(all_blocks: Dictionary, root_transform: Transform3D, 
+		block_size: float) -> void:
+	_styler_range = get_blocks_range(root_transform, block_size)
+
+
+func _block_is_selected_for_style(block: RoommateBlock, all_blocks: Dictionary) -> bool:
+	return _styler_range.has_point((block.position as Vector3) + Vector3.ONE / 2)
 
 
 func get_block_positions(root_transform: Transform3D, block_size: float) -> Array[Vector3i]:
@@ -86,6 +90,15 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 	range.size.y = 1 if range.size.y == 0 and size.y != 0 else range.size.y
 	range.size.z = 1 if range.size.z == 0 and size.z != 0 else range.size.z
 	return range
+
+
+func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
+	var margin := absf(SETTINGS.get_float(&"stid_area_snap_margin"))
+	var range := get_blocks_range(root_transform, block_size).grow(-margin)
+	var root_quaternion := root_transform.basis.get_rotation_quaternion()
+	rotation = rotation.snapped(Vector3.ONE * PI / 2)
+	position = range.get_center()
+	size = range.size
 
 
 func find_root() -> RoommateRoot:

@@ -11,6 +11,8 @@
 class_name RoommateStyler
 extends Node3D
 
+const SETTINGS := preload("../plugin_settings.gd")
+
 @export var style: RoommateStyle
 @export var style_apply_order := 0
 
@@ -24,13 +26,17 @@ func apply_style(all_blocks: Dictionary, root_transform: Transform3D,
 	if not style:
 		return
 	var area_blocks := {}
+	_prepare_for_style(all_blocks, root_transform, block_size)
 	for block_position in all_blocks:
-		if _check_block_for_style(all_blocks[block_position], all_blocks,
-				root_transform, block_size):
+		if _block_is_selected_for_style(all_blocks[block_position], all_blocks):
 			area_blocks[block_position] = all_blocks[block_position]
 	style.apply(area_blocks)
 
 
-func _check_block_for_style(block: RoommateBlock, all_blocks: Dictionary, 
-		root_transform: Transform3D, block_size: float) -> bool:
-	return true # virtual method
+func _prepare_for_style(all_blocks: Dictionary, root_transform: Transform3D, 
+		block_size: float) -> void: # virtual method
+	pass
+
+
+func _block_is_selected_for_style(block: RoommateBlock, all_blocks: Dictionary) -> bool: # virtual method
+	return true

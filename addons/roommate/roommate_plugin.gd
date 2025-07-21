@@ -46,8 +46,7 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 	if roots.is_empty():
 		return
 	for root in roots:
-		var blocks := root.create_blocks()
-		root.generate(blocks)
+		root.generate()
 
 
 func clear_roots_scenes(roots: Array[RoommateRoot]) -> void:

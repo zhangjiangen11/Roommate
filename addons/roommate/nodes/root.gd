@@ -92,10 +92,15 @@ static func get_class_name() -> StringName:
 
 func _ready() -> void:
 	if not Engine.is_editor_hint() and generate_on_ready:
-		generate(create_blocks())
+		generate()
 
 
-func generate(all_blocks: Dictionary) -> void:
+func generate() -> void:
+	var blocks := create_blocks()
+	generate_with(blocks)
+
+
+func generate_with(all_blocks: Dictionary) -> void:
 	if all_blocks.is_empty():
 		return
 	
@@ -253,10 +258,7 @@ func clear_scenes() -> void:
 func snap_areas() -> void:
 	var areas := get_owned_areas()
 	for area in areas:
-		var margin := -absf(SETTINGS.get_float(&"stid_area_snap_margin"))
-		var blocks_range := area.get_blocks_range(global_transform, block_size).grow(margin)
-		area.global_position = blocks_range.get_center()
-		area.size = blocks_range.size
+		area.snap_to_range(global_transform, block_size)
 
 
 func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
