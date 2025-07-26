@@ -20,7 +20,7 @@ const SNAP_STEP := Vector3.ONE * 0.5
 
 @export var size := Vector3.ONE:
 	set(value):
-		size = value
+		size = value.abs()
 		update_gizmos()
 @export var blocks_apply_order := 0
 
@@ -98,7 +98,7 @@ func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
 	var root_quaternion := root_transform.basis.get_rotation_quaternion()
 	rotation = rotation.snapped(Vector3.ONE * PI / 2)
 	position = range.get_center()
-	size = range.size
+	size = root_transform.basis.inverse() * global_transform.basis * range.size
 
 
 func find_root() -> RoommateRoot:
