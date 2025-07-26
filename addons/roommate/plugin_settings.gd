@@ -12,6 +12,7 @@ extends RefCounted
 const SETTINGS_PATH_TEMPLATE := "plugins/roommate/%s"
 
 const SETTING_DEFAULTS := {
+	&"stid_area_block_range_step": 0.5,
 	&"stid_mesh_container_name": &"RoommateMeshContainer",
 	&"stid_scenes_group": &"roommate_generated_scenes",
 	&"stid_scenes_fallback_parent_name": &"RoommateSceneFallbackContainer",
