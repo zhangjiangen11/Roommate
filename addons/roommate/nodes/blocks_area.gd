@@ -92,12 +92,13 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 
 
 func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
-	var margin := absf(SETTINGS.get_float(&"stid_area_snap_margin"))
-	var range := get_blocks_range(root_transform, block_size).grow(-margin)
-	var root_quaternion := root_transform.basis.get_rotation_quaternion()
-	rotation = rotation.snapped(Vector3.ONE * PI / 2)
-	position = range.get_center()
-	size = transform.basis.inverse() * range.size
+	var range := get_blocks_range(root_transform, block_size)
+	range.size *= block_size
+	range.position *= block_size
+	range = range.grow(-absf(SETTINGS.get_float(&"stid_area_snap_margin")))
+	global_rotation = root_transform.basis.get_euler() + rotation.snapped(Vector3.ONE * PI / 2)
+	global_position = root_transform * range.get_center()
+	size = global_transform.affine_inverse().basis * (root_transform.basis * range.size)
 
 
 func find_root() -> RoommateRoot:
