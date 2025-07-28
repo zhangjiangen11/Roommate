@@ -17,6 +17,7 @@ const OUT_OF_BOUNDS_TYPE := &"btid_out_of_bounds"
 
 var type_id: StringName
 var position: Vector3i
+var rotation: Vector3
 var slots := {}
 var center: Vector3:
 	get: return (position as Vector3) + Vector3.ONE / 2

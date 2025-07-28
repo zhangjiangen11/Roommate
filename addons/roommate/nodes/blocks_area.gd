@@ -63,10 +63,13 @@ func get_block_positions(root_transform: Transform3D, block_size: float) -> Arra
 func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary:
 	var result := {}
 	var blocks_range := get_blocks_range(root_transform, block_size)
+	var block_rotation := (root_transform.affine_inverse() * global_transform).basis.get_euler().snapped(Vector3.ONE * PI / 2)
+	print(Vector3(rad_to_deg(block_rotation.x), rad_to_deg(block_rotation.y), rad_to_deg(block_rotation.z)))
 	for block_position in get_block_positions(root_transform, block_size):
 		var new_block := RoommateBlock.new()
 		new_block.type_id = RoommateBlock.NODRAW_TYPE
 		new_block.position = block_position
+		new_block.rotation = block_rotation
 		var processed_block := _process_block(new_block, blocks_range)
 		if processed_block:
 			processed_block.position = block_position
