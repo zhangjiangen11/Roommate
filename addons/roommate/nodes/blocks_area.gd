@@ -96,8 +96,10 @@ func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
 	range.size *= block_size
 	range.position *= block_size
 	range = range.grow(-absf(SETTINGS.get_float(&"stid_area_snap_margin")))
-	rotation = rotation.snapped(Vector3.ONE * PI / 2)
-	global_position = root_transform * range.get_center()
+	var old_scale := scale
+	var new_basis := Basis.from_euler(rotation.snapped(Vector3.ONE * PI / 2))
+	global_transform = root_transform * Transform3D(new_basis, range.get_center())
+	scale = old_scale
 	size = global_transform.affine_inverse().basis * (root_transform.basis * range.size)
 
 
