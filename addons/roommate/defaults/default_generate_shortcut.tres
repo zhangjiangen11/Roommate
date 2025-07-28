@@ -2,6 +2,6 @@
 
 [resource]
 device = -1
-shift_pressed = true
-keycode = 68
-unicode = 68
+alt_pressed = true
+keycode = 81
+unicode = 113

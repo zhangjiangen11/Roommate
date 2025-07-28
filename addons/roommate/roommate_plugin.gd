@@ -40,6 +40,10 @@ func _shortcut_input(event: InputEvent) -> void:
 		return
 	if _match_shortcut(&"stid_generate_root_nodes_shortcut", event):
 		generate_roots(_get_root_nodes_by_selected_children())
+	elif _match_shortcut(&"stid_snap_roots_areas_shortcut", event):
+		snap_roots_areas(_get_root_nodes_by_selected_children())
+	elif _match_shortcut(&"stid_clear_scenes_shortcut", event):
+		clear_roots_scenes(_get_root_nodes_by_selected_children())
 
 
 func generate_roots(roots: Array[RoommateRoot]) -> void:

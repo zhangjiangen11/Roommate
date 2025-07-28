@@ -1,0 +1,7 @@
+[gd_resource type="InputEventKey" format=3 uid="uid://4jj3u5f77vig"]
+
+[resource]
+device = -1
+alt_pressed = true
+keycode = 69
+unicode = 101

@@ -46,7 +46,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	forward_axis[extend_axis] = 0
 	forward_axis[up_axis.max_axis_index()] = 0
 	
-	var plane := get_oblique_plane(blocks_range)
+	var plane := get_oblique_plane(new_block.rotation, blocks_range)
 	var ray_front := plane.intersects_ray(new_block.center, up_axis)
 	var ray_back := plane.intersects_ray(new_block.center, -up_axis)
 	var intersection := ray_front as Vector3 if ray_front else ray_back as Vector3
@@ -84,7 +84,7 @@ func _process_block(new_block: RoommateBlock, blocks_range: AABB) -> RoommateBlo
 	return new_block
 
 
-func get_oblique_plane(blocks_range: AABB) -> Plane:
+func get_oblique_plane(block_rotation: Vector3, blocks_range: AABB) -> Plane:
 	var extend_axis_vector := Vector3.ZERO
 	extend_axis_vector[extend_axis] = -1 if extend_axis == Vector3.AXIS_X else 1
 	var used_size := blocks_range.size

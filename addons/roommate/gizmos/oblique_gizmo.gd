@@ -24,7 +24,8 @@ func _redraw() -> void:
 	var blocks_box := area.get_blocks_range(root.global_transform, root.block_size)
 	blocks_box.size *= root.block_size
 	blocks_box.position *= root.block_size
-	var plane := area.get_oblique_plane(blocks_box)
+	var block_rotation := (root.global_transform.affine_inverse() * area.global_transform).basis.get_euler().snapped(Vector3.ONE * PI / 2)
+	var plane := area.get_oblique_plane(block_rotation, blocks_box)
 	var blocks_box_lines := area.global_transform.affine_inverse() * (root.global_transform * _get_oblique_lines(blocks_box, plane))
 	var blocks_material := get_plugin().get_material("blocks", self)
 	add_lines(blocks_box_lines, blocks_material)

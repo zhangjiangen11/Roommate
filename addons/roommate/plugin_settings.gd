@@ -22,7 +22,9 @@ const SETTING_DEFAULTS := {
 }
 
 const SHORTCUT_DEFAULTS := {
-	"stid_generate_root_nodes_shortcut": preload("./defaults/default_generate_shortcut.tres"),
+	&"stid_generate_root_nodes_shortcut": preload("./defaults/default_generate_shortcut.tres"),
+	&"stid_snap_roots_areas_shortcut": preload("./defaults/default_snap_areas_shortcut.tres"),
+	&"stid_clear_scenes_shortcut": preload("./defaults/default_clear_scenes_shortcut.tres"),
 }
 
 

@@ -72,6 +72,7 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 		var processed_block := _process_block(new_block, blocks_range)
 		if processed_block:
 			processed_block.position = block_position
+			processed_block.rotation = block_rotation
 		result[block_position] = processed_block
 	return result
 
