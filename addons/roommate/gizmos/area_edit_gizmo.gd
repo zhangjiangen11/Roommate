@@ -97,15 +97,21 @@ func _commit_handle(handle_id: int, secondary: bool, restore: Variant, cancel: b
 	var original_size := _original_area_size as Vector3
 	_original_area_global_transform = null
 	_original_area_size = null
-	var area := get_node_3d() as RoommateBlocksArea
+	var area := get_node_3d() as RoommateBlocksArea	
 	if cancel:
 		area.size = original_size
-		area.global_position = original_transform.origin
+		area.global_transform = original_transform
 		return
+	
+	if SETTINGS.get_bool(&"stid_auto_snap_on_gizmo_edit"):
+		var root := area.find_root()
+		if root:
+			area.snap_to_range(root.global_transform, root.block_size)
+	
 	var undo_redo := _plugin.get_undo_redo()
 	undo_redo.create_action("ROOMMATE: Change Area Size")
-	undo_redo.add_undo_property(area, &"global_position", original_transform.origin)
-	undo_redo.add_do_property(area, &"global_position", area.global_position)
+	undo_redo.add_undo_property(area, &"global_transform", original_transform)
+	undo_redo.add_do_property(area, &"global_transform", area.global_transform)
 	undo_redo.add_undo_property(area, &"size", original_size)
 	undo_redo.add_do_property(area, &"size", area.size)
 	undo_redo.commit_action()

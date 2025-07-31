@@ -33,6 +33,8 @@ func _exit_tree() -> void:
 	_root_actions.free()
 	_root_actions = null
 	remove_node_3d_gizmo_plugin(_gizmo_plugin)
+	if SETTINGS.get_bool(&"stid_clear_settings_when_plugin_disabled"):
+		SETTINGS.clear(get_editor_interface().get_editor_settings())
 
 
 func _shortcut_input(event: InputEvent) -> void:
@@ -98,8 +100,8 @@ func _update_controls_visibility() -> void:
 
 func _match_shortcut(setting_id: StringName, event: InputEvent) -> bool:
 	var editor_settings := get_editor_interface().get_editor_settings()
-	var generate_shortcut := SETTINGS.get_shortcut(setting_id, editor_settings)
-	return generate_shortcut and generate_shortcut.is_match(event)
+	var shortcut := SETTINGS.get_shortcut(setting_id, editor_settings)
+	return shortcut and shortcut.matches_event(event)
 
 
 func _get_root_nodes_by_selected_children() -> Array[RoommateRoot]:

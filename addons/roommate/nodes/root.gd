@@ -152,10 +152,11 @@ func generate_with(all_blocks: Dictionary) -> void:
 	for info in scene_infos:
 		var scene_parent := get_node_or_null(info[&"parent_path"])
 		var valid_parent := scene_parent and (is_ancestor_of(scene_parent) or self == scene_parent)
-		if info[&"parent_path"].is_empty():
-			push_warning("ROOMMATE: Scene creation. Path is empty")
-		elif not valid_parent:
-			push_warning("ROOMMATE: Scene creation. There is no valid node on path %s" % info[&"parent_path"])
+		if SETTINGS.get_bool(&"stid_warn_about_invalid_scene_paths"):
+			if info[&"parent_path"].is_empty():
+				push_warning("ROOMMATE: Scene creation. Path is empty")
+			elif not valid_parent:
+				push_warning("ROOMMATE: Scene creation. There is no valid node on path %s" % info[&"parent_path"])
 		
 		if info[&"parent_path"].is_empty() or not valid_parent:
 			if not use_scenes_fallback_parent:

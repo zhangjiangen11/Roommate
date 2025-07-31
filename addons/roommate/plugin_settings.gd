@@ -10,36 +10,23 @@
 extends RefCounted
 
 const SETTINGS_PATH_TEMPLATE := "plugins/roommate/%s"
-
-const SETTING_DEFAULTS := {
-	&"stid_area_block_range_step": 0.5,
-	&"stid_mesh_container_name": &"RoommateMeshContainer",
-	&"stid_scenes_group": &"roommate_generated_scenes",
-	&"stid_scenes_fallback_parent_name": &"RoommateSceneFallbackContainer",
-	&"stid_bake_nav_on_thread": true,
-	&"stid_area_resize_snap": 1.0,
-	&"stid_area_snap_margin": 0.0,
-}
-
-const SHORTCUT_DEFAULTS := {
-	&"stid_generate_root_nodes_shortcut": preload("./defaults/default_generate_shortcut.tres"),
-	&"stid_snap_roots_areas_shortcut": preload("./defaults/default_snap_areas_shortcut.tres"),
-	&"stid_clear_scenes_shortcut": preload("./defaults/default_clear_scenes_shortcut.tres"),
-}
+#const SETTING_DEFAULTS_SCRIPT := preload("./defaults/default_setting_values.gd")
+const DEFAULTS := preload("./defaults/default_setting_values.tres")
 
 
 static func init_settings(editor_settings: EditorSettings) -> void:
-	for setting_id in SHORTCUT_DEFAULTS:
+	for setting_id in DEFAULTS.shortcuts:
 		var shortcut_path := _get_path(setting_id)
-		var default_shortcut := SHORTCUT_DEFAULTS[setting_id].duplicate() as InputEventKey
+		var default_shortcut := Shortcut.new()
+		default_shortcut.events = [DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
 		var create_shortcut := not editor_settings.has_setting(shortcut_path)
 		if create_shortcut:
 			editor_settings.set_setting(shortcut_path, default_shortcut)
 		editor_settings.set_initial_value(shortcut_path, default_shortcut, false)
 	
-	for setting_id in SETTING_DEFAULTS:
+	for setting_id in DEFAULTS.settings:
 		var setting_path := _get_path(setting_id)
-		var default_value: Variant = SETTING_DEFAULTS[setting_id]
+		var default_value: Variant = DEFAULTS.settings[setting_id]
 		if ProjectSettings.has_setting(setting_path):
 			continue
 		ProjectSettings.set_setting(setting_path, default_value)
@@ -47,14 +34,14 @@ static func init_settings(editor_settings: EditorSettings) -> void:
 
 
 static func get_shortcut(setting_id: StringName, 
-		editor_settings: EditorSettings) -> InputEventKey:
+		editor_settings: EditorSettings) -> Shortcut:
 	var path := _get_path(setting_id)
 	if not editor_settings.has_setting(path):
 		push_error("ROOMMATE: Editor setting %s doesn't exist." % path)
 		return null
-	var shortcut := editor_settings.get_setting(path) as InputEventKey
+	var shortcut := editor_settings.get_setting(path) as Shortcut
 	if not shortcut:
-		push_error("ROOMMATE: Wrong type of editor setting %s. InputEventKey expected." % path)
+		push_error("ROOMMATE: Wrong type of editor setting %s. Shortcut expected." % path)
 		return null
 	return shortcut
 
@@ -73,7 +60,7 @@ static func get_string(setting_id: StringName) -> StringName:
 
 static func get_or_default(setting_id: StringName) -> Variant:
 	var path := _get_path(setting_id)
-	var default_value: Variant = SETTING_DEFAULTS[setting_id]
+	var default_value: Variant = DEFAULTS.settings[setting_id]
 	if not ProjectSettings.has_setting(path):
 		push_error("ROOMMATE: Project setting %s doesn't exists." % path)
 		return default_value
@@ -82,6 +69,15 @@ static func get_or_default(setting_id: StringName) -> Variant:
 		push_error("ROOMMATE: Wrong type of project setting %s. Type %d expected." % [path, typeof(default_value)])
 		return default_value
 	return ProjectSettings.get_setting_with_override(path)
+
+
+static func clear(editor_settings: EditorSettings) -> void:
+	for setting_id in DEFAULTS.settings:
+		var setting_path := _get_path(setting_id)
+		ProjectSettings.set_setting(setting_path, null)
+	for shortcut_id in DEFAULTS.shortcuts:
+		var shortcut_path := _get_path(shortcut_id)
+		editor_settings.erase(shortcut_path)
 
 
 static func _get_path(settind_id: StringName) -> String:
