@@ -103,7 +103,7 @@ func _commit_handle(handle_id: int, secondary: bool, restore: Variant, cancel: b
 		area.global_position = original_transform.origin
 		return
 	var undo_redo := _plugin.get_undo_redo()
-	undo_redo.create_action("Change Roommate Blocks Area Size")
+	undo_redo.create_action("ROOMMATE: Change Area Size")
 	undo_redo.add_undo_property(area, &"global_position", original_transform.origin)
 	undo_redo.add_do_property(area, &"global_position", area.global_position)
 	undo_redo.add_undo_property(area, &"size", original_size)

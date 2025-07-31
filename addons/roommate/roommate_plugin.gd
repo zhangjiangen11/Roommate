@@ -53,18 +53,38 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 		root.generate()
 
 
-func clear_roots_scenes(roots: Array[RoommateRoot]) -> void:
-	if roots.is_empty():
-		return
-	for root in roots:
-		root.clear_scenes()
-
-
 func snap_roots_areas(roots: Array[RoommateRoot]) -> void:
 	if roots.is_empty():
 		return
+	var undo_redo := get_undo_redo()
+	undo_redo.create_action("ROOMMATE: Snap Areas To Blocks Range")
 	for root in roots:
-		root.snap_areas()
+		var areas := root.get_owned_areas()
+		for area in areas:
+			undo_redo.add_undo_property(area, &"transform", area.transform)
+			undo_redo.add_undo_property(area, &"size", area.size)
+			area.snap_to_range(root.global_transform, root.block_size)
+			undo_redo.add_do_property(area, &"transform", area.transform)
+			undo_redo.add_do_property(area, &"size", area.size)
+	undo_redo.commit_action()
+
+
+func clear_roots_scenes(roots: Array[RoommateRoot]) -> void:
+	if roots.is_empty():
+		return
+	var undo_redo := get_undo_redo()
+	undo_redo.create_action("ROOMMATE: Clear Root's Scenes")
+	for root in roots:
+		_remove_root_scenes(root)
+	undo_redo.commit_action()
+
+
+func _remove_root_scenes(root: RoommateRoot) -> void:
+	var undo_redo := get_undo_redo()
+	for scene in root.get_owned_scenes():
+		#undo_redo.add_undo_method(scene.get_parent(), &"add_child", scene)
+		undo_redo.add_undo_reference(scene)
+		undo_redo.add_do_method(scene.get_parent(), &"remove_child", scene)
 
 
 func _update_controls_visibility() -> void:

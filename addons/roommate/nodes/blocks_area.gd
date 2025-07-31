@@ -60,10 +60,15 @@ func get_block_positions(root_transform: Transform3D, block_size: float) -> Arra
 	return result
 
 
+func get_block_rotation(root_transform: Transform3D) -> Vector3:
+	var relative_transform := root_transform.affine_inverse() * global_transform
+	return relative_transform.basis.get_euler().snapped(Vector3.ONE * PI / 2)
+
+
 func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary:
 	var result := {}
 	var blocks_range := get_blocks_range(root_transform, block_size)
-	var block_rotation := (root_transform.affine_inverse() * global_transform).basis.get_euler().snapped(Vector3.ONE * PI / 2)
+	var block_rotation := get_block_rotation(root_transform)
 	for block_position in get_block_positions(root_transform, block_size):
 		var new_block := RoommateBlock.new()
 		new_block.type_id = RoommateBlock.NODRAW_TYPE
@@ -99,8 +104,11 @@ func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
 	range.size *= block_size
 	range.position *= block_size
 	range = range.grow(-absf(SETTINGS.get_float(&"stid_area_snap_margin")))
-	var new_basis := Basis.from_euler(rotation.snapped(Vector3.ONE * PI / 2))
-	global_transform = root_transform * Transform3D(new_basis, range.get_center())
+	global_position = root_transform * range.get_center()
+	
+	var block_rotation := Quaternion.from_euler(get_block_rotation(root_transform))
+	var new_global_rotation := root_transform.basis.get_rotation_quaternion() * block_rotation
+	global_rotation = new_global_rotation.get_euler()
 	size = global_transform.affine_inverse().basis * (root_transform.basis * range.size)
 
 

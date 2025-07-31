@@ -15,7 +15,11 @@ var plugin: ROOMMATE
 
 
 func _ready() -> void:
-	get_popup().id_pressed.connect(_on_popup_menu_id_pressed)
+	var popup := get_popup()
+	popup.add_item("Generate", 0)
+	popup.add_item("Snap Areas", 1)
+	popup.add_item("Clear Scenes", 2)
+	popup.id_pressed.connect(_on_popup_menu_id_pressed)
 
 
 func _on_popup_menu_id_pressed(id: int) -> void:
