@@ -252,7 +252,9 @@ func register_block_type_id(block_type_id: StringName, part_processor: Callable)
 func clear_scenes() -> void:
 	var scenes := get_owned_scenes()
 	for scene in scenes:
-		scene.get_parent().remove_child(scene)
+		var parent := scene.get_parent()
+		if parent:
+			parent.remove_child(scene)
 		scene.queue_free()
 
 
