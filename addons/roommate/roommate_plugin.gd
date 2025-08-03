@@ -10,56 +10,61 @@
 extends EditorPlugin
 
 const SETTINGS := preload("./plugin_settings.gd")
-const ROOT_ACTIONS_SCENE := preload("./controls/roommate_root_actions/roommate_root_actions.tscn")
-const ROOT_ACTIONS_SCRIPT := preload("./controls/roommate_root_actions/roommate_root_actions.gd")
+const GIZMO_PLUGIN_SCRIPT := preload("./gizmos/gizmo_plugin.gd")
+const CONTROL_SCENES: Array[PackedScene] = [
+	preload("./controls/root_actions/root_actions.tscn"),
+	preload("./controls/blocks_area_actions/blocks_area_actions.tscn"),
+]
 
-var _root_actions: Control
-var _gizmo_plugin := preload("./gizmos/gizmo_plugin.gd").new(self)
+var _controls: Array[Control] = []
+var _gizmo_plugin: GIZMO_PLUGIN_SCRIPT
+
+
+func _init() -> void:
+	_gizmo_plugin = GIZMO_PLUGIN_SCRIPT.new(self)
 
 
 func _enter_tree() -> void:
 	get_editor_interface().get_selection().selection_changed.connect(_update_controls_visibility)
-	add_node_3d_gizmo_plugin(_gizmo_plugin)
-	_root_actions = ROOT_ACTIONS_SCENE.instantiate() as ROOT_ACTIONS_SCRIPT
-	_root_actions.plugin = self
-	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, _root_actions)
-	_update_controls_visibility()
 	SETTINGS.init_settings(get_editor_interface().get_editor_settings())
+	add_node_3d_gizmo_plugin(_gizmo_plugin)
+	for scene in CONTROL_SCENES:
+		var control := scene.instantiate() as Control
+		control.set(&"plugin", self)
+		add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, control)
+		_controls.append(control)
+	_update_controls_visibility()
 
 
 func _exit_tree() -> void:
 	get_editor_interface().get_selection().selection_changed.disconnect(_update_controls_visibility)
-	remove_control_from_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, _root_actions)
-	_root_actions.free()
-	_root_actions = null
+	for control in _controls:
+		remove_control_from_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, control)
+		control.free()
+	_controls.clear()
 	remove_node_3d_gizmo_plugin(_gizmo_plugin)
+
+
+func _disable_plugin() -> void:
 	if SETTINGS.get_bool(&"stid_clear_settings_when_plugin_disabled"):
 		SETTINGS.clear(get_editor_interface().get_editor_settings())
-
-
-func _shortcut_input(event: InputEvent) -> void:
-	if not event.is_pressed() or event.is_echo(): 
-		return
-	if _match_shortcut(&"stid_generate_root_nodes_shortcut", event):
-		generate_roots(_get_root_nodes_by_selected_children())
-	elif _match_shortcut(&"stid_snap_roots_areas_shortcut", event):
-		snap_roots_areas(_get_root_nodes_by_selected_children())
-	elif _match_shortcut(&"stid_clear_scenes_shortcut", event):
-		clear_roots_scenes(_get_root_nodes_by_selected_children())
 
 
 func generate_roots(roots: Array[RoommateRoot]) -> void:
 	if roots.is_empty():
 		return
+	var undo_redo := get_undo_redo()
+	undo_redo.create_action("ROOMMATE: Generate Root(s)")
 	for root in roots:
 		root.generate()
+	undo_redo.commit_action()
 
 
 func snap_roots_areas(roots: Array[RoommateRoot]) -> void:
 	if roots.is_empty():
 		return
 	var undo_redo := get_undo_redo()
-	undo_redo.create_action("ROOMMATE: Snap Areas To Blocks Range")
+	undo_redo.create_action("ROOMMATE: Snap Root's Areas To Blocks")
 	for root in roots:
 		var areas := root.get_owned_areas()
 		for area in areas:
@@ -81,6 +86,23 @@ func clear_roots_scenes(roots: Array[RoommateRoot]) -> void:
 	undo_redo.commit_action()
 
 
+func snap_areas(areas: Array[RoommateBlocksArea]) -> void:
+	if areas.is_empty():
+		return
+	var undo_redo := get_undo_redo()
+	undo_redo.create_action("ROOMMATE: Snap Area(s) To Blocks")
+	for area in areas:
+		var related_root := area.find_root()
+		if not related_root:
+			continue
+		undo_redo.add_undo_property(area, &"transform", area.transform)
+		undo_redo.add_undo_property(area, &"size", area.size)
+		area.snap_to_range(related_root.global_transform, related_root.block_size)
+		undo_redo.add_do_property(area, &"transform", area.transform)
+		undo_redo.add_do_property(area, &"size", area.size)
+	undo_redo.commit_action()
+
+
 func _remove_root_scenes(root: RoommateRoot) -> void:
 	var undo_redo := get_undo_redo()
 	for scene in root.get_owned_scenes():
@@ -90,28 +112,13 @@ func _remove_root_scenes(root: RoommateRoot) -> void:
 
 
 func _update_controls_visibility() -> void:
-	if not _root_actions:
-		return
 	var nodes := get_editor_interface().get_selection().get_selected_nodes()
-	var is_extends := func(node: Node) -> bool:
-		return node is RoommateRoot
-	_root_actions.visible = nodes.any(is_extends)
+	for control in _controls:
+		var callable := Callable(control, &"visibility_predicate")
+		control.visible = callable.is_valid() and callable.call(nodes) as bool
 
 
 func _match_shortcut(setting_id: StringName, event: InputEvent) -> bool:
 	var editor_settings := get_editor_interface().get_editor_settings()
 	var shortcut := SETTINGS.get_shortcut(setting_id, editor_settings)
 	return shortcut and shortcut.matches_event(event)
-
-
-func _get_root_nodes_by_selected_children() -> Array[RoommateRoot]:
-	var selected_nodes := get_editor_interface().get_selection().get_selected_nodes()
-	var scene_root := get_editor_interface().get_edited_scene_root()
-	var roots: Array[RoommateRoot] = []
-	roots.assign(scene_root.find_children("*", RoommateRoot.get_class_name()))
-	var filter_by_child := func(root: RoommateRoot) -> bool:
-		for node in selected_nodes:
-			if root == node or root.is_ancestor_of(node):
-				return true
-		return false
-	return roots.filter(filter_by_child)

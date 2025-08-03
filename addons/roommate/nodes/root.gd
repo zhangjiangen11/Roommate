@@ -268,7 +268,12 @@ func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
 	var child_nodes := find_children("*", node_class_name)
 	var child_roots := find_children("*", get_class_name())
 	var nodes: Array[Node] = []
-	nodes.assign(child_nodes.filter(_filter_by_parents.bind(child_roots)))
+	var filter_by_parents := func (target: Node) -> bool:
+		for parent in child_roots:
+			if parent.is_ancestor_of(target):
+				return false
+		return true
+	nodes.assign(child_nodes.filter(filter_by_parents))
 	return nodes
 
 
@@ -287,9 +292,14 @@ func get_owned_stylers() -> Array[RoommateStyler]:
 func get_owned_scenes() -> Array[Node]:
 	var all_scenes := get_tree().get_nodes_in_group(SETTINGS.get_string(&"stid_scenes_group"))
 	var child_roots := find_children("*", get_class_name())
-	var filter_by_self := func (target: Node) -> bool:
-		return is_ancestor_of(target)
-	return all_scenes.filter(filter_by_self).filter(_filter_by_parents.bind(child_roots)) as Array[Node]
+	var filter_by_parents_and_self := func (target: Node) -> bool:
+		if not is_ancestor_of(target):
+			return false
+		for parent in child_roots:
+			if parent.is_ancestor_of(target):
+				return false
+		return true
+	return all_scenes.filter(filter_by_parents_and_self) as Array[Node]
 
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
@@ -414,10 +424,3 @@ func _process_oblique_block_part(slot_id: StringName, part: RoommatePart, block:
 func _process_nodraw_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
 		all_blocks: Dictionary) -> RoommatePart:
 	return null
-
-
-func _filter_by_parents(target: Node, parents: Array[Node]) -> bool:
-	for parent in parents:
-		if parent.is_ancestor_of(target):
-			return false
-	return true
