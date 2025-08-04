@@ -26,7 +26,7 @@ const NAV_ASSEMBLED := &"nmtid_assembled"
 
 @export var block_size := 1.0:
 	set(value):
-		block_size = value
+		block_size = value if value > 0 else 1
 		for node in find_children("*", RoommateBlocksArea.get_class_name()):
 			var area := node as RoommateBlocksArea
 			area.update_gizmos()
