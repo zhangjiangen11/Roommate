@@ -21,6 +21,7 @@ extends RoommateStyler
 		size = value.abs()
 		update_gizmos()
 @export var blocks_apply_order := 0
+@export var extra_slots: Array[StringName] = []
 
 var box: AABB:
 	get:
@@ -78,6 +79,10 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 		if processed_block:
 			processed_block.position = block_position
 			processed_block.rotation = block_rotation
+			for slot_id in extra_slots:
+				if processed_block.slots.has(slot_id):
+					continue
+				processed_block.slots[slot_id] = RoommatePart.new()
 		result[block_position] = processed_block
 	return result
 
