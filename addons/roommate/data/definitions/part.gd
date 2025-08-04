@@ -24,6 +24,7 @@ var scene: PackedScene
 var nav_mesh: Mesh
 
 var scene_parent_path := NodePath()
+var scene_property_overrides := {}
 
 var fallback_surface_override := RoommateSurfaceOverride.new()
 var surface_overrides := {}

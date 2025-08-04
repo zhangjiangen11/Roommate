@@ -40,6 +40,8 @@ var nav_mesh: MESH_SETTER:
 
 var scene_parent_path: NODE_PATH_SETTER:
 	get: return resolve_value_setter(&"scene_parent_path", NODE_PATH_SETTER)
+var scene_property_overrides: DICTIONARY_SETTER:
+	get: return resolve_value_setter(&"scene_property_overrides", DICTIONARY_SETTER)
 
 var surface_overrides := {}
 var fallback_surface_override: SURFACE_OVERRIDE_SETTER = null

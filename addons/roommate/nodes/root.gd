@@ -182,6 +182,11 @@ func generate_with(all_blocks: Dictionary) -> void:
 			node3d_scene.global_transform = global_transform * info[&"scene_transform"]
 		else:
 			node3d_scene.transform = info[&"scene_transform"]
+		
+		for property_name in info[&"property_overrides"]:
+			if not property_name is String and not property_name is StringName:
+				continue
+			node3d_scene.set(property_name, info[&"property_overrides"][property_name])
 	
 	# applying navigation
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
@@ -318,6 +323,7 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 		info[&"scene"] = part.scene
 		info[&"scene_transform"] = part.scene_transform.translated(part_origin)
 		info[&"parent_path"] = part.scene_parent_path
+		info[&"property_overrides"] = part.scene_property_overrides
 		info.make_read_only()
 		scene_infos.append(info)
 	
