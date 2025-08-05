@@ -146,14 +146,13 @@ func _draw_area_edit() -> void:
 
 func _get_aabb_lines(aabb: AABB) -> PackedVector3Array:
 	const AABB_ENDPOINTS_COUNT := 8
-	const ENDPOINTS_GROUPS_COUNT := 2
-	const ENDPOINTS_IN_GROUP_COUNT := 2
+	const ENDPOINTS_MATRIX_ORDER := 2
 	const TOP_ENDPOINTS := [[2, 1], [0, 3]]
 	const BOTTOM_ENDPOINTS := [[6, 5], [4, 7]]
 	
 	var result := PackedVector3Array()
-	for i in ENDPOINTS_GROUPS_COUNT:
-		for j in ENDPOINTS_IN_GROUP_COUNT:
+	for i in ENDPOINTS_MATRIX_ORDER:
+		for j in ENDPOINTS_MATRIX_ORDER:
 			# corner 1
 			result.push_back(aabb.get_endpoint(TOP_ENDPOINTS[0][i]))
 			result.push_back(aabb.get_endpoint(TOP_ENDPOINTS[1][j]))

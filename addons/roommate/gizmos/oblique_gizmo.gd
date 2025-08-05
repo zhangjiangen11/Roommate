@@ -33,15 +33,14 @@ func _redraw() -> void:
 
 func _get_oblique_lines(aabb: AABB, plane: Plane) -> PackedVector3Array:
 	const AABB_ENDPOINTS_COUNT := 8
-	const ENDPOINTS_GROUPS_COUNT := 2
-	const ENDPOINTS_IN_GROUP_COUNT := 2
+	const ENDPOINTS_MATRIX_ORDER := 2
 	const TOP_ENDPOINTS := [[2, 1], [0, 3]]
 	const BOTTOM_ENDPOINTS := [[6, 5], [4, 7]]
-	const OPPOSITE_ENDPOINTS_INDEX_SUM := 7
+	const OPPOSITE_ENDPOINTS_ID_SUM := 7
 	
 	var result := PackedVector3Array()
-	for i in ENDPOINTS_GROUPS_COUNT:
-		for j in ENDPOINTS_IN_GROUP_COUNT:
+	for i in ENDPOINTS_MATRIX_ORDER:
+		for j in ENDPOINTS_MATRIX_ORDER:
 			# corner 1
 			_try_add_oblique_line(aabb.get_endpoint(TOP_ENDPOINTS[0][i]), 
 					aabb.get_endpoint(TOP_ENDPOINTS[1][j]), plane, result)
@@ -53,7 +52,7 @@ func _get_oblique_lines(aabb: AABB, plane: Plane) -> PackedVector3Array:
 					aabb.get_endpoint(BOTTOM_ENDPOINTS[i][j]), plane, result)
 	for i in AABB_ENDPOINTS_COUNT:
 		for j in AABB_ENDPOINTS_COUNT:
-			if i == j or i + j == OPPOSITE_ENDPOINTS_INDEX_SUM:
+			if i == j or i + j == OPPOSITE_ENDPOINTS_ID_SUM:
 				continue
 			var from := aabb.get_endpoint(i)
 			var to := aabb.get_endpoint(j)
