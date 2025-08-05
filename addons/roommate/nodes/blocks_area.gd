@@ -88,9 +88,11 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 
 
 func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
+	const AABB_ENDPOINTS_COUNT := 8
+	
 	var start := Vector3.INF
 	var end := -Vector3.INF
-	for i in 8:
+	for i in AABB_ENDPOINTS_COUNT:
 		var corner := root_transform.affine_inverse() * global_transform * box.get_endpoint(i)
 		start = Vector3(minf(start.x, corner.x), minf(start.y, corner.y), minf(start.z, corner.z))
 		end = Vector3(maxf(end.x, corner.x), maxf(end.y, corner.y), maxf(end.z, corner.z))

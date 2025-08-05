@@ -19,20 +19,24 @@ func _init(init_axis: Vector3) -> void:
 
 
 func prepare(source_blocks: Dictionary) -> void:
+	const AXIS_COUNT := 3
+	
 	_max_position = -Vector3.INF
 	_min_position = Vector3.INF
 	for key in source_blocks.keys():
 		var position := key as Vector3i
-		for i in 3:
+		for i in AXIS_COUNT:
 			_max_position[i] = maxf(_max_position[i], position[i])
 			_min_position[i] = minf(_min_position[i], position[i])
 
 
 func _block_is_selected(offset_position: Vector3i, block: RoommateBlock, 
 		source_blocks: Dictionary) -> bool:
+	const AXIS_COUNT := 3
+	
 	if not AABB(_min_position, Vector3.ZERO).expand(_max_position).has_point(offset_position):
 		return false
-	for i in 3:
+	for i in AXIS_COUNT:
 		if axis[i] == 0:
 			continue
 		var max_delta := axis[i] if axis[i] > 0 else 0 
