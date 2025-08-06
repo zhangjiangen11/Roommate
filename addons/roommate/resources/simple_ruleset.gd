@@ -22,22 +22,9 @@ const BLOCKS_SELECTOR_INNER := &"sbsid_inner"
 const BLOCKS_SELECTOR_RANDOM := &"sbsid_random"
 
 @export_group("Blocks Selector")
-@export_enum("All Blocks", "Only Space Blocks", "Only Oblique Blocks", 
-		"Blocks On Extreme Positions", "Edge Blocks", "Blocks On Interval", 
-		"Inner Blocks", "Random Blocks") var blocks_selector: String:
-	set(value):
-		const SELECTOR_MAP := {
-			"All Blocks": BLOCKS_SELECTOR_ALL,
-			"Only Space Blocks": BLOCKS_SELECTOR_SPACE_TYPE,
-			"Only Oblique Blocks": BLOCKS_SELECTOR_OBLIQUE_TYPE,
-			"Blocks On Extreme Positions": BLOCKS_SELECTOR_EXTREME,
-			"Edge Blocks": BLOCKS_SELECTOR_EDGE,
-			"Blocks On Interval": BLOCKS_SELECTOR_INTERVAL,
-			"Inner Blocks": BLOCKS_SELECTOR_INNER,
-			"Random Blocks": BLOCKS_SELECTOR_RANDOM,
-		}
-		blocks_selector = value
-		_blocks_selector_id = SELECTOR_MAP[value]
+@export_enum(BLOCKS_SELECTOR_ALL, BLOCKS_SELECTOR_SPACE_TYPE, BLOCKS_SELECTOR_OBLIQUE_TYPE, 
+		BLOCKS_SELECTOR_EXTREME, BLOCKS_SELECTOR_EDGE, BLOCKS_SELECTOR_INTERVAL, 
+		BLOCKS_SELECTOR_INNER, BLOCKS_SELECTOR_RANDOM) var blocks_selector := String(BLOCKS_SELECTOR_ALL)
 @export var blocks_selector_step := Vector3i.ZERO
 @export var blocks_selector_offset := Vector3i.ZERO
 
@@ -65,5 +52,3 @@ const BLOCKS_SELECTOR_RANDOM := &"sbsid_random"
 
 @export var material: Material = null
 @export var color := Color.WHITE
-
-var _blocks_selector_id := BLOCKS_SELECTOR_ALL

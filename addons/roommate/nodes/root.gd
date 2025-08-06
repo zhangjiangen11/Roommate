@@ -36,13 +36,7 @@ const NAV_ASSEMBLED := &"nmtid_assembled"
 @export var generate_on_ready := false
 
 @export_group("Mesh")
-@export_enum("Single Mesh") var mesh_type := "Single Mesh":
-	set(value):
-		const MESH_MAP := {
-			"Single Mesh": MESH_SINGLE
-		}
-		mesh_type = value
-		_mesh_type_id = MESH_MAP[value]
+@export_enum(MESH_SINGLE) var mesh_type := String(MESH_SINGLE)
 @export_node_path("Node3D") var linked_mesh_container: NodePath
 @export var create_mesh_container_if_missing := true
 @export var index_mesh := true
@@ -50,14 +44,7 @@ const NAV_ASSEMBLED := &"nmtid_assembled"
 @export var generate_tangents := true
 
 @export_group("Collision")
-@export_enum("Concave", "Convex") var collision_shape := "Concave":
-	set(value):
-		const SHAPE_MAP := {
-			"Concave": COLLISION_CONCAVE,
-			"Convex": COLLISION_CONVEX,
-		}
-		collision_shape = value
-		_collision_shape_id = SHAPE_MAP[value]
+@export_enum(COLLISION_CONCAVE, COLLISION_CONVEX) var collision_shape := String(COLLISION_CONCAVE)
 @export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
 
 @export_group("Scenes")
@@ -66,19 +53,9 @@ const NAV_ASSEMBLED := &"nmtid_assembled"
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
-@export_enum("Baked", "Assembled") var nav_mesh_type := "Baked":
-	set(value):
-		const NAV_MAP := {
-			"Baked": NAV_BAKED,
-			"Assembled": NAV_ASSEMBLED,
-		}
-		nav_mesh_type = value
-		_nav_mesh_type_id = NAV_MAP[value]
+@export_enum(NAV_BAKED, NAV_ASSEMBLED) var nav_mesh_type := String(NAV_BAKED)
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 
-var _mesh_type_id := MESH_SINGLE
-var _collision_shape_id := COLLISION_CONCAVE
-var _nav_mesh_type_id := NAV_BAKED
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
 	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
@@ -125,17 +102,17 @@ func generate_with(all_blocks: Dictionary) -> void:
 						collision_faces, scene_infos, nav_tool)
 	
 	# applying mesh
-	match _mesh_type_id:
+	match StringName(mesh_type):
 		MESH_SINGLE:
 			_generate_single_mesh(surface_tools)
 		_:
-			push_error("ROOMMATE: Unknown mesh type id %s." % _mesh_type_id)
+			push_error("ROOMMATE: Unknown mesh type id %s." % mesh_type)
 	
 	# applying collision
 	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
 	if collision_shape_node:
 		var shape: Shape3D
-		match _collision_shape_id:
+		match StringName(collision_shape):
 			COLLISION_CONCAVE:
 				var concave := ConcavePolygonShape3D.new()
 				concave.set_faces(collision_faces)
@@ -145,7 +122,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 				convex.points = collision_faces.duplicate()
 				collision_shape_node.shape = convex
 			_:
-				push_error("ROOMMATE: Unknown collision shape id %s." % _collision_shape_id)
+				push_error("ROOMMATE: Unknown collision shape id %s." % collision_shape)
 	
 	#applying scenes
 	clear_scenes()
@@ -195,7 +172,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 		if not nav_mesh:
 			nav_mesh = NavigationMesh.new()
 			navigation_region.navigation_mesh = nav_mesh
-		match _nav_mesh_type_id:
+		match StringName(nav_mesh_type):
 			NAV_BAKED:
 				navigation_region.bake_navigation_mesh(SETTINGS.get_bool(&"stid_bake_nav_on_thread"))
 			NAV_ASSEMBLED:
@@ -203,7 +180,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 				nav_mesh.create_from_mesh(nav_tool.commit())
 				navigation_region.update_gizmos()
 			_:
-				push_error("ROOMMATE: Unknown nav mesh type id %s." % _nav_mesh_type_id)
+				push_error("ROOMMATE: Unknown nav mesh type id %s." % nav_mesh_type)
 
 
 func create_blocks() -> Dictionary:
@@ -394,12 +371,12 @@ func _generate_single_mesh(surface_tools: Dictionary) -> void:
 func _resolve_mesh_container() -> Node3D:
 	var container := get_node_or_null(linked_mesh_container) as Node3D
 	if container:
-		if _mesh_type_id == MESH_SINGLE and not container is MeshInstance3D:
+		if mesh_type == MESH_SINGLE and not container is MeshInstance3D:
 			push_error("ROOMMATE: Wrong type of mesh container. MeshInstance3D expected.")
 			return null
 		return container
 	if create_mesh_container_if_missing:
-		container = MeshInstance3D.new() if _mesh_type_id == MESH_SINGLE else Node3D.new()
+		container = MeshInstance3D.new() if mesh_type == MESH_SINGLE else Node3D.new()
 		container.name = SETTINGS.get_string(&"stid_mesh_container_name")
 		add_child(container)
 		container.owner = owner
