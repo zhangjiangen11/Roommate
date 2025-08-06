@@ -10,7 +10,6 @@
 class_name RoommateSimpleRuleset
 extends Resource
 
-const RANDOM_DENSITY := 0.5
 # sbsid - simple blocks selector id
 const BLOCKS_SELECTOR_ALL := &"sbsid_all"
 const BLOCKS_SELECTOR_SPACE_TYPE := &"sbsid_space_type"
@@ -20,6 +19,7 @@ const BLOCKS_SELECTOR_EDGE := &"sbsid_edge"
 const BLOCKS_SELECTOR_INTERVAL := &"sbsid_interval"
 const BLOCKS_SELECTOR_INNER := &"sbsid_inner"
 const BLOCKS_SELECTOR_RANDOM := &"sbsid_random"
+const BLOCKS_SELECTOR_SEEDED_RANDOM := &"sbsid_seeded_random"
 
 @export_group("Blocks Selector")
 @export_enum(BLOCKS_SELECTOR_ALL, BLOCKS_SELECTOR_SPACE_TYPE, BLOCKS_SELECTOR_OBLIQUE_TYPE, 
@@ -44,11 +44,15 @@ const BLOCKS_SELECTOR_RANDOM := &"sbsid_random"
 @export_group("Overrides")
 @export var part_position_offset := Vector3.ZERO
 @export var part_rotation_offset := Vector3.ZERO
-@export var part_scale := Vector3.ONE
+@export var part_scale_offset := Vector3.ONE
 
 @export var mesh: Mesh = null
 @export var collision_mesh: Mesh = null
 @export var nav_mesh: Mesh = null
+
+@export var scene: PackedScene
+@export var scene_path: NodePath
+@export var scene_properties: Dictionary
 
 @export var material: Material = null
 @export var color := Color.WHITE
