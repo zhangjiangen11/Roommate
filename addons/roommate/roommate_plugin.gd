@@ -9,26 +9,26 @@
 @tool
 extends EditorPlugin
 
-const SETTINGS := preload("./plugin_settings.gd")
-const GIZMO_PLUGIN_SCRIPT := preload("./gizmos/gizmo_plugin.gd")
-const CONTROL_SCENES: Array[PackedScene] = [
+const _SETTINGS := preload("./plugin_settings.gd")
+const _GIZMO_PLUGIN_SCRIPT := preload("./gizmos/gizmo_plugin.gd")
+const _CONTROL_SCENES: Array[PackedScene] = [
 	preload("./controls/root_actions/root_actions.tscn"),
 	preload("./controls/blocks_area_actions/blocks_area_actions.tscn"),
 ]
 
 var _controls: Array[Control] = []
-var _gizmo_plugin: GIZMO_PLUGIN_SCRIPT
+var _gizmo_plugin: _GIZMO_PLUGIN_SCRIPT
 
 
 func _init() -> void:
-	_gizmo_plugin = GIZMO_PLUGIN_SCRIPT.new(self)
+	_gizmo_plugin = _GIZMO_PLUGIN_SCRIPT.new(self)
 
 
 func _enter_tree() -> void:
 	get_editor_interface().get_selection().selection_changed.connect(_update_controls_visibility)
-	SETTINGS.init_settings(get_editor_interface().get_editor_settings())
+	_SETTINGS.init_settings(get_editor_interface().get_editor_settings())
 	add_node_3d_gizmo_plugin(_gizmo_plugin)
-	for scene in CONTROL_SCENES:
+	for scene in _CONTROL_SCENES:
 		var control := scene.instantiate() as Control
 		control.set(&"plugin", self)
 		add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_MENU, control)
@@ -46,8 +46,8 @@ func _exit_tree() -> void:
 
 
 func _disable_plugin() -> void:
-	if SETTINGS.get_bool(&"stid_clear_settings_when_plugin_disabled"):
-		SETTINGS.clear(get_editor_interface().get_editor_settings())
+	if _SETTINGS.get_bool(&"stid_clear_settings_when_plugin_disabled"):
+		_SETTINGS.clear(get_editor_interface().get_editor_settings())
 
 
 func generate_roots(roots: Array[RoommateRoot]) -> void:
@@ -120,5 +120,5 @@ func _update_controls_visibility() -> void:
 
 func _match_shortcut(setting_id: StringName, event: InputEvent) -> bool:
 	var editor_settings := get_editor_interface().get_editor_settings()
-	var shortcut := SETTINGS.get_shortcut(setting_id, editor_settings)
+	var shortcut := _SETTINGS.get_shortcut(setting_id, editor_settings)
 	return shortcut and shortcut.matches_event(event)

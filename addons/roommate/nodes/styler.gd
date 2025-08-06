@@ -11,14 +11,10 @@
 class_name RoommateStyler
 extends Node3D
 
-const SETTINGS := preload("../plugin_settings.gd")
+const _SETTINGS := preload("../plugin_settings.gd")
 
 @export var style: RoommateStyle
 @export var style_apply_order := 0
-
-
-static func get_class_name() -> StringName:
-	return &"RoommateStyler"
 
 
 func apply_style(all_blocks: Dictionary, root_transform: Transform3D, 

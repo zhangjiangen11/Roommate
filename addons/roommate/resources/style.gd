@@ -18,9 +18,9 @@ extends Resource
 ## [br][br]
 ## It can be used in [RoommateRoot], [RoommateBlocksArea] and it's derived classes.
 
-const RULESET := preload("../data/style/ruleset.gd")
+const _RULESET := preload("../data/style/ruleset.gd")
 
-var _current_rulesets: Array[RULESET] = []
+var _current_rulesets: Array[_RULESET] = []
 
 
 func apply(source_blocks: Dictionary) -> void:
@@ -30,8 +30,8 @@ func apply(source_blocks: Dictionary) -> void:
 		ruleset.apply(source_blocks)
 
 
-func create_ruleset() -> RULESET:
-	var new_ruleset = RULESET.new()
+func create_ruleset() -> _RULESET:
+	var new_ruleset = _RULESET.new()
 	_current_rulesets.append(new_ruleset)
 	return new_ruleset
 

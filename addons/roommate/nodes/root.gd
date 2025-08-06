@@ -14,8 +14,6 @@ extends Node3D
 ## 
 ## Set [RoommateBlocksArea] or it's derived nodes as a child to affect generation.
 
-const SETTINGS := preload("../plugin_settings.gd")
-
 const MESH_SINGLE := &"mtid_single"
 
 const COLLISION_CONCAVE := &"csid_concave"
@@ -24,10 +22,12 @@ const COLLISION_CONVEX := &"csid_convex"
 const NAV_BAKED := &"nmtid_baked"
 const NAV_ASSEMBLED := &"nmtid_assembled"
 
+const _SETTINGS := preload("../plugin_settings.gd")
+
 @export var block_size := 1.0:
 	set(value):
 		block_size = value if value > 0 else 1
-		for node in find_children("*", RoommateBlocksArea.get_class_name()):
+		for node in find_children("*", &"RoommateBlocksArea"):
 			var area := node as RoommateBlocksArea
 			area.update_gizmos()
 
@@ -61,10 +61,6 @@ var _part_processors := {
 	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
 	RoommateBlock.NODRAW_TYPE: _process_nodraw_block_part,
 }
-
-
-static func get_class_name() -> StringName:
-	return &"RoommateRoot"
 
 
 func _ready() -> void:
@@ -129,7 +125,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 	for info in scene_infos:
 		var scene_parent := get_node_or_null(info[&"parent_path"])
 		var valid_parent := scene_parent and (is_ancestor_of(scene_parent) or self == scene_parent)
-		if SETTINGS.get_bool(&"stid_warn_about_invalid_scene_paths"):
+		if _SETTINGS.get_bool(&"stid_warn_about_invalid_scene_paths"):
 			if info[&"parent_path"].is_empty():
 				push_warning("ROOMMATE: Scene creation. Path is empty")
 			elif not valid_parent:
@@ -138,19 +134,19 @@ func generate_with(all_blocks: Dictionary) -> void:
 		if info[&"parent_path"].is_empty() or not valid_parent:
 			if not use_scenes_fallback_parent:
 				continue
-			var fallback := get_node_or_null(NodePath(SETTINGS.get_string(&"stid_scenes_fallback_parent_name")))
+			var fallback := get_node_or_null(NodePath(_SETTINGS.get_string(&"stid_scenes_fallback_parent_name")))
 			if not fallback:
 				fallback = Node3D.new()
-				fallback.name = SETTINGS.get_string(&"stid_scenes_fallback_parent_name")
+				fallback.name = _SETTINGS.get_string(&"stid_scenes_fallback_parent_name")
 				add_child(fallback)
 				fallback.owner = owner
-				fallback.add_to_group(SETTINGS.get_string(&"stid_scenes_group"), true)
+				fallback.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
 			scene_parent = fallback
 		
 		var new_scene := info[&"scene"].instantiate() as Node
 		scene_parent.add_child(new_scene, force_readable_scene_names)
 		new_scene.owner = owner
-		new_scene.add_to_group(SETTINGS.get_string(&"stid_scenes_group"), true)
+		new_scene.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
 		
 		var node3d_scene := new_scene as Node3D
 		if not node3d_scene:
@@ -174,7 +170,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 			navigation_region.navigation_mesh = nav_mesh
 		match StringName(nav_mesh_type):
 			NAV_BAKED:
-				navigation_region.bake_navigation_mesh(SETTINGS.get_bool(&"stid_bake_nav_on_thread"))
+				navigation_region.bake_navigation_mesh(_SETTINGS.get_bool(&"stid_bake_nav_on_thread"))
 			NAV_ASSEMBLED:
 				nav_tool.index()
 				nav_mesh.create_from_mesh(nav_tool.commit())
@@ -248,7 +244,7 @@ func snap_areas() -> void:
 
 func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
 	var child_nodes := find_children("*", node_class_name)
-	var child_roots := find_children("*", get_class_name())
+	var child_roots := find_children("*", &"RoommateRoot")
 	var nodes: Array[Node] = []
 	var filter_by_parents := func (target: Node) -> bool:
 		for parent in child_roots:
@@ -261,19 +257,19 @@ func get_owned_nodes(node_class_name: StringName) -> Array[Node]:
 
 func get_owned_areas() -> Array[RoommateBlocksArea]:
 	var areas: Array[RoommateBlocksArea] = []
-	areas.assign(get_owned_nodes(RoommateBlocksArea.get_class_name()))
+	areas.assign(get_owned_nodes(&"RoommateBlocksArea"))
 	return areas
 
 
 func get_owned_stylers() -> Array[RoommateStyler]:
 	var stylers: Array[RoommateStyler] = []
-	stylers.assign(get_owned_nodes(RoommateStyler.get_class_name()))
+	stylers.assign(get_owned_nodes(&"RoommateStyler"))
 	return stylers
 
 
 func get_owned_scenes() -> Array[Node]:
-	var all_scenes := get_tree().get_nodes_in_group(SETTINGS.get_string(&"stid_scenes_group"))
-	var child_roots := find_children("*", get_class_name())
+	var all_scenes := get_tree().get_nodes_in_group(_SETTINGS.get_string(&"stid_scenes_group"))
+	var child_roots := find_children("*", &"RoommateRoot")
 	var filter_by_parents_and_self := func (target: Node) -> bool:
 		if not is_ancestor_of(target):
 			return false
@@ -377,7 +373,7 @@ func _resolve_mesh_container() -> Node3D:
 		return container
 	if create_mesh_container_if_missing:
 		container = MeshInstance3D.new() if mesh_type == MESH_SINGLE else Node3D.new()
-		container.name = SETTINGS.get_string(&"stid_mesh_container_name")
+		container.name = _SETTINGS.get_string(&"stid_mesh_container_name")
 		add_child(container)
 		container.owner = owner
 		linked_mesh_container = get_path_to(container)

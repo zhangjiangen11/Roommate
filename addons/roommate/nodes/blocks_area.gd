@@ -29,10 +29,6 @@ var box: AABB:
 var _styler_range: AABB
 
 
-static func get_class_name() -> StringName:
-	return &"RoommateBlocksArea"
-
-
 func _ready():
 	set_notify_transform(true)
 
@@ -96,7 +92,7 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 		var corner := root_transform.affine_inverse() * global_transform * box.get_endpoint(i)
 		start = Vector3(minf(start.x, corner.x), minf(start.y, corner.y), minf(start.z, corner.z))
 		end = Vector3(maxf(end.x, corner.x), maxf(end.y, corner.y), maxf(end.z, corner.z))
-	var range_step := Vector3.ONE * SETTINGS.get_float(&"stid_area_block_range_step")
+	var range_step := Vector3.ONE * _SETTINGS.get_float(&"stid_area_block_range_step")
 	var start_block_position := (start / block_size).snapped(range_step).floor()
 	var end_block_position := (end / block_size).snapped(range_step).ceil()
 	var range := AABB(start_block_position, Vector3.ZERO).expand(end_block_position)
@@ -110,7 +106,7 @@ func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
 	var range := get_blocks_range(root_transform, block_size)
 	range.size *= block_size
 	range.position *= block_size
-	range = range.grow(-absf(SETTINGS.get_float(&"stid_area_snap_margin")))
+	range = range.grow(-absf(_SETTINGS.get_float(&"stid_area_snap_margin")))
 	global_position = root_transform * range.get_center()
 	
 	var block_rotation := Quaternion.from_euler(get_block_rotation(root_transform))

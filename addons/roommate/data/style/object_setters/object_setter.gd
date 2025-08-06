@@ -9,29 +9,29 @@
 @tool
 extends RefCounted
 
-const BASE_VALUE_SETTER := preload("../value_setters/value_setter.gd")
-const BOOL_SETTER := preload("../value_setters/bool_value_setter.gd")
-const FLOAT_SETTER := preload("../value_setters/float_value_setter.gd")
-const VECTOR3_SETTER := preload("../value_setters/vector3_value_setter.gd")
-const COLOR_SETTER := preload("../value_setters/color_value_setter.gd")
-const NODE_PATH_SETTER := preload("../value_setters/node_path_value_setter.gd")
-const TRANSFORM2D_SETTER := preload("../value_setters/transform2d_value_setter.gd")
-const TRANSFORM3D_SETTER := preload("../value_setters/transform3d_value_setter.gd")
-const DICTIONARY_SETTER := preload("../value_setters/dictionary_value_setter.gd")
-const MATERIAL_SETTER := preload("../value_setters/material_value_setter.gd")
-const MESH_SETTER := preload("../value_setters/mesh_value_setter.gd")
-const PACKED_SCENE_SETTER := preload("../value_setters/packed_scene_value_setter.gd")
+const _BASE_VALUE_SETTER := preload("../value_setters/value_setter.gd")
+const _BOOL_SETTER := preload("../value_setters/bool_value_setter.gd")
+const _FLOAT_SETTER := preload("../value_setters/float_value_setter.gd")
+const _VECTOR3_SETTER := preload("../value_setters/vector3_value_setter.gd")
+const _COLOR_SETTER := preload("../value_setters/color_value_setter.gd")
+const _NODE_PATH_SETTER := preload("../value_setters/node_path_value_setter.gd")
+const _TRANSFORM2D_SETTER := preload("../value_setters/transform2d_value_setter.gd")
+const _TRANSFORM3D_SETTER := preload("../value_setters/transform3d_value_setter.gd")
+const _DICTIONARY_SETTER := preload("../value_setters/dictionary_value_setter.gd")
+const _MATERIAL_SETTER := preload("../value_setters/material_value_setter.gd")
+const _MESH_SETTER := preload("../value_setters/mesh_value_setter.gd")
+const _PACKED_SCENE_SETTER := preload("../value_setters/packed_scene_value_setter.gd")
 
 var _value_setters := {}
 
 
-func resolve_value_setter(property_name: StringName, setter_script: Script) -> BASE_VALUE_SETTER:
+func resolve_value_setter(property_name: StringName, setter_script: Script) -> _BASE_VALUE_SETTER:
 	if _value_setters.has(property_name):
-		var existing_setter := _value_setters[property_name] as BASE_VALUE_SETTER
+		var existing_setter := _value_setters[property_name] as _BASE_VALUE_SETTER
 		if not setter_script.instance_has(existing_setter):
 			push_error("ROOMMATE: Setter %s doesn't have expected type." % property_name)
 		return existing_setter
-	var new_setter := setter_script.new() as BASE_VALUE_SETTER
+	var new_setter := setter_script.new() as _BASE_VALUE_SETTER
 	new_setter.property_name = property_name
 	_value_setters[property_name] = new_setter
 	return new_setter

@@ -9,24 +9,22 @@
 @tool
 extends RefCounted
 
-const SETTINGS_PATH_TEMPLATE := "plugins/roommate/%s"
-#const SETTING_DEFAULTS_SCRIPT := preload("./defaults/default_setting_values.gd")
-const DEFAULTS := preload("./defaults/default_setting_values.tres")
+const _DEFAULTS := preload("./defaults/default_setting_values.tres")
 
 
 static func init_settings(editor_settings: EditorSettings) -> void:
-	for setting_id in DEFAULTS.shortcuts:
+	for setting_id in _DEFAULTS.shortcuts:
 		var shortcut_path := _get_path(setting_id)
 		var default_shortcut := Shortcut.new()
-		default_shortcut.events = [DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
+		default_shortcut.events = [_DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
 		var create_shortcut := not editor_settings.has_setting(shortcut_path)
 		if create_shortcut:
 			editor_settings.set_setting(shortcut_path, default_shortcut)
 		editor_settings.set_initial_value(shortcut_path, default_shortcut, false)
 	
-	for setting_id in DEFAULTS.settings:
+	for setting_id in _DEFAULTS.settings:
 		var setting_path := _get_path(setting_id)
-		var default_value: Variant = DEFAULTS.settings[setting_id]
+		var default_value: Variant = _DEFAULTS.settings[setting_id]
 		if ProjectSettings.has_setting(setting_path):
 			continue
 		ProjectSettings.set_setting(setting_path, default_value)
@@ -39,7 +37,7 @@ static func get_shortcut(setting_id: StringName,
 	if not editor_settings.has_setting(path):
 		push_error("ROOMMATE: Editor setting %s doesn't exist." % path)
 		var default_shortcut := Shortcut.new()
-		default_shortcut.events = [DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
+		default_shortcut.events = [_DEFAULTS.shortcuts[setting_id].duplicate() as InputEventKey]
 		return default_shortcut
 	var shortcut := editor_settings.get_setting(path) as Shortcut
 	if not shortcut:
@@ -62,7 +60,7 @@ static func get_string(setting_id: StringName) -> StringName:
 
 static func get_or_default(setting_id: StringName) -> Variant:
 	var path := _get_path(setting_id)
-	var default_value: Variant = DEFAULTS.settings[setting_id]
+	var default_value: Variant = _DEFAULTS.settings[setting_id]
 	if not ProjectSettings.has_setting(path):
 		push_error("ROOMMATE: Project setting %s doesn't exists." % path)
 		return default_value
@@ -74,15 +72,17 @@ static func get_or_default(setting_id: StringName) -> Variant:
 
 
 static func clear(editor_settings: EditorSettings) -> void:
-	for setting_id in DEFAULTS.settings:
+	for setting_id in _DEFAULTS.settings:
 		var setting_path := _get_path(setting_id)
 		ProjectSettings.set_setting(setting_path, null)
-	for shortcut_id in DEFAULTS.shortcuts:
+	for shortcut_id in _DEFAULTS.shortcuts:
 		var shortcut_path := _get_path(shortcut_id)
 		editor_settings.erase(shortcut_path)
 
 
 static func _get_path(settind_id: StringName) -> String:
+	const SETTINGS_PATH_TEMPLATE := "plugins/roommate/%s"
+	
 	if not settind_id.begins_with("stid_"):
 		push_error("ROOMMATE: Setting Id must start with stid_ prefix. Received '%s'." % settind_id)
 	return SETTINGS_PATH_TEMPLATE % settind_id.trim_prefix("stid_")

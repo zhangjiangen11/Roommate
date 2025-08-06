@@ -9,21 +9,21 @@
 @tool
 extends "./object_setter.gd"
 
-var material: MATERIAL_SETTER:
-	get: return resolve_value_setter(&"material", MATERIAL_SETTER)
-var uv_transform: TRANSFORM2D_SETTER:
-	get: return resolve_value_setter(&"uv_transform", TRANSFORM2D_SETTER)
-var flip_faces: BOOL_SETTER:
-	get: return resolve_value_setter(&"flip_faces", BOOL_SETTER)
-var color: COLOR_SETTER:
-	get: return resolve_value_setter(&"color", COLOR_SETTER)
-var color_weight: FLOAT_SETTER:
-	get: return resolve_value_setter(&"color_weight", FLOAT_SETTER)
+var material: _MATERIAL_SETTER:
+	get: return resolve_value_setter(&"material", _MATERIAL_SETTER)
+var uv_transform: _TRANSFORM2D_SETTER:
+	get: return resolve_value_setter(&"uv_transform", _TRANSFORM2D_SETTER)
+var flip_faces: _BOOL_SETTER:
+	get: return resolve_value_setter(&"flip_faces", _BOOL_SETTER)
+var color: _COLOR_SETTER:
+	get: return resolve_value_setter(&"color", _COLOR_SETTER)
+var color_weight: _FLOAT_SETTER:
+	get: return resolve_value_setter(&"color_weight", _FLOAT_SETTER)
 
 
 func apply(target: RoommateSurfaceOverride) -> void:
 	for property_name in _value_setters:
-		var setter := _value_setters[property_name] as BASE_VALUE_SETTER
+		var setter := _value_setters[property_name] as _BASE_VALUE_SETTER
 		setter.apply(target)
 
 
