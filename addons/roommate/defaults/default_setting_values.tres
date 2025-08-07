@@ -32,6 +32,7 @@ settings = {
 "stid_mesh_container_name": &"RoommateMeshContainer",
 "stid_scenes_fallback_parent_name": &"RoommateSceneFallbackContainer",
 "stid_scenes_group": &"roommate_generated_scenes",
+"stid_set_global_rotation_when_snapping": false,
 "stid_warn_about_invalid_scene_paths": true
 }
 shortcuts = {

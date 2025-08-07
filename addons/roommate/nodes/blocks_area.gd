@@ -103,15 +103,33 @@ func get_blocks_range(root_transform: Transform3D, block_size: float) -> AABB:
 
 
 func snap_to_range(root_transform: Transform3D, block_size: float) -> void:
+	const AXIS_COUNT := 3
+	
 	var range := get_blocks_range(root_transform, block_size)
 	range.size *= block_size
 	range.position *= block_size
 	range = range.grow(-absf(_SETTINGS.get_float(&"stid_area_snap_margin")))
 	global_position = root_transform * range.get_center()
 	
-	var block_rotation := Quaternion.from_euler(get_block_rotation(root_transform))
-	var new_global_rotation := root_transform.basis.get_rotation_quaternion() * block_rotation
-	global_rotation = new_global_rotation.get_euler()
+	var block_quat := Quaternion.from_euler(get_block_rotation(root_transform))
+	var new_global_quat := root_transform.basis.get_rotation_quaternion() * block_quat
+	
+	if _SETTINGS.get_bool(&"stid_set_global_rotation_when_snapping"):
+		global_rotation = new_global_quat.get_euler()
+	else:
+		var local_quat := Quaternion.from_euler(rotation.snapped(Vector3.ONE * PI / 2))
+		var parent := get_parent() as Node3D
+		if parent:
+			local_quat = Quaternion.from_euler(parent.global_rotation).inverse() * new_global_quat
+		rotation = local_quat.get_euler()
+	
+	# Not letting rotation snap between -PI and PI each time method called
+	var current_rotation := rotation
+	for i in AXIS_COUNT:
+		if is_equal_approx(current_rotation[i], -PI):
+			current_rotation[i] = -PI
+	rotation = current_rotation
+	
 	size = global_transform.affine_inverse().basis * (root_transform.basis * range.size)
 
 
