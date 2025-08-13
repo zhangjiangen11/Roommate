@@ -156,7 +156,7 @@ func _create_default_part(anchor: Vector3, flow: Vector3, part_transform: Transf
 	result.nav_transform = part_transform
 	result.scene_transform = part_transform
 	var default_mesh := QuadMesh.new()
-	default_mesh.material = preload("../defaults/default_material.tres")
+	default_mesh.material = RoommateStyler.DEFAULT_MATERIAL
 	result.mesh = default_mesh if set_mesh else null
 	result.collision_mesh = default_mesh if set_mesh else null
 	result.nav_mesh = default_mesh if set_nav else null

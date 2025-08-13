@@ -9,6 +9,9 @@
 @tool
 extends EditorNode3DGizmoPlugin
 
+const _BLOCKS_AREA_GIZMO := preload("./blocks_gizmo.gd")
+const _OBLIQUE_GIZMO := preload("./oblique_gizmo.gd")
+
 var _plugin: EditorPlugin
 
 
@@ -30,7 +33,7 @@ func _get_gizmo_name() -> String:
 
 func _create_gizmo(for_node_3d: Node3D) -> EditorNode3DGizmo:
 	if for_node_3d is RoommateOblique:
-		return preload("./oblique_gizmo.gd").new(_plugin)
+		return _OBLIQUE_GIZMO.new(_plugin)
 	if for_node_3d is RoommateBlocksArea:
-		return preload("./blocks_gizmo.gd").new(_plugin)
+		return _BLOCKS_AREA_GIZMO.new(_plugin)
 	return null

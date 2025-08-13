@@ -23,6 +23,7 @@ const NAV_BAKED := &"nmtid_baked"
 const NAV_ASSEMBLED := &"nmtid_assembled"
 
 const _SETTINGS := preload("../plugin_settings.gd")
+const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 
 @export var block_size := 1.0:
 	set(value):
@@ -204,7 +205,7 @@ func create_blocks() -> Dictionary:
 			all_blocks[new_block_position] = new_block
 	
 	# Applying internal style
-	var internal_style := preload("../resources/internal_style.gd").new()
+	var internal_style := _INTERNAL_STYLE.new()
 	if scale_with_block_size:
 		internal_style.scale = Vector3.ONE * block_size
 	internal_style.force_white_vertex_color = force_white_vertex_color

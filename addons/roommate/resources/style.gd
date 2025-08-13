@@ -28,6 +28,7 @@ func apply(source_blocks: Dictionary) -> void:
 	_build_rulesets()
 	for ruleset in _current_rulesets:
 		ruleset.apply(source_blocks)
+	_current_rulesets.clear()
 
 
 func create_ruleset() -> _RULESET:

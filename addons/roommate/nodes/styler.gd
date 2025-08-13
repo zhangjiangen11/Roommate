@@ -11,6 +11,7 @@
 class_name RoommateStyler
 extends Node3D
 
+const DEFAULT_MATERIAL := preload("../defaults/default_material.tres")
 const _SETTINGS := preload("../plugin_settings.gd")
 
 @export var style: RoommateStyle

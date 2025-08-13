@@ -10,18 +10,18 @@
 extends EditorPlugin
 
 const _SETTINGS := preload("./plugin_settings.gd")
-const _GIZMO_PLUGIN_SCRIPT := preload("./gizmos/gizmo_plugin.gd")
+const _GIZMO_PLUGIN := preload("./gizmos/gizmo_plugin.gd")
 const _CONTROL_SCENES: Array[PackedScene] = [
 	preload("./controls/root_actions/root_actions.tscn"),
 	preload("./controls/blocks_area_actions/blocks_area_actions.tscn"),
 ]
 
 var _controls: Array[Control] = []
-var _gizmo_plugin: _GIZMO_PLUGIN_SCRIPT
+var _gizmo_plugin: _GIZMO_PLUGIN
 
 
 func _init() -> void:
-	_gizmo_plugin = _GIZMO_PLUGIN_SCRIPT.new(self)
+	_gizmo_plugin = _GIZMO_PLUGIN.new(self)
 
 
 func _enter_tree() -> void:
