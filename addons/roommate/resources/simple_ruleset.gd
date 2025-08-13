@@ -36,23 +36,46 @@ const BLOCKS_SELECTOR_SEEDED_RANDOM := &"sbsid_seeded_random"
 	RoommateBlock.Slot.WALL_RIGHT,
 	RoommateBlock.Slot.WALL_FORWARD,
 	RoommateBlock.Slot.WALL_BACK,
-	RoommateBlock.Slot.CENTER,
 	RoommateBlock.Slot.OBLIQUE,
 ]
 @export var inverse_selection := false
 
-@export_group("Overrides")
-@export var part_position_offset := Vector3.ZERO
-@export var part_rotation_offset := Vector3.ZERO
-@export var part_scale_offset := Vector3.ONE
+@export_group("General")
+@export var anchor := -Vector3.ONE
+@export var uniform_offset := Vector3.ZERO
+@export var uniform_rotation := Vector3.ZERO
+@export var uniform_scale := Vector3.ONE
+@export var uniform_mesh: Mesh
 
+@export_group("Mesh")
+@export var mesh_offset := Vector3.ZERO
+@export var mesh_rotation := Vector3.ZERO
+@export var mesh_scale := Vector3.ONE
 @export var mesh: Mesh = null
-@export var collision_mesh: Mesh = null
-@export var nav_mesh: Mesh = null
 
-@export var scene: PackedScene
-@export var scene_path: NodePath
-@export var scene_properties: Dictionary
-
+@export_group("Mesh Surface")
 @export var material: Material = null
+@export var uv_tile_size := Vector2i.ZERO
+@export var uv_tile_position := Vector2i.ZERO
 @export var color := Color.WHITE
+@export var flip_faces := false
+
+@export_group("Collision") 
+@export var collision_offset := Vector3.ZERO
+@export var collision_rotation := Vector3.ZERO
+@export var collision_scale := Vector3.ONE
+@export var collision_mesh: Mesh = null
+
+@export_group("Scenes")
+@export var scene_offset := Vector3.ZERO
+@export var scene_rotation := Vector3.ZERO
+@export var scene_scale := Vector3.ONE
+@export var scene: PackedScene = null
+@export var scene_parent_path := NodePath()
+@export var scene_property_overrides := {}
+
+@export_group("Navigation")
+@export var nav_offset := Vector3.ZERO
+@export var nav_rotation := Vector3.ZERO
+@export var nav_scale := Vector3.ONE
+@export var nav_mesh: Mesh = null

@@ -16,6 +16,21 @@ const _BLOCK_SELECTOR := preload("../data/style/blocks_selectors/blocks_selector
 @export var simple_rulesets: Array[RoommateSimpleRuleset] = []
 
 
+static func _build_transform(position: Vector3, degrees: Vector3, scale: Vector3) -> Transform3D:
+	const AXIS_COUNT := 3
+	var rotation := Vector3.ZERO
+	for i in AXIS_COUNT:
+		rotation[i] = deg_to_rad(degrees[i])
+	var basis := Basis.from_euler(rotation).scaled(scale)
+	return Transform3D(basis, position)
+
+
+static func _build_transform_fallback(position: Vector3, degrees: Vector3, scale: Vector3,
+		fallback: Transform3D) -> Transform3D:
+	var transform := _build_transform(position, degrees, scale)
+	return transform if transform != Transform3D.IDENTITY else fallback
+
+
 func _build_rulesets() -> void:
 	for simple_ruleset in simple_rulesets:
 		_build_simple_ruleset(simple_ruleset)
@@ -52,30 +67,63 @@ func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 			blocks_selector = ruleset.select_random_blocks(RANDOM_DENSITY, rng)
 		_:
 			push_error("ROOMMATE: Unknown simple blocks selector type: %s." % simple_ruleset.blocks_selector)
+			return
 	blocks_selector.set_offset(simple_ruleset.blocks_selector_offset)
 	
 	var parts_selector := ruleset.select_parts(simple_ruleset.selected_parts)
 	parts_selector.inverse_selection = simple_ruleset.inverse_selection
 	
-	var transform := Transform3D.IDENTITY
-	transform.origin = simple_ruleset.part_position_offset
-	transform.basis = Basis.from_euler(simple_ruleset.part_rotation_offset)
-	transform.scaled_local(simple_ruleset.part_scale_offset)
-	parts_selector.mesh_transform.accumulate(transform)
-	parts_selector.collision_transform.accumulate(transform)
-	parts_selector.nav_transform.accumulate(transform)
+	# General
+	if simple_ruleset.anchor.clamp(Vector3.ZERO, Vector3.ONE) == simple_ruleset.anchor:
+		parts_selector.anchor.override(simple_ruleset.anchor)
 	
-	if simple_ruleset.mesh:
-		parts_selector.mesh.override(simple_ruleset.mesh)
-	if simple_ruleset.collision_mesh:
-		parts_selector.collision_mesh.override(simple_ruleset.collision_mesh)
-	if simple_ruleset.nav_mesh:
-		parts_selector.nav_mesh.override(simple_ruleset.nav_mesh)
+	# transform overrides
+	var uniform_transform := _build_transform(simple_ruleset.uniform_offset, 
+			simple_ruleset.uniform_rotation, simple_ruleset.uniform_scale)
+	var mesh_transform := _build_transform_fallback(simple_ruleset.mesh_offset, 
+			simple_ruleset.mesh_rotation, simple_ruleset.mesh_scale, uniform_transform)
+	var collision_transform := _build_transform_fallback(simple_ruleset.collision_offset, 
+			simple_ruleset.collision_rotation, simple_ruleset.collision_scale, uniform_transform)
+	var scene_transform := _build_transform_fallback(simple_ruleset.scene_offset, 
+			simple_ruleset.scene_rotation, simple_ruleset.scene_scale, uniform_transform)
+	var nav_transform := _build_transform_fallback(simple_ruleset.nav_offset, 
+			simple_ruleset.nav_rotation, simple_ruleset.nav_scale, uniform_transform)
+	if mesh_transform != Transform3D.IDENTITY:
+		parts_selector.mesh_transform.accumulate(mesh_transform)
+	if collision_transform != Transform3D.IDENTITY:
+		parts_selector.collision_transform.accumulate(collision_transform)
+	if scene_transform != Transform3D.IDENTITY:
+		parts_selector.scene_transform.accumulate(scene_transform)
+	if nav_transform != Transform3D.IDENTITY:
+		parts_selector.nav_transform.accumulate(nav_transform)
+	
+	# mesh overrides
+	var mesh := simple_ruleset.mesh if simple_ruleset.mesh else simple_ruleset.uniform_mesh
+	var collision_mesh := simple_ruleset.collision_mesh if simple_ruleset.collision_mesh else simple_ruleset.uniform_mesh
+	var nav_mesh := simple_ruleset.nav_mesh if simple_ruleset.nav_mesh else simple_ruleset.uniform_mesh
+	if mesh:
+		parts_selector.mesh.override(mesh)
+	if collision_mesh:
+		parts_selector.collision_mesh.override(collision_mesh)
+	if nav_mesh:
+		parts_selector.nav_mesh.override(nav_mesh)
+	
+	# scenes overrides
 	if simple_ruleset.scene:
 		parts_selector.scene.override(simple_ruleset.scene)
+	if not simple_ruleset.scene_parent_path.is_empty():
+		parts_selector.scene_parent_path.override(simple_ruleset.scene_parent_path)
+	if not simple_ruleset.scene_property_overrides.is_empty():
+		parts_selector.scene_property_overrides.accumulate(simple_ruleset.scene_property_overrides)
 	
+	# surface overrides
+	var surface_override := parts_selector.override_fallback_surface()
 	if simple_ruleset.material:
-		parts_selector.override_fallback_surface().material.override(simple_ruleset.material)
-	
+		surface_override.material.override(simple_ruleset.material)
 	if simple_ruleset.color != Color.WHITE:
-		parts_selector.override_fallback_surface().set_color(simple_ruleset.color)
+		surface_override.set_color(simple_ruleset.color)
+	if simple_ruleset.uv_tile_size.x > 0 and simple_ruleset.uv_tile_size.y > 0:
+		surface_override.set_uv_tile(simple_ruleset.uv_tile_position, simple_ruleset.uv_tile_size, 0)
+	if simple_ruleset.flip_faces:
+		surface_override.flip_faces.override(simple_ruleset.flip_faces)
+	
