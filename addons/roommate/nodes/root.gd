@@ -81,7 +81,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 	# creating collections
 	var surface_tools := {}
 	var collision_faces := PackedVector3Array()
-	var scene_infos: Array[Dictionary] = []
+	var staged_scenes := {}
 	var nav_tool := SurfaceTool.new()
 	
 	# generating everything
@@ -96,7 +96,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
 				_generate_part(processed_part, block, surface_tools, 
-						collision_faces, scene_infos, nav_tool)
+						collision_faces, staged_scenes, nav_tool)
 	
 	# applying mesh
 	match StringName(mesh_type):
@@ -123,44 +123,34 @@ func generate_with(all_blocks: Dictionary) -> void:
 	
 	#applying scenes
 	clear_scenes()
-	for info in scene_infos:
-		var scene_parent := get_node_or_null(info[&"parent_path"])
-		var valid_parent := scene_parent and (is_ancestor_of(scene_parent) or self == scene_parent)
-		if _SETTINGS.get_bool(&"stid_warn_about_invalid_scene_paths"):
-			if info[&"parent_path"].is_empty():
-				push_warning("ROOMMATE: Scene creation. Path is empty")
-			elif not valid_parent:
-				push_warning("ROOMMATE: Scene creation. There is no valid node on path %s" % info[&"parent_path"])
-		
-		if info[&"parent_path"].is_empty() or not valid_parent:
-			if not use_scenes_fallback_parent:
-				continue
-			var fallback := get_node_or_null(NodePath(_SETTINGS.get_string(&"stid_scenes_fallback_parent_name")))
-			if not fallback:
-				fallback = Node3D.new()
-				fallback.name = _SETTINGS.get_string(&"stid_scenes_fallback_parent_name")
-				add_child(fallback)
-				fallback.owner = owner
-				fallback.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
-			scene_parent = fallback
-		
-		var new_scene := info[&"scene"].instantiate() as Node
-		scene_parent.add_child(new_scene, force_readable_scene_names)
-		new_scene.owner = owner
-		new_scene.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
-		
-		var node3d_scene := new_scene as Node3D
-		if not node3d_scene:
+	var scene_paths: Array[NodePath] = []
+	scene_paths.assign(staged_scenes.keys())
+	var sort_by_node_path := func(a: NodePath, b: NodePath) -> bool:
+		return a.get_name_count() < b.get_name_count()
+	scene_paths.sort_custom(sort_by_node_path)
+	for scene_path in scene_paths:
+		var staged_scene_items := staged_scenes[scene_path] as Array[Dictionary]
+		var scene_parent := _resolve_scene_parent(scene_path)
+		if not scene_parent:
+			for staged_scene_item in staged_scene_items:
+				var new_scene := staged_scene_item[&"scene"] as Node
+				new_scene.queue_free()
 			continue
-		if transform_scene_relative_to_part:
-			node3d_scene.global_transform = global_transform * info[&"scene_transform"]
-		else:
-			node3d_scene.transform = info[&"scene_transform"]
 		
-		for property_name in info[&"property_overrides"]:
-			if not property_name is String and not property_name is StringName:
-				continue
-			node3d_scene.set(property_name, info[&"property_overrides"][property_name])
+		for staged_scene_item in staged_scene_items:
+			var new_scene := staged_scene_item[&"scene"] as Node
+			var property_overrides := staged_scene_item[&"property_overrides"] as Dictionary
+			scene_parent.add_child(new_scene, force_readable_scene_names)
+			new_scene.owner = owner
+			new_scene.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
+			
+			var node3d_scene := new_scene as Node3D
+			if node3d_scene and transform_scene_relative_to_part:
+				node3d_scene.global_transform = global_transform * node3d_scene.transform
+			for key in property_overrides:
+				if key is String or key is StringName:
+					var property_name := key as StringName
+					new_scene.set(property_name, property_overrides[property_name])
 	
 	# applying navigation
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
@@ -229,8 +219,7 @@ func register_block_type_id(block_type_id: StringName, part_processor: Callable)
 
 
 func clear_scenes() -> void:
-	var scenes := get_owned_scenes()
-	for scene in scenes:
+	for scene in get_owned_scenes():
 		var parent := scene.get_parent()
 		if parent:
 			parent.remove_child(scene)
@@ -283,7 +272,7 @@ func get_owned_scenes() -> Array[Node]:
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
 		surface_tools: Dictionary, collision_faces: PackedVector3Array,
-		scene_infos: Array[Dictionary], nav_tool: SurfaceTool) -> void:
+		staged_scenes: Dictionary, nav_tool: SurfaceTool) -> void:
 	if not part:
 		return
 	var part_origin := parent_block.position * block_size + block_size * part.anchor
@@ -293,13 +282,22 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 		collision_faces.append_array(part_collision_faces)
 	
 	if part.scene:
-		var info := {}
-		info[&"scene"] = part.scene
-		info[&"scene_transform"] = part.scene_transform.translated(part_origin)
-		info[&"parent_path"] = part.scene_parent_path
-		info[&"property_overrides"] = part.scene_property_overrides
-		info.make_read_only()
-		scene_infos.append(info)
+		var new_scene := part.scene.instantiate() as Node
+		var node3d_scene := new_scene as Node3D
+		if node3d_scene:
+			node3d_scene.transform = part.scene_transform.translated(part_origin)
+		
+		var parent_path := part.scene_parent_path
+		if not parent_path.is_absolute() and not parent_path.is_empty():
+			parent_path = NodePath(("%s/%s" % [get_path(), part.scene_parent_path]).simplify_path())
+		
+		if not staged_scenes.has(parent_path):
+			var new_scenes_array: Array[Dictionary] = []
+			staged_scenes[parent_path] = new_scenes_array
+		staged_scenes[parent_path].append({
+			&"scene": new_scene,
+			&"property_overrides": part.scene_property_overrides,
+		})
 	
 	if part.nav_mesh:
 		for surface_id in part.nav_mesh.get_surface_count():
@@ -321,7 +319,8 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 		part_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_arrays)
 		var mesh_data_tool := MeshDataTool.new()
 		var create_error := mesh_data_tool.create_from_surface(part_mesh, 0)
-		assert(create_error == OK)
+		if create_error != OK:
+			push_error("ROOMMATE: Can't create MeshDataTool from surface. Error %s." % create_error)
 		
 		for vertex_id in mesh_data_tool.get_vertex_count():
 			var uv := mesh_data_tool.get_vertex_uv(vertex_id)
@@ -331,7 +330,8 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 		
 		part_mesh.clear_surfaces()
 		var commit_error := mesh_data_tool.commit_to_surface(part_mesh)
-		assert(commit_error == OK)
+		if commit_error != OK:
+			push_error("ROOMMATE: MeshDataTool can't commit to surface. Error %s." % commit_error)
 		
 		# appending surfaces
 		var part_material := part.mesh.surface_get_material(surface_id)
@@ -379,6 +379,30 @@ func _resolve_mesh_container() -> Node3D:
 		container.owner = owner
 		linked_mesh_container = get_path_to(container)
 	return container
+
+
+func _resolve_scene_parent(parent_path: NodePath) -> Node:
+	var scene_parent := get_node_or_null(parent_path)
+	if _SETTINGS.get_bool(&"stid_warn_about_invalid_scene_paths"):
+		if parent_path.is_empty():
+			push_warning("ROOMMATE: Scene creation. Path is empty.")
+		elif not scene_parent:
+			push_warning("ROOMMATE: Scene creation. Parent doesn't exist at %s." % parent_path)
+	
+	if scene_parent:
+		return scene_parent
+	elif not use_scenes_fallback_parent:
+		return null
+	
+	var fallback_name := _SETTINGS.get_string(&"stid_scenes_fallback_parent_name")
+	var fallback := get_node_or_null(NodePath(fallback_name))
+	if not fallback:
+		fallback = Node3D.new()
+		fallback.name = fallback_name
+		add_child(fallback)
+		fallback.owner = owner
+		fallback.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
+	return fallback
 
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 

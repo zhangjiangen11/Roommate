@@ -112,7 +112,7 @@ func _build_simple_ruleset(simple_ruleset: RoommateSimpleRuleset) -> void:
 	if simple_ruleset.scene:
 		parts_selector.scene.override(simple_ruleset.scene)
 	if not simple_ruleset.scene_parent_path.is_empty():
-		parts_selector.scene_parent_path.override(simple_ruleset.scene_parent_path)
+		parts_selector.scene_parent_path.override(NodePath(simple_ruleset.scene_parent_path))
 	if not simple_ruleset.scene_property_overrides.is_empty():
 		parts_selector.scene_property_overrides.accumulate(simple_ruleset.scene_property_overrides)
 	

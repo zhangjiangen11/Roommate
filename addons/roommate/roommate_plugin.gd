@@ -106,7 +106,8 @@ func snap_areas(areas: Array[RoommateBlocksArea]) -> void:
 func _remove_root_scenes(root: RoommateRoot) -> void:
 	var undo_redo := get_undo_redo()
 	for scene in root.get_owned_scenes():
-		#undo_redo.add_undo_method(scene.get_parent(), &"add_child", scene)
+		undo_redo.add_undo_method(scene.get_parent(), &"add_child", scene)
+		undo_redo.add_undo_property(scene, &"owner", root.owner)
 		undo_redo.add_undo_reference(scene)
 		undo_redo.add_do_method(scene.get_parent(), &"remove_child", scene)
 

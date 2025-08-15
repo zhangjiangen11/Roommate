@@ -71,7 +71,7 @@ const BLOCKS_SELECTOR_SEEDED_RANDOM := &"sbsid_seeded_random"
 @export var scene_rotation := Vector3.ZERO
 @export var scene_scale := Vector3.ONE
 @export var scene: PackedScene = null
-@export var scene_parent_path := NodePath()
+@export var scene_parent_path := String()
 @export var scene_property_overrides := {}
 
 @export_group("Navigation")
