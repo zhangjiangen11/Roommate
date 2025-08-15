@@ -34,11 +34,13 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 
 @export var scale_with_block_size := true
 @export var force_white_vertex_color := true
+@export var auto_create_resource_files := false
 @export var generate_on_ready := false
 
 @export_group("Mesh")
 @export_enum(MESH_SINGLE) var mesh_type := String(MESH_SINGLE)
 @export_node_path("Node3D") var linked_mesh_container: NodePath
+@export_file("*.tres", "*.res") var path_to_mesh_resource: String
 @export var create_mesh_container_if_missing := true
 @export var index_mesh := true
 @export var generate_normals := true
@@ -47,6 +49,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 @export_group("Collision")
 @export_enum(COLLISION_CONCAVE, COLLISION_CONVEX) var collision_shape := String(COLLISION_CONCAVE)
 @export_node_path("CollisionShape3D") var linked_collision_shape: NodePath
+@export_file("*.tres", "*.res") var path_to_collision_shape_resource: String
 
 @export_group("Scenes")
 @export var transform_scene_relative_to_part := true
@@ -56,6 +59,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 @export_group("Navigation")
 @export_enum(NAV_BAKED, NAV_ASSEMBLED) var nav_mesh_type := String(NAV_BAKED)
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
+@export_file("*.tres", "*.res") var path_to_nav_mesh_resource: String
 
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
@@ -108,18 +112,25 @@ func generate_with(all_blocks: Dictionary) -> void:
 	# applying collision
 	var collision_shape_node := get_node_or_null(linked_collision_shape) as CollisionShape3D
 	if collision_shape_node:
-		var shape: Shape3D
+		var new_shape: Shape3D
 		match StringName(collision_shape):
 			COLLISION_CONCAVE:
 				var concave := ConcavePolygonShape3D.new()
+				if collision_shape_node.shape is ConcavePolygonShape3D:
+					concave = collision_shape_node.shape.duplicate(true) as ConcavePolygonShape3D
 				concave.set_faces(collision_faces)
-				collision_shape_node.shape = concave
+				new_shape = concave
 			COLLISION_CONVEX:
 				var convex := ConvexPolygonShape3D.new()
+				if collision_shape_node.shape is ConvexPolygonShape3D:
+					convex = collision_shape_node.shape.duplicate(true) as ConvexPolygonShape3D
 				convex.points = collision_faces.duplicate()
-				collision_shape_node.shape = convex
+				new_shape = convex
 			_:
 				push_error("ROOMMATE: Unknown collision shape id %s." % collision_shape)
+		if _try_save_resource(new_shape, path_to_collision_shape_resource, &"stid_collision_shape_resource_file_postfix"):
+			path_to_collision_shape_resource = new_shape.resource_path
+		collision_shape_node.shape = new_shape
 	
 	#applying scenes
 	clear_scenes()
@@ -155,16 +166,27 @@ func generate_with(all_blocks: Dictionary) -> void:
 	# applying navigation
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
 	if navigation_region:
-		var nav_mesh := navigation_region.navigation_mesh
-		if not nav_mesh:
-			nav_mesh = NavigationMesh.new()
-			navigation_region.navigation_mesh = nav_mesh
 		match StringName(nav_mesh_type):
 			NAV_BAKED:
+				var on_bake_finished := func() -> void:
+					var baked_mesh := navigation_region.navigation_mesh
+					if _try_save_resource(baked_mesh, path_to_nav_mesh_resource, &"stid_nav_mesh_resource_file_postfix"):
+						path_to_nav_mesh_resource = baked_mesh.resource_path
+					navigation_region.navigation_mesh = baked_mesh
+				if not navigation_region.navigation_mesh:
+					navigation_region.navigation_mesh = NavigationMesh.new()
+				navigation_region.bake_finished.connect(on_bake_finished, CONNECT_ONE_SHOT)
 				navigation_region.bake_navigation_mesh(_SETTINGS.get_bool(&"stid_bake_nav_on_thread"))
 			NAV_ASSEMBLED:
 				nav_tool.index()
-				nav_mesh.create_from_mesh(nav_tool.commit())
+				var new_nav_mesh := NavigationMesh.new()
+				if navigation_region.navigation_mesh:
+					new_nav_mesh = navigation_region.navigation_mesh.duplicate(true) as NavigationMesh
+				new_nav_mesh.create_from_mesh(nav_tool.commit())
+				
+				if _try_save_resource(new_nav_mesh, path_to_nav_mesh_resource, &"stid_nav_mesh_resource_file_postfix"):
+					path_to_nav_mesh_resource = new_nav_mesh.resource_path
+				navigation_region.navigation_mesh = new_nav_mesh
 				navigation_region.update_gizmos()
 			_:
 				push_error("ROOMMATE: Unknown nav mesh type id %s." % nav_mesh_type)
@@ -351,7 +373,10 @@ func _generate_single_mesh(surface_tools: Dictionary) -> void:
 	var container := _resolve_mesh_container() as MeshInstance3D
 	if not container:
 		return
-	var result_mesh := ArrayMesh.new()
+	var new_mesh := ArrayMesh.new()
+	if container.mesh is ArrayMesh:
+		new_mesh = container.mesh.duplicate(true) as ArrayMesh
+		new_mesh.clear_surfaces()
 	for surface_material in surface_tools:
 		var tool := surface_tools[surface_material] as SurfaceTool
 		if index_mesh:
@@ -360,9 +385,11 @@ func _generate_single_mesh(surface_tools: Dictionary) -> void:
 			tool.generate_normals()
 		if generate_tangents:
 			tool.generate_tangents()
-		tool.commit(result_mesh)
-		result_mesh.surface_set_material(result_mesh.get_surface_count() - 1, surface_material)
-	container.mesh = result_mesh
+		tool.commit(new_mesh)
+		new_mesh.surface_set_material(new_mesh.get_surface_count() - 1, surface_material)
+	if _try_save_resource(new_mesh, path_to_mesh_resource, &"stid_mesh_resource_file_postfix"):
+		path_to_mesh_resource = new_mesh.resource_path
+	container.mesh = new_mesh
 
 
 func _resolve_mesh_container() -> Node3D:
@@ -403,6 +430,24 @@ func _resolve_scene_parent(parent_path: NodePath) -> Node:
 		fallback.owner = owner
 		fallback.add_to_group(_SETTINGS.get_string(&"stid_scenes_group"), true)
 	return fallback
+
+
+func _try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName) -> bool:
+	if not Engine.is_editor_hint():
+		return false
+	var path := path_to_resource
+	var auto_creation_requested := auto_create_resource_files and path.is_empty()
+	if auto_creation_requested:
+		var scene_path := get_tree().edited_scene_root.scene_file_path
+		var postfix := _SETTINGS.get_string(postfix_setting)
+		path = scene_path.path_join("..").simplify_path().path_join(name.to_snake_case() + postfix)
+	if ResourceLoader.exists(path) or auto_creation_requested:
+		var save_error := ResourceSaver.save(new_resource, path)
+		if save_error != OK:
+			push_error("ROOMMATE: Can't save resource to %s. Error %s." % [path, save_error])
+		new_resource.take_over_path(path)
+		return true
+	return false
 
 
 func _process_space_block_part(slot_id: StringName, part: RoommatePart, block: RoommateBlock, 
