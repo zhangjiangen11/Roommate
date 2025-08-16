@@ -27,11 +27,11 @@ func _generate() -> void:
 	var roots := _get_related_roots()
 	if roots.is_empty():
 		return
-	plugin.generate_roots(roots)
+	plugin.actions.generate_roots(roots)
 
 
 func _snap() -> void:
 	var areas := _get_blocks_areas()
 	if areas.is_empty():
 		return
-	plugin.snap_areas(areas)
+	plugin.actions.snap_areas(areas)

@@ -445,6 +445,7 @@ func _try_save_resource(new_resource: Resource, path_to_resource: String, postfi
 		var save_error := ResourceSaver.save(new_resource, path)
 		if save_error != OK:
 			push_error("ROOMMATE: Can't save resource to %s. Error %s." % [path, save_error])
+			return false
 		new_resource.take_over_path(path)
 		return true
 	return false

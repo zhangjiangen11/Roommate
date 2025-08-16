@@ -28,18 +28,18 @@ func _generate() -> void:
 	var roots := _get_roots()
 	if roots.is_empty():
 		return
-	plugin.generate_roots(roots)
+	plugin.actions.generate_roots(roots)
 
 
 func _snap() -> void:
 	var roots := _get_roots()
 	if roots.is_empty():
 		return
-	plugin.snap_roots_areas(roots)
+	plugin.actions.snap_roots_areas(roots)
 
 
 func _clear_scenes() -> void:
 	var roots := _get_roots()
 	if roots.is_empty():
 		return
-	plugin.clear_roots_scenes(roots)
+	plugin.actions.clear_roots_scenes(roots)

@@ -11,22 +11,27 @@ extends EditorPlugin
 
 const _SETTINGS := preload("./plugin_settings.gd")
 const _GIZMO_PLUGIN := preload("./gizmos/gizmo_plugin.gd")
+const _EDITOR_ACTIONS := preload("./editor_actions.gd")
 const _CONTROL_SCENES: Array[PackedScene] = [
 	preload("./controls/root_actions/root_actions.tscn"),
 	preload("./controls/blocks_area_actions/blocks_area_actions.tscn"),
 ]
 
-var _controls: Array[Control] = []
+var settings: _SETTINGS
+var actions: _EDITOR_ACTIONS
 var _gizmo_plugin: _GIZMO_PLUGIN
+var _controls: Array[Control] = []
 
 
 func _init() -> void:
+	settings = _SETTINGS.new(self)
+	actions = _EDITOR_ACTIONS.new(self)
 	_gizmo_plugin = _GIZMO_PLUGIN.new(self)
 
 
 func _enter_tree() -> void:
 	get_editor_interface().get_selection().selection_changed.connect(_update_controls_visibility)
-	_SETTINGS.init_settings(get_editor_interface().get_editor_settings())
+	settings.init_settings()
 	add_node_3d_gizmo_plugin(_gizmo_plugin)
 	for scene in _CONTROL_SCENES:
 		var control := scene.instantiate() as Control
@@ -46,70 +51,8 @@ func _exit_tree() -> void:
 
 
 func _disable_plugin() -> void:
-	if _SETTINGS.get_bool(&"stid_clear_settings_when_plugin_disabled"):
-		_SETTINGS.clear(get_editor_interface().get_editor_settings())
-
-
-func generate_roots(roots: Array[RoommateRoot]) -> void:
-	if roots.is_empty():
-		return
-	var undo_redo := get_undo_redo()
-	undo_redo.create_action("ROOMMATE: Generate Root(s)")
-	for root in roots:
-		root.generate()
-	undo_redo.commit_action()
-
-
-func snap_roots_areas(roots: Array[RoommateRoot]) -> void:
-	if roots.is_empty():
-		return
-	var undo_redo := get_undo_redo()
-	undo_redo.create_action("ROOMMATE: Snap Root's Areas To Blocks")
-	for root in roots:
-		var areas := root.get_owned_areas()
-		for area in areas:
-			undo_redo.add_undo_property(area, &"transform", area.transform)
-			undo_redo.add_undo_property(area, &"size", area.size)
-			area.snap_to_range(root.global_transform, root.block_size)
-			undo_redo.add_do_property(area, &"transform", area.transform)
-			undo_redo.add_do_property(area, &"size", area.size)
-	undo_redo.commit_action()
-
-
-func clear_roots_scenes(roots: Array[RoommateRoot]) -> void:
-	if roots.is_empty():
-		return
-	var undo_redo := get_undo_redo()
-	undo_redo.create_action("ROOMMATE: Clear Root's Scenes")
-	for root in roots:
-		_remove_root_scenes(root)
-	undo_redo.commit_action()
-
-
-func snap_areas(areas: Array[RoommateBlocksArea]) -> void:
-	if areas.is_empty():
-		return
-	var undo_redo := get_undo_redo()
-	undo_redo.create_action("ROOMMATE: Snap Area(s) To Blocks")
-	for area in areas:
-		var related_root := area.find_root()
-		if not related_root:
-			continue
-		undo_redo.add_undo_property(area, &"transform", area.transform)
-		undo_redo.add_undo_property(area, &"size", area.size)
-		area.snap_to_range(related_root.global_transform, related_root.block_size)
-		undo_redo.add_do_property(area, &"transform", area.transform)
-		undo_redo.add_do_property(area, &"size", area.size)
-	undo_redo.commit_action()
-
-
-func _remove_root_scenes(root: RoommateRoot) -> void:
-	var undo_redo := get_undo_redo()
-	for scene in root.get_owned_scenes():
-		undo_redo.add_undo_method(scene.get_parent(), &"add_child", scene)
-		undo_redo.add_undo_property(scene, &"owner", root.owner)
-		undo_redo.add_undo_reference(scene)
-		undo_redo.add_do_method(scene.get_parent(), &"remove_child", scene)
+	if settings.get_bool(&"stid_clear_settings_when_plugin_disabled"):
+		settings.clear()
 
 
 func _update_controls_visibility() -> void:
@@ -117,9 +60,3 @@ func _update_controls_visibility() -> void:
 	for control in _controls:
 		var callable := Callable(control, &"visibility_predicate")
 		control.visible = callable.is_valid() and callable.call(nodes) as bool
-
-
-func _match_shortcut(setting_id: StringName, event: InputEvent) -> bool:
-	var editor_settings := get_editor_interface().get_editor_settings()
-	var shortcut := _SETTINGS.get_shortcut(setting_id, editor_settings)
-	return shortcut and shortcut.matches_event(event)
