@@ -85,8 +85,8 @@ func select_edge_blocks_axis(edge_size: Vector3i) -> _EDGE_BLOCKS_SELECTOR:
 	return select_edge_blocks(segments)
 
 
-func select_interval_blocks(interval: Vector3i) -> _INTERVAL_BLOCKS_SELECTOR:
-	var selector := _INTERVAL_BLOCKS_SELECTOR.new(interval)
+func select_interval_blocks(interval: Vector3i, global_space := false) -> _INTERVAL_BLOCKS_SELECTOR:
+	var selector := _INTERVAL_BLOCKS_SELECTOR.new(interval, global_space)
 	return _add_blocks_selector(selector) as _INTERVAL_BLOCKS_SELECTOR
 
 
