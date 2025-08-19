@@ -410,11 +410,10 @@ func _resolve_mesh_container() -> Node3D:
 
 func _resolve_scene_parent(parent_path: NodePath) -> Node:
 	var scene_parent := get_node_or_null(parent_path)
-	if _SETTINGS.get_bool(&"stid_warn_about_invalid_scene_paths"):
-		if parent_path.is_empty():
-			push_warning("ROOMMATE: Scene creation. Path is empty.")
-		elif not scene_parent:
-			push_warning("ROOMMATE: Scene creation. Parent doesn't exist at %s." % parent_path)
+	if parent_path.is_empty():
+		push_warning("ROOMMATE: Scene creation. Path is empty.")
+	elif not scene_parent:
+		push_warning("ROOMMATE: Scene creation. Parent doesn't exist at %s." % parent_path)
 	
 	if scene_parent:
 		return scene_parent
