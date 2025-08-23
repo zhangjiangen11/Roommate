@@ -77,11 +77,11 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 			pass
 		_ur.add_do_property(root, &"linked_mesh_container", root.linked_mesh_container)
 		
-		# pre-generate collision
+		# post-generate collision
 		if collision_shape:
 			_ur.add_do_property(collision_shape, &"shape", collision_shape.shape)
 		
-		# pre-generate nav
+		# post-generate nav
 		if nav_region:
 			_ur.add_do_property(nav_region, &"navigation_mesh", nav_region.navigation_mesh)
 		
