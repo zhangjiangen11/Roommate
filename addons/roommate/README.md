@@ -4,7 +4,9 @@ Roommate is hassle-free and easy to use 3D level builder plugin for Godot 4. Ori
 
 ## Learn
 
-[Repository with examples](https://github.com/Hoork/roommate_examples/)
+- [Documentation](https://hoork.github.io/roommate)
+
+- [Example scenes](https://github.com/hoork/roommate/tree/master/examples) are in the examples folder
 
 ## Features
 
