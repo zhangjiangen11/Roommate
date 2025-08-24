@@ -1,4 +1,6 @@
 site_name: Roommate
 site_url: https://hoork.github.io/roommate
+repo_url: https://github.com/hoork/roommate
+repo_name: hoork/roommate
 theme:
   name: material
