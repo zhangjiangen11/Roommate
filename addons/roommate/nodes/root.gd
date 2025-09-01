@@ -204,6 +204,8 @@ func generate_with(all_blocks: Dictionary) -> void:
 					path_to_occluder_resource = occluder.resource_path
 				occluder_container.occluder = occluder
 				occluder_container.update_gizmos()
+			_:
+				push_error("ROOMMATE: Unknown occluder type id %s." % occluder_type)
 
 
 func create_blocks() -> Dictionary:

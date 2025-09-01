@@ -47,6 +47,9 @@ var scene_parent_path: _NODE_PATH_SETTER:
 var scene_property_overrides: _DICTIONARY_SETTER:
 	get: return resolve_value_setter(&"scene_property_overrides", _DICTIONARY_SETTER)
 
+var surfaces: _SURFACE_OVERRIDE_SETTER:
+	get: return override_fallback_surface()
+
 var surface_overrides := {}
 var fallback_surface_override: _SURFACE_OVERRIDE_SETTER = null
 
