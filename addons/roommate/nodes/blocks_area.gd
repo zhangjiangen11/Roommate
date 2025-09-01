@@ -79,6 +79,7 @@ func create_blocks(root_transform: Transform3D, block_size: float) -> Dictionary
 				if processed_block.slots.has(slot_id):
 					continue
 				processed_block.slots[slot_id] = RoommatePart.new()
+			processed_block.make_read_only()
 		result[block_position] = processed_block
 	return result
 
