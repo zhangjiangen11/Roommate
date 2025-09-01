@@ -19,7 +19,6 @@ const MESH_SINGLE := &"mtid_single"
 const COLLISION_CONCAVE := &"csid_concave"
 const COLLISION_CONVEX := &"csid_convex"
 
-const NAV_BAKED := &"nmtid_baked"
 const NAV_ASSEMBLED := &"nmtid_assembled"
 
 const _SETTINGS := preload("../plugin_settings.gd")
@@ -57,7 +56,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
-@export_enum(NAV_BAKED, NAV_ASSEMBLED) var nav_mesh_type := String(NAV_BAKED)
+@export_enum(NAV_ASSEMBLED) var nav_mesh_type := String(NAV_ASSEMBLED)
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 @export_file("*.tres", "*.res") var path_to_nav_mesh_resource: String
 
@@ -167,16 +166,6 @@ func generate_with(all_blocks: Dictionary) -> void:
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
 	if navigation_region:
 		match StringName(nav_mesh_type):
-			NAV_BAKED:
-				var on_bake_finished := func() -> void:
-					var baked_mesh := navigation_region.navigation_mesh
-					if _try_save_resource(baked_mesh, path_to_nav_mesh_resource, &"stid_nav_mesh_resource_file_postfix"):
-						path_to_nav_mesh_resource = baked_mesh.resource_path
-					navigation_region.navigation_mesh = baked_mesh
-				if not navigation_region.navigation_mesh:
-					navigation_region.navigation_mesh = NavigationMesh.new()
-				navigation_region.bake_finished.connect(on_bake_finished, CONNECT_ONE_SHOT)
-				navigation_region.bake_navigation_mesh(_SETTINGS.get_bool(&"stid_bake_nav_on_thread"))
 			NAV_ASSEMBLED:
 				nav_tool.index()
 				var new_nav_mesh := NavigationMesh.new()

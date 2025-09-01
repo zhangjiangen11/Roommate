@@ -27,7 +27,6 @@ settings = {
 "stid_area_resize_snap": 1.0,
 "stid_area_snap_margin": 0.0,
 "stid_auto_snap_on_gizmo_edit": false,
-"stid_bake_nav_on_thread": true,
 "stid_clear_settings_when_plugin_disabled": false,
 "stid_collision_shape_resource_file_postfix": "_collision.tres",
 "stid_mesh_container_name": &"RoommateMeshContainer",
