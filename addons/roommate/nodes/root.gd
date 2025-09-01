@@ -19,7 +19,7 @@ const MESH_SINGLE := &"mtid_single"
 const COLLISION_CONCAVE := &"csid_concave"
 const COLLISION_CONVEX := &"csid_convex"
 
-const NAV_ASSEMBLED := &"nmtid_assembled"
+const NAV_SINGLE := &"nmtid_single"
 
 const _SETTINGS := preload("../plugin_settings.gd")
 const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
@@ -38,7 +38,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 
 @export_group("Mesh")
 @export_enum(MESH_SINGLE) var mesh_type := String(MESH_SINGLE)
-@export_node_path("Node3D") var linked_mesh_container: NodePath
+@export_node_path("MeshInstance3D") var linked_mesh_container: NodePath
 @export_file("*.tres", "*.res") var path_to_mesh_resource: String
 @export var create_mesh_container_if_missing := true
 @export var index_mesh := true
@@ -56,7 +56,7 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 @export var force_readable_scene_names := true
 
 @export_group("Navigation")
-@export_enum(NAV_ASSEMBLED) var nav_mesh_type := String(NAV_ASSEMBLED)
+@export_enum(NAV_SINGLE) var nav_mesh_type := String(NAV_SINGLE)
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 @export_file("*.tres", "*.res") var path_to_nav_mesh_resource: String
 
@@ -166,7 +166,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 	var navigation_region := get_node_or_null(linked_navigation_region) as NavigationRegion3D
 	if navigation_region:
 		match StringName(nav_mesh_type):
-			NAV_ASSEMBLED:
+			NAV_SINGLE:
 				nav_tool.index()
 				var new_nav_mesh := NavigationMesh.new()
 				if navigation_region.navigation_mesh:
