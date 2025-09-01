@@ -17,15 +17,17 @@ func override(color: Color) -> void:
 	_override_value = color
 
 
-func accumulate(color: Color, blend_over := true) -> void:
+func accumulate(color: Color, new_alpha := -1.0, blend_over := true) -> void:
 	_accumulation_requested = true
+	if new_alpha >= 0:
+		color.a = new_alpha
 	_accumulation_value = color
 	_blend_over = blend_over
 
 
 func _handle_accumulation(current_value: Variant) -> Variant:
 	var current_color := current_value as Color
-	var accumulate_color := _accumulation_value as Color
-	var color_under := current_color if _blend_over else accumulate_color
-	var color_over := accumulate_color if _blend_over else current_color
+	var accumulation_color := _accumulation_value as Color
+	var color_under := current_color if _blend_over else accumulation_color
+	var color_over := accumulation_color if _blend_over else current_color
 	return color_under.blend(color_over)
