@@ -56,6 +56,11 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 		if nav_region:
 			_ur.add_undo_property(nav_region, &"navigation_mesh", nav_region.navigation_mesh)
 		
+		# pre-generate occlusion
+		var occluder_container := root.get_node_or_null(root.linked_occluder_container) as OccluderInstance3D
+		if occluder_container:
+			_ur.add_undo_property(occluder_container, &"occluder", occluder_container.occluder)
+		
 		# generating everything...
 		root.generate()
 		
@@ -82,6 +87,10 @@ func generate_roots(roots: Array[RoommateRoot]) -> void:
 		# post-generate nav
 		if nav_region:
 			_ur.add_do_property(nav_region, &"navigation_mesh", nav_region.navigation_mesh)
+		
+		# post-generate occlusion
+		if occluder_container:
+			_ur.add_do_property(occluder_container, &"occluder", occluder_container.occluder)
 		
 		# post-generate scenes
 		for scene in root.get_owned_scenes():

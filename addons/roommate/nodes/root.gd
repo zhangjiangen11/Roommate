@@ -21,6 +21,8 @@ const COLLISION_CONVEX := &"csid_convex"
 
 const NAV_SINGLE := &"nmtid_single"
 
+const OCCLUDER_SINGLE := &"otid_single"
+
 const _SETTINGS := preload("../plugin_settings.gd")
 const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 
@@ -60,6 +62,11 @@ const _INTERNAL_STYLE := preload("../resources/internal_style.gd")
 @export_node_path("NavigationRegion3D") var linked_navigation_region: NodePath
 @export_file("*.tres", "*.res") var path_to_nav_mesh_resource: String
 
+@export_group("Occluder")
+@export_enum(OCCLUDER_SINGLE) var occluder_type := String(OCCLUDER_SINGLE)
+@export_node_path("OccluderInstance3D") var linked_occluder_container: NodePath
+@export_file("*.tres", "*.res", "*.occ") var path_to_occluder_resource: String
+
 var _part_processors := {
 	RoommateBlock.SPACE_TYPE: _process_space_block_part,
 	RoommateBlock.OBLIQUE_TYPE: _process_oblique_block_part,
@@ -86,6 +93,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 	var collision_faces := PackedVector3Array()
 	var staged_scenes := {}
 	var nav_tool := SurfaceTool.new()
+	var occluder_tool := SurfaceTool.new()
 	
 	# generating everything
 	for block_position in all_blocks:
@@ -99,7 +107,7 @@ func generate_with(all_blocks: Dictionary) -> void:
 			var processed_part := processor.call(slot_id, part, block, all_blocks) as RoommatePart
 			if processed_part:
 				_generate_part(processed_part, block, surface_tools, 
-						collision_faces, staged_scenes, nav_tool)
+						collision_faces, staged_scenes, nav_tool, occluder_tool)
 	
 	# applying mesh
 	match StringName(mesh_type):
@@ -179,6 +187,23 @@ func generate_with(all_blocks: Dictionary) -> void:
 				navigation_region.update_gizmos()
 			_:
 				push_error("ROOMMATE: Unknown nav mesh type id %s." % nav_mesh_type)
+	
+	# applying occluder
+	var occluder_container := get_node_or_null(linked_occluder_container) as OccluderInstance3D
+	if occluder_container:
+		match StringName(occluder_type):
+			OCCLUDER_SINGLE:
+				occluder_tool.index()
+				var occluder := ArrayOccluder3D.new()
+				var occluder_arrays := occluder_tool.commit_to_arrays()
+				var vertices := PackedVector3Array(occluder_arrays[Mesh.ARRAY_VERTEX])
+				var indices := PackedInt32Array(occluder_arrays[Mesh.ARRAY_INDEX])
+				occluder.set_arrays(vertices, indices)
+				
+				if _try_save_resource(occluder, path_to_occluder_resource, &"stid_occluder_resource_file_postfix"):
+					path_to_occluder_resource = occluder.resource_path
+				occluder_container.occluder = occluder
+				occluder_container.update_gizmos()
 
 
 func create_blocks() -> Dictionary:
@@ -283,7 +308,8 @@ func get_owned_scenes() -> Array[Node]:
 
 func _generate_part(part: RoommatePart, parent_block: RoommateBlock, 
 		surface_tools: Dictionary, collision_faces: PackedVector3Array,
-		staged_scenes: Dictionary, nav_tool: SurfaceTool) -> void:
+		staged_scenes: Dictionary, nav_tool: SurfaceTool, 
+		occluder_tool: SurfaceTool) -> void:
 	if not part:
 		return
 	var part_origin := parent_block.position * block_size + block_size * part.anchor
@@ -313,6 +339,11 @@ func _generate_part(part: RoommatePart, parent_block: RoommateBlock,
 	if part.nav_mesh:
 		for surface_id in part.nav_mesh.get_surface_count():
 			nav_tool.append_from(part.nav_mesh, surface_id, part.nav_transform.translated(part_origin))
+	
+	if part.occluder_mesh:
+		for surface_id in part.occluder_mesh.get_surface_count():
+			occluder_tool.append_from(part.occluder_mesh, surface_id, 
+					part.occluder_transform.translated(part_origin))
 	
 	if not part.mesh:
 		return
