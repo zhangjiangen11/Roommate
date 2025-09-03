@@ -49,8 +49,7 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
-  - Home:
-    - Welcome: index.md
+  - Home: index.md
   - Getting Started:
     - getting_started/installation.md
     - getting_started/first_room.md
