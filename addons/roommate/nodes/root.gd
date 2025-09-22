@@ -304,6 +304,9 @@ func get_owned_stylers() -> Array[RoommateStyler]:
 
 
 func get_owned_scenes() -> Array[Node]:
+	if not is_inside_tree():
+		push_warning("ROOMMATE: RoommateRoot must be inside tree when getting owned scenes.")
+		return []
 	var all_scenes := get_tree().get_nodes_in_group(_SETTINGS.get_string(&"stid_scenes_group"))
 	var child_roots := find_children("*", &"RoommateRoot", true, false)
 	var filter_by_parents_and_self := func (target: Node) -> bool:
@@ -462,12 +465,14 @@ func _resolve_scene_parent(parent_path: NodePath) -> Node:
 
 
 func _try_save_resource(new_resource: Resource, path_to_resource: String, postfix_setting: StringName) -> bool:
-	if not Engine.is_editor_hint():
-		return false
 	var path := path_to_resource
 	var auto_creation_requested := auto_create_resource_files and path.is_empty()
 	if auto_creation_requested:
-		var scene_path := get_tree().edited_scene_root.scene_file_path
+		if not is_inside_tree():
+			push_error("ROOMMATE: RoommateRoot must be inside tree when saving resource.")
+			return false
+		var scene_node := get_tree().edited_scene_root if Engine.is_editor_hint() else get_tree().current_scene
+		var scene_path := scene_node.scene_file_path
 		var postfix := _SETTINGS.get_string(postfix_setting)
 		path = scene_path.path_join("..").simplify_path().path_join(name.to_snake_case() + postfix)
 	if ResourceLoader.exists(path) or auto_creation_requested:
