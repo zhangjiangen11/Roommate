@@ -15,6 +15,7 @@ const _EDITOR_ACTIONS := preload("./editor_actions.gd")
 const _CONTROL_SCENES: Array[PackedScene] = [
 	preload("./controls/root_actions/root_actions.tscn"),
 	preload("./controls/blocks_area_actions/blocks_area_actions.tscn"),
+	preload("./controls/styler_actions/styler_actions.tscn"),
 ]
 
 var settings: _SETTINGS
