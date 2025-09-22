@@ -14,6 +14,8 @@ extends Node3D
 ## 
 ## Set [RoommateBlocksArea] or it's derived nodes as a child to affect generation.
 
+signal generated
+
 const MESH_SINGLE := &"mtid_single"
 
 const COLLISION_CONCAVE := &"csid_concave"
@@ -207,6 +209,9 @@ func generate_with(all_blocks: Dictionary) -> void:
 				occluder_container.update_gizmos()
 			_:
 				push_error("ROOMMATE: Unknown occluder type id %s." % occluder_type)
+	
+	if not Engine.is_editor_hint():
+		generated.emit()
 
 
 func create_blocks() -> Dictionary:
